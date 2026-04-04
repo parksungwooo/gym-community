@@ -596,11 +596,6 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <header className="app-header">
-        <p className="eyebrow">Daily Fitness Loop</p>
-        <h1>{isEnglish ? 'A community that keeps today\'s workout moving' : '오늘 운동을 이어가는 커뮤니티'}</h1>
-      </header>
-
       {errorMessage && <div className="error-box">{errorMessage}</div>}
       {successState && (
         <div className={`app-toast ${successState.accent ?? 'default'}`}>
@@ -671,8 +666,6 @@ export default function App() {
                 workoutLoading={loadingAction}
                 onOpenWorkoutComposer={() => openWorkoutComposer()}
                 onStartRoutine={(routine) => openWorkoutComposer(routine)}
-                onOpenCommunity={() => setView(VIEW.COMMUNITY)}
-                onOpenProgress={() => setView(VIEW.PROGRESS)}
                 onOpenTest={() => {
                   setView(VIEW.PROGRESS)
                   setShowTestForm(true)

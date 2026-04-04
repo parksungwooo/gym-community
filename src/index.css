@@ -51,50 +51,7 @@ button:active {
 .app-shell {
   width: min(520px, 100%);
   margin: 0 auto;
-  padding: 12px 12px 88px;
-}
-
-.app-header {
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
-  margin-bottom: 10px;
-  padding: 12px 12px 14px;
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at top right, rgba(255, 212, 122, 0.36), transparent 24%),
-    linear-gradient(135deg, #0f172a 0%, #172b49 58%, #1f3d67 100%);
-  box-shadow: var(--shadow-strong);
-}
-
-.app-header::after {
-  content: '';
-  position: absolute;
-  inset: auto -34px -44px auto;
-  width: 120px;
-  height: 120px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.app-header h1 {
-  position: relative;
-  margin: 4px 0 8px;
-  max-width: 12ch;
-  color: #f8fbff;
-  font-size: 1.58rem;
-  line-height: 1.06;
-  letter-spacing: -0.03em;
-}
-
-.eyebrow {
-  position: relative;
-  margin: 0;
-  color: rgba(255, 247, 237, 0.82);
-  font-weight: 800;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  padding: 8px 12px 88px;
 }
 
 .user-badge {
@@ -3424,27 +3381,6 @@ button:active {
   line-height: 1.24;
 }
 
-.home-link-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.home-link-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 9px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(203, 213, 225, 0.9);
-  background: rgba(255, 255, 255, 0.96);
-  color: #334155;
-  font-size: 0.8rem;
-  font-weight: 800;
-  cursor: pointer;
-}
-
 .home-workout-panel-shell {
   display: grid;
   gap: 10px;
@@ -3847,11 +3783,7 @@ button:active {
 
 @media (min-width: 640px) {
   .app-shell {
-    padding: 28px 20px 118px;
-  }
-
-  .app-header h1 {
-    font-size: 1.96rem;
+    padding: 20px 20px 118px;
   }
 
   .stats-grid,
@@ -3918,7 +3850,7 @@ button:active {
 
 @media (max-width: 639px) {
   .app-shell {
-    padding: 14px 12px 102px;
+    padding: 10px 12px 102px;
   }
 
   .card {
@@ -4016,17 +3948,6 @@ button:active {
     grid-template-columns: 1fr;
   }
 
-  .home-link-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .home-link-chip {
-    width: 100%;
-    padding-inline: 10px;
-    font-size: 0.76rem;
-  }
-
   .workout-capture-card.compact {
     padding: 14px;
   }
@@ -4055,10 +3976,6 @@ button:active {
 
   .sheet-submit-bar.compact {
     gap: 10px;
-  }
-
-  .app-header h1 {
-    font-size: 1.46rem;
   }
 
   .home-dashboard-title {

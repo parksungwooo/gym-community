@@ -34,14 +34,6 @@ function RoutineStartCard({ routine, onStart }) {
   )
 }
 
-function HomeLinkChip({ label, onClick }) {
-  return (
-    <button type="button" className="home-link-chip" onClick={onClick}>
-      {label}
-    </button>
-  )
-}
-
 export default function HomeDashboard({
   profile,
   todayDone,
@@ -52,8 +44,6 @@ export default function HomeDashboard({
   workoutLoading,
   onOpenWorkoutComposer,
   onStartRoutine,
-  onOpenCommunity,
-  onOpenProgress,
   onOpenTest,
 }) {
   const { isEnglish, language } = useI18n()
@@ -167,12 +157,6 @@ export default function HomeDashboard({
             <span>{isEnglish ? 'This week' : '이번 주'}</span>
             <strong>{weeklySummary}</strong>
           </div>
-        </div>
-
-        <div className="home-link-row">
-          <HomeLinkChip label={isEnglish ? 'Records' : '기록'} onClick={onOpenProgress} />
-          <HomeLinkChip label={isEnglish ? 'Community' : '커뮤니티'} onClick={onOpenCommunity} />
-          <HomeLinkChip label={isEnglish ? 'Test' : '테스트'} onClick={onOpenTest} />
         </div>
       </section>
     </section>
