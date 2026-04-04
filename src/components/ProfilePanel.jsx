@@ -88,11 +88,11 @@ export default function ProfilePanel({
             <p className="subtext compact">
               {isGuest
                 ? (isEnglish
-                  ? 'Stay in guest mode, or connect an account whenever you want.'
-                  : '게스트로 사용하다가, 원할 때 계정을 연결할 수 있어요.')
+                    ? 'Stay in guest mode, or connect an account whenever you want.'
+                    : '지금은 게스트 모드예요. 원할 때 계정을 연결할 수 있어요.')
                 : (isEnglish
-                  ? 'Keep your profile, language, and goal in one tidy place.'
-                  : '프로필, 언어, 목표를 한 곳에서 간단히 정리해보세요.')}
+                    ? 'Keep your profile, language, and goal in one tidy place.'
+                    : '프로필, 언어, 목표를 한 곳에서 간단하게 관리해보세요.')}
             </p>
           </div>
         </div>
@@ -100,7 +100,7 @@ export default function ProfilePanel({
         <div className="profile-summary-grid compact">
           <SummaryStat
             label={isEnglish ? 'Level' : '레벨'}
-            value={latestResult?.level ? localizeLevelText(latestResult.level, language) : (isEnglish ? 'Not tested' : '측정 전')}
+            value={latestResult?.level ? localizeLevelText(latestResult.level, language) : (isEnglish ? 'Not tested' : '아직 측정 전')}
           />
           <SummaryStat
             label={isEnglish ? 'This Week' : '이번 주'}
@@ -121,14 +121,22 @@ export default function ProfilePanel({
 
         <SettingRow
           label={isEnglish ? 'Language' : '언어'}
-          helper={isEnglish ? 'Choose your app language.' : '앱에서 사용할 언어를 선택하세요.'}
+          helper={isEnglish ? 'Choose the app language.' : '앱에서 사용할 언어를 선택하세요.'}
           compact
         >
-          <div className="language-switcher settings-language-switcher">
-            <button type="button" className={`lang-btn ${language === 'ko' ? 'active' : ''}`} onClick={() => onSetLanguage('ko')}>
+          <div className="language-switcher settings-language-switcher segmented-language-switcher">
+            <button
+              type="button"
+              className={`lang-btn ${language === 'ko' ? 'active' : ''}`}
+              onClick={() => onSetLanguage('ko')}
+            >
               한국어
             </button>
-            <button type="button" className={`lang-btn ${language === 'en' ? 'active' : ''}`} onClick={() => onSetLanguage('en')}>
+            <button
+              type="button"
+              className={`lang-btn ${language === 'en' ? 'active' : ''}`}
+              onClick={() => onSetLanguage('en')}
+            >
               English
             </button>
           </div>
@@ -136,7 +144,11 @@ export default function ProfilePanel({
 
         <SettingRow
           label={isEnglish ? 'Account' : '계정'}
-          helper={isGuest ? (isEnglish ? 'Currently using guest mode.' : '현재 게스트 모드로 사용 중이에요.') : (isEnglish ? 'Connected account is active.' : '연결된 계정을 사용 중이에요.')}
+          helper={
+            isGuest
+              ? (isEnglish ? 'You are currently using guest mode.' : '현재는 게스트 모드로 사용 중이에요.')
+              : (isEnglish ? 'Your connected account is active.' : '연결된 계정으로 사용 중이에요.')
+          }
           compact
         >
           <div className="profile-auth-actions compact">
@@ -183,7 +195,7 @@ export default function ProfilePanel({
 
           <SettingRow
             label={isEnglish ? 'Avatar Style' : '아바타 스타일'}
-            helper={isEnglish ? 'Pick the tag that fits your vibe.' : '지금 분위기에 맞는 태그를 골라보세요.'}
+            helper={isEnglish ? 'Pick the tag that fits your vibe.' : '내 분위기에 맞는 태그를 골라보세요.'}
             compact
           >
             <div className="avatar-grid settings-avatar-grid compact">
@@ -210,7 +222,7 @@ export default function ProfilePanel({
 
           <SettingRow
             label={isEnglish ? 'Workout Target' : '운동 목표'}
-            helper={isEnglish ? 'This sets the weekly challenge on your home screen.' : '홈 화면 챌린지 기준이 됩니다.'}
+            helper={isEnglish ? 'This sets the challenge target on the home screen.' : '홈 화면 챌린지 목표를 이 기준으로 맞춰요.'}
             compact
           >
             <div className="goal-chip-row settings-goal-row compact">
