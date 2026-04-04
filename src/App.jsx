@@ -182,30 +182,6 @@ function buildChallenge(stats, profile, isEnglish) {
   }
 }
 
-function buildTodayFocus({ todayDone, latestResult, stats, isEnglish }) {
-  if (!latestResult) {
-    return {
-      label: isEnglish ? 'Suggested Next Step' : '오늘의 추천 액션',
-      title: isEnglish ? 'Start with the fitness level test' : '체력 테스트부터 시작해보세요',
-      detail: isEnglish ? 'Once you know your level, your goal and record feel more focused.' : '레벨을 먼저 측정하면 목표와 기록이 더 선명해져요.',
-    }
-  }
-
-  if (!todayDone) {
-    return {
-      label: isEnglish ? 'Today\'s Focus' : '오늘의 핵심 미션',
-      title: isEnglish ? 'Log a 20-minute workout today' : '운동 20분 기록 남기기',
-      detail: isEnglish ? `${stats.weeklyCount} workouts done this week. One more log gets you closer to your challenge.` : `이번 주 ${stats.weeklyCount}회 완료 중이에요. 오늘 체크하면 챌린지에 더 가까워져요.`,
-    }
-  }
-
-  return {
-    label: isEnglish ? 'Today\'s Status' : '오늘의 상태',
-    title: isEnglish ? 'You already completed today\'s workout' : '오늘 운동을 이미 완료했어요',
-    detail: isEnglish ? 'Check the community and leave a quick supportive comment.' : '커뮤니티에서 다른 사람 기록도 둘러보고 응원 댓글을 남겨보세요.',
-  }
-}
-
 function validateDisplayName(name, isEnglish) {
   const trimmed = name.trim()
 
@@ -231,6 +207,8 @@ export default function App() {
   const [profile, setProfile] = useState(null)
   const [selectedCommunityUser, setSelectedCommunityUser] = useState(null)
   const [showTestForm, setShowTestForm] = useState(false)
+  const [showWorkoutPanel, setShowWorkoutPanel] = useState(false)
+  const [workoutPreset, setWorkoutPreset] = useState(null)
   const [loadingInit, setLoadingInit] = useState(true)
   const [loadingAction, setLoadingAction] = useState(false)
   const [loadingFeed, setLoadingFeed] = useState(false)
@@ -249,7 +227,6 @@ export default function App() {
     if (sameLevelRows.length) return sameLevelRows.slice(0, 2)
     return leaderboard.filter((item) => item.user_id !== user?.id).slice(0, 2)
   }, [leaderboard, latestResult?.level, testResult?.level, user?.id])
-  const todayFocus = useMemo(() => buildTodayFocus({ todayDone, latestResult, stats: workoutStats, isEnglish }), [isEnglish, latestResult, todayDone, workoutStats])
 
   const refreshFeed = useCallback(async (userId) => {
     setLoadingFeed(true)
@@ -421,6 +398,34 @@ export default function App() {
     }
   }
 
+  const openWorkoutComposer = useCallback((preset = null) => {
+    const nextPreset = preset
+      ? {
+          name: preset.name || '',
+          workoutType: preset.workout_type || preset.workoutType || workoutStats.lastWorkoutType || '러닝',
+          durationMinutes: preset.duration_minutes || preset.durationMinutes || workoutStats.lastWorkoutDuration || 30,
+          note: preset.note || '',
+        }
+      : {
+          name: '',
+          workoutType: workoutStats.lastWorkoutType || '러닝',
+          durationMinutes: workoutStats.lastWorkoutDuration || 30,
+          note: '',
+        }
+
+    setWorkoutPreset(nextPreset)
+    setShowWorkoutPanel(true)
+
+    window.setTimeout(() => {
+      document.querySelector('.home-workout-panel-shell')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 40)
+  }, [workoutStats.lastWorkoutDuration, workoutStats.lastWorkoutType])
+
+  const closeWorkoutComposer = useCallback(() => {
+    setShowWorkoutPanel(false)
+    setWorkoutPreset(null)
+  }, [])
+
   const handleWorkoutComplete = async (details = {}) => {
     if (!user?.id) return
 
@@ -440,7 +445,10 @@ export default function App() {
 
       showSuccess(isEnglish ? `${details.workoutType || 'Workout'} saved.` : `${details.workoutType || '운동'} 기록이 저장됐어요.`, 'success')
       setCelebration({ workoutType: details.workoutType || '운동', durationMinutes: Number(details.durationMinutes) || 0, nextWeeklyCount: summary.stats.weeklyCount })
+      setShowWorkoutPanel(false)
+      setWorkoutPreset(null)
       setView(VIEW.HOME)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (error) {
       setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to save workout.' : '운동 기록 저장에 실패했습니다.', isEnglish))
     } finally {
@@ -645,23 +653,24 @@ export default function App() {
                     {isEnglish ? `You are now at ${celebration.nextWeeklyCount} this week.` : `이번 주 누적 ${celebration.nextWeeklyCount}회입니다.`}
                   </p>
                   <div className="celebration-actions">
-                    <button type="button" className="secondary-btn" onClick={() => setView(VIEW.COMMUNITY)}>{isEnglish ? 'See Community' : '커뮤니티 반응 보기'}</button>
-                    <button type="button" className="ghost-btn" onClick={() => setView(VIEW.PROGRESS)}>{isEnglish ? 'View Records' : '기록 흐름 보기'}</button>
+                    <button type="button" className="secondary-btn" onClick={() => {
+                      setCelebration(null)
+                      openWorkoutComposer()
+                    }}>{isEnglish ? 'Log Another' : '하나 더 기록'}</button>
+                    <button type="button" className="ghost-btn" onClick={() => setView(VIEW.COMMUNITY)}>{isEnglish ? 'See Community' : '커뮤니티 보기'}</button>
                   </div>
                 </section>
               )}
               <HomeDashboard
-                user={user}
                 profile={profile}
                 todayDone={todayDone}
                 currentLevel={latestResult?.level ?? testResult?.level ?? null}
-                currentScore={latestResult?.score ?? testResult?.score ?? null}
                 stats={workoutStats}
                 challenge={challenge}
-                badges={badges}
-                todayFocus={todayFocus}
-                onCompleteWorkout={handleWorkoutComplete}
+                routineTemplates={workoutTemplates}
                 workoutLoading={loadingAction}
+                onOpenWorkoutComposer={() => openWorkoutComposer()}
+                onStartRoutine={(routine) => openWorkoutComposer(routine)}
                 onOpenCommunity={() => setView(VIEW.COMMUNITY)}
                 onOpenProgress={() => setView(VIEW.PROGRESS)}
                 onOpenTest={() => {
@@ -669,16 +678,28 @@ export default function App() {
                   setShowTestForm(true)
                 }}
               />
-              <WorkoutPanel
-                onComplete={handleWorkoutComplete}
-                onSaveRoutine={handleSaveWorkoutTemplate}
-                onDeleteRoutine={handleDeleteWorkoutTemplate}
-                loading={loadingAction}
-                todayDone={todayDone}
-                todayCount={workoutStats.todayCount}
-                recentWorkout={{ workoutType: workoutStats.lastWorkoutType, durationMinutes: workoutStats.lastWorkoutDuration, note: workoutStats.lastWorkoutNote }}
-                routineTemplates={workoutTemplates}
-              />
+              {showWorkoutPanel && (
+                <div className="home-workout-panel-shell">
+                  <WorkoutPanel
+                    key={[
+                      workoutPreset?.name || '',
+                      workoutPreset?.workoutType || '',
+                      workoutPreset?.durationMinutes || '',
+                      workoutPreset?.note || '',
+                    ].join('|')}
+                    onComplete={handleWorkoutComplete}
+                    onSaveRoutine={handleSaveWorkoutTemplate}
+                    onDeleteRoutine={handleDeleteWorkoutTemplate}
+                    onClose={closeWorkoutComposer}
+                    loading={loadingAction}
+                    todayDone={todayDone}
+                    todayCount={workoutStats.todayCount}
+                    recentWorkout={{ workoutType: workoutStats.lastWorkoutType, durationMinutes: workoutStats.lastWorkoutDuration, note: workoutStats.lastWorkoutNote }}
+                    routineTemplates={workoutTemplates}
+                    initialSelection={workoutPreset}
+                  />
+                </div>
+              )}
             </div>
           )}
 

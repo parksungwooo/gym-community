@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { getWorkoutTypeLabel, useI18n } from '../i18n.js'
 
 const WORKOUT_OPTIONS = ['러닝', '웨이트', '스트레칭', '요가', '필라테스', '사이클', '기타']
@@ -20,17 +20,19 @@ export default function WorkoutPanel({
   onComplete,
   onSaveRoutine,
   onDeleteRoutine,
+  onClose,
   loading,
   todayDone,
   todayCount = 0,
   recentWorkout,
   routineTemplates = [],
+  initialSelection = null,
 }) {
   const { language, isEnglish } = useI18n()
-  const [workoutType, setWorkoutType] = useState('러닝')
-  const [durationMinutes, setDurationMinutes] = useState('30')
-  const [note, setNote] = useState('')
-  const [routineName, setRoutineName] = useState('')
+  const [workoutType, setWorkoutType] = useState(() => initialSelection?.workoutType || '러닝')
+  const [durationMinutes, setDurationMinutes] = useState(() => String(initialSelection?.durationMinutes || 30))
+  const [note, setNote] = useState(() => initialSelection?.note || '')
+  const [routineName, setRoutineName] = useState(() => initialSelection?.name || '')
 
   const noteHint = useMemo(() => {
     if (workoutType === '러닝') {
@@ -41,7 +43,9 @@ export default function WorkoutPanel({
       return isEnglish ? 'ex: Lower body 40 min, focused on squats' : '예: 하체 40분, 스쿼트 집중'
     }
 
-    return isEnglish ? 'ex: Leave a short note about how your body felt today' : '예: 오늘 몸 상태나 운동 느낌을 짧게 남겨보세요'
+    return isEnglish
+      ? 'ex: Leave a short note about how your body felt today'
+      : '예: 오늘 몸 상태나 운동 느낌을 짧게 남겨보세요'
   }, [isEnglish, workoutType])
 
   const handleSubmit = async (event) => {
@@ -53,15 +57,13 @@ export default function WorkoutPanel({
       note: note.trim(),
     })
 
-    setWorkoutType(recentWorkout?.workoutType || '러닝')
-    setDurationMinutes(String(recentWorkout?.durationMinutes || 30))
+    setWorkoutType(recentWorkout?.workoutType || initialSelection?.workoutType || '러닝')
+    setDurationMinutes(String(recentWorkout?.durationMinutes || initialSelection?.durationMinutes || 30))
     setNote('')
   }
 
   const handleReuseRecent = () => {
-    if (!recentWorkout?.workoutType) {
-      return
-    }
+    if (!recentWorkout?.workoutType) return
 
     setWorkoutType(recentWorkout.workoutType)
     setDurationMinutes(String(recentWorkout.durationMinutes || 30))
@@ -76,9 +78,7 @@ export default function WorkoutPanel({
   }
 
   const handleSaveRoutine = async () => {
-    if (!routineName.trim()) {
-      return
-    }
+    if (!routineName.trim()) return
 
     await onSaveRoutine({
       name: routineName.trim(),
@@ -95,29 +95,47 @@ export default function WorkoutPanel({
       <div className="workout-capture-header compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Workout Sheet' : '운동 입력 시트'}</span>
-          <h2>{isEnglish ? 'Log Today\'s Workout' : '오늘 운동 기록하기'}</h2>
+          <h2>{isEnglish ? "Log Today's Workout" : '오늘 운동 기록하기'}</h2>
           <p className="subtext compact">
-            {isEnglish ? 'It does not have to be detailed. Type and time are enough.' : '복잡하게 쓰지 않아도 괜찮아요. 종류와 시간만 남겨도 충분해요.'}
+            {isEnglish
+              ? 'Keep it short. Type and time are enough to save today.'
+              : '짧게 적어도 충분해요. 운동 종류와 시간만 있어도 오늘 기록은 완성됩니다.'}
           </p>
         </div>
-        <span className={`capture-status ${todayDone ? 'done' : ''}`}>
-          {todayDone ? (isEnglish ? 'More logs available today' : '오늘 추가 기록 가능') : isEnglish ? 'Ready to log' : '지금 기록 가능'}
-        </span>
+
+        <div className="capture-header-actions">
+          <span className={`capture-status ${todayDone ? 'done' : ''}`}>
+            {todayDone
+              ? (isEnglish ? 'More logs available today' : '오늘은 추가 기록 가능')
+              : (isEnglish ? 'Ready to log' : '지금 기록 가능')}
+          </span>
+          {onClose ? (
+            <button type="button" className="sheet-close-btn" onClick={onClose} disabled={loading}>
+              {isEnglish ? 'Close' : '닫기'}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <div className="sheet-summary-bar compact">
         <div className="capture-helper-card compact">
-          <span className="capture-helper-label">{isEnglish ? 'Today\'s Logs' : '오늘 기록 수'}</span>
-          <strong className="capture-helper-value">{isEnglish ? todayCount : `${todayCount}개`}</strong>
+          <span className="capture-helper-label">{isEnglish ? "Today's Logs" : '오늘 기록 수'}</span>
+          <strong className="capture-helper-value">
+            {isEnglish ? `${todayCount}` : `${todayCount}개`}
+          </strong>
         </div>
 
         {recentWorkout?.workoutType && (
           <button type="button" className="reuse-workout-btn compact" onClick={handleReuseRecent} disabled={loading}>
-            {isEnglish ? 'Reuse Latest Workout' : '최근 운동 다시 기록'}
+            {isEnglish ? 'Reuse Latest Workout' : '최근 운동 다시 쓰기'}
             <span>
               <span className="reuse-inline-mark">{getWorkoutMark(recentWorkout.workoutType)}</span>
               {getWorkoutTypeLabel(recentWorkout.workoutType, language)}
-              {recentWorkout.durationMinutes ? isEnglish ? ` · ${recentWorkout.durationMinutes} min` : ` · ${recentWorkout.durationMinutes}분` : ''}
+              {recentWorkout.durationMinutes
+                ? isEnglish
+                  ? ` · ${recentWorkout.durationMinutes} min`
+                  : ` · ${recentWorkout.durationMinutes}분`
+                : ''}
             </span>
           </button>
         )}
@@ -127,7 +145,7 @@ export default function WorkoutPanel({
         <div className="routine-header-row">
           <span className="field-label-text">{isEnglish ? 'Saved Routines' : '저장된 루틴'}</span>
           <span className="routine-count-pill">
-            {isEnglish ? `${routineTemplates.length} saved` : `${routineTemplates.length}개 저장`}
+            {isEnglish ? `${routineTemplates.length} saved` : `${routineTemplates.length}개 저장됨`}
           </span>
         </div>
 
@@ -171,7 +189,11 @@ export default function WorkoutPanel({
                       <strong>{routine.name}</strong>
                       <span>
                         {getWorkoutTypeLabel(routine.workout_type, language)}
-                        {routine.duration_minutes ? isEnglish ? ` · ${routine.duration_minutes} min` : ` · ${routine.duration_minutes}분` : ''}
+                        {routine.duration_minutes
+                          ? isEnglish
+                            ? ` · ${routine.duration_minutes} min`
+                            : ` · ${routine.duration_minutes}분`
+                          : ''}
                       </span>
                     </div>
                   </div>
@@ -191,8 +213,12 @@ export default function WorkoutPanel({
           </div>
         ) : (
           <div className="routine-empty-card compact">
-            <strong>{isEnglish ? 'Save the combinations you repeat often' : '자주 하는 조합을 저장해두세요'}</strong>
-            <p>{isEnglish ? 'Once saved, you can fill the form in one tap.' : '한 번 저장하면 다음부터는 탭 한 번으로 폼이 채워져요.'}</p>
+            <strong>{isEnglish ? 'Save the combinations you repeat often' : '자주 쓰는 조합을 저장해보세요'}</strong>
+            <p>
+              {isEnglish
+                ? 'Once saved, the next workout can start in one tap.'
+                : '한 번 저장해두면 다음 운동은 한 번에 바로 시작할 수 있어요.'}
+            </p>
           </div>
         )}
       </section>
@@ -237,7 +263,12 @@ export default function WorkoutPanel({
           <div className="capture-field-grid">
             <label className="field-label">
               <span className="field-label-text">{isEnglish ? 'Workout Type' : '운동 종류 직접 선택'}</span>
-              <select className="workout-select compact" value={workoutType} onChange={(event) => setWorkoutType(event.target.value)} disabled={loading}>
+              <select
+                className="workout-select compact"
+                value={workoutType}
+                onChange={(event) => setWorkoutType(event.target.value)}
+                disabled={loading}
+              >
                 {WORKOUT_OPTIONS.map((option) => (
                   <option key={option} value={option}>{getWorkoutTypeLabel(option, language)}</option>
                 ))}
@@ -276,18 +307,21 @@ export default function WorkoutPanel({
         <div className="sheet-submit-bar compact">
           <div className="sheet-submit-copy">
             <strong>{getWorkoutTypeLabel(workoutType, language)}</strong>
-            <span>{Number(durationMinutes) ? (isEnglish ? `${durationMinutes} min planned` : `${durationMinutes}분 기록 예정`) : (isEnglish ? 'Duration not set' : '시간 미설정')}</span>
+            <span>
+              {Number(durationMinutes)
+                ? (isEnglish ? `${durationMinutes} min planned` : `${durationMinutes}분 기록 예정`)
+                : (isEnglish ? 'Duration not set' : '시간 미설정')}
+            </span>
           </div>
           <button type="submit" className="primary-btn capture-submit-btn compact" disabled={loading}>
             {loading
-              ? isEnglish ? 'Saving workout...' : '기록 저장 중...'
+              ? (isEnglish ? 'Saving workout...' : '기록 저장 중...')
               : todayDone
-                ? isEnglish ? 'Save Another Workout Today' : '오늘 운동 추가 기록 저장'
-                : isEnglish ? 'Save Today\'s Workout' : '오늘 운동 기록 저장'}
+                ? (isEnglish ? 'Save Another Workout Today' : '오늘 운동 추가 저장')
+                : (isEnglish ? "Save Today's Workout" : '오늘 운동 기록 저장')}
           </button>
         </div>
       </form>
     </section>
   )
 }
-
