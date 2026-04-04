@@ -1,0 +1,242 @@
+﻿import { useMemo, useState } from 'react'
+import { getWorkoutTypeLabel, useI18n } from '../i18n.js'
+
+const WORKOUT_OPTIONS = ['러닝', '웨이트', '스트레칭', '요가', '필라테스', '사이클', '기타', '빠른 체크인']
+
+function getWorkoutMark(type) {
+  switch (type) {
+    case '러닝': return 'RN'
+    case '웨이트': return 'WT'
+    case '스트레칭': return 'ST'
+    case '요가': return 'YG'
+    case '필라테스': return 'PL'
+    case '사이클': return 'CY'
+    case '빠른 체크인': return 'QC'
+    default: return 'ET'
+  }
+}
+
+function formatDate(date, language) {
+  return new Date(date).toLocaleDateString(language === 'en' ? 'en-US' : 'ko-KR', {
+    month: 'short',
+    day: 'numeric',
+    weekday: 'short',
+  })
+}
+
+function formatDuration(minutes, isEnglish) {
+  if (!minutes) {
+    return isEnglish ? 'No duration' : '시간 미입력'
+  }
+
+  return isEnglish ? `${minutes} min` : `${minutes}분`
+}
+
+function formatTime(dateTime, language) {
+  if (!dateTime) return ''
+
+  return new Date(dateTime).toLocaleTimeString(language === 'en' ? 'en-US' : 'ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function HistoryItem({ item, onUpdate, onDelete, loading }) {
+  const { language, isEnglish } = useI18n()
+  const [editing, setEditing] = useState(false)
+  const [workoutType, setWorkoutType] = useState(item.workout_type ?? '운동')
+  const [durationMinutes, setDurationMinutes] = useState(String(item.duration_minutes ?? ''))
+  const [note, setNote] = useState(item.note ?? '')
+
+  const handleSave = async (event) => {
+    event.preventDefault()
+
+    await onUpdate(item.id, {
+      workoutType,
+      durationMinutes: Number(durationMinutes) || 0,
+      note: note.trim(),
+      date: item.date,
+    })
+
+    setEditing(false)
+  }
+
+  return (
+    <article className="history-timeline-item">
+      <div className="history-timeline-rail">
+        <span className="history-timeline-dot" />
+        <span className="history-timeline-line" />
+      </div>
+
+      <div className="history-timeline-time">
+        <span>{formatTime(item.created_at, language) || (isEnglish ? 'Log' : '기록')}</span>
+      </div>
+
+      <div className="history-card">
+        {!editing ? (
+          <>
+            <div className="history-header">
+              <div className="history-title-row">
+                <span className={`workout-mark ${item.workout_type === '빠른 체크인' ? 'quick' : ''}`}>{getWorkoutMark(item.workout_type)}</span>
+                <div>
+                  <strong>{getWorkoutTypeLabel(item.workout_type, language)}</strong>
+                  <span className="history-duration-inline">{formatDuration(item.duration_minutes, isEnglish)}</span>
+                </div>
+              </div>
+              <span className="history-time-badge">{formatDuration(item.duration_minutes, isEnglish)}</span>
+            </div>
+            {item.note && <p className="history-note">{item.note}</p>}
+            <div className="history-actions">
+              <button type="button" className="mini-btn" onClick={() => setEditing(true)} disabled={loading}>{isEnglish ? 'Edit' : '수정'}</button>
+              <button type="button" className="mini-btn danger" onClick={() => onDelete(item.id)} disabled={loading}>{isEnglish ? 'Delete' : '삭제'}</button>
+            </div>
+          </>
+        ) : (
+          <form className="history-edit-sheet" onSubmit={handleSave}>
+            <div className="history-edit-sheet-header">
+              <span className="history-edit-handle" />
+              <div className="history-edit-title-row">
+                <strong>{isEnglish ? 'Edit Workout' : '운동 기록 수정'}</strong>
+                <span>{formatTime(item.created_at, language) || (isEnglish ? 'Saved log' : '저장된 기록')}</span>
+              </div>
+            </div>
+
+            <div className="history-edit-fields">
+              <label className="field-label history-edit-field">
+                {isEnglish ? 'Workout Type' : '운동 종류'}
+                <select className="workout-select" value={workoutType} onChange={(event) => setWorkoutType(event.target.value)} disabled={loading}>
+                  {WORKOUT_OPTIONS.map((option) => (
+                    <option key={option} value={option}>{getWorkoutTypeLabel(option, language)}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="field-label history-edit-field">
+                {isEnglish ? 'Duration (min)' : '운동 시간(분)'}
+                <input className="workout-input" type="number" min="0" max="300" step="5" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} disabled={loading} />
+              </label>
+
+              <label className="field-label history-edit-field full">
+                {isEnglish ? 'Note' : '메모'}
+                <textarea className="workout-textarea" rows="3" maxLength="120" value={note} onChange={(event) => setNote(event.target.value)} disabled={loading} />
+              </label>
+            </div>
+
+            <div className="history-edit-sheet-actions">
+              <div className="history-edit-sheet-copy">
+                <strong>{getWorkoutTypeLabel(workoutType, language)}</strong>
+                <span>{Number(durationMinutes) ? (isEnglish ? `${durationMinutes} min` : `${durationMinutes}분`) : (isEnglish ? 'No duration yet' : '시간 미입력')}</span>
+              </div>
+              <div className="history-actions">
+                <button type="button" className="mini-btn" onClick={() => setEditing(false)} disabled={loading}>{isEnglish ? 'Cancel' : '취소'}</button>
+                <button type="submit" className="mini-btn primary" disabled={loading}>{isEnglish ? 'Save' : '저장'}</button>
+              </div>
+            </div>
+          </form>
+        )}
+      </div>
+    </article>
+  )
+}
+
+export default function WorkoutHistory({ history, onUpdate, onDelete, loading }) {
+  const { language, isEnglish } = useI18n()
+  const recentWeek = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date()
+    date.setDate(date.getDate() - (6 - index))
+    const key = date.toLocaleDateString('sv-SE')
+    const matched = history.find((item) => item.date === key)
+
+    return {
+      key,
+      label: date.toLocaleDateString(language === 'en' ? 'en-US' : 'ko-KR', { weekday: 'short' }),
+      done: Boolean(matched),
+    }
+  })
+
+  const groupedHistory = useMemo(() => {
+    const groups = []
+
+    history.forEach((item) => {
+      const lastGroup = groups[groups.length - 1]
+      if (!lastGroup || lastGroup.date !== item.date) {
+        groups.push({ date: item.date, items: [item] })
+        return
+      }
+      lastGroup.items.push(item)
+    })
+
+    return groups
+  }, [history])
+
+  return (
+    <section className="card record-module-card compact">
+      <div className="app-section-heading compact">
+        <div>
+          <span className="app-section-kicker">{isEnglish ? 'Timeline' : '타임라인'}</span>
+          <h2>{isEnglish ? 'Workout History' : '운동 기록'}</h2>
+        </div>
+        <span className="community-mini-pill">{isEnglish ? `${history.length} logs` : `${history.length}개`}</span>
+      </div>
+      <p className="subtext compact">{isEnglish ? 'See your recent logs and the last 7 days in one place.' : '최근 기록과 지난 7일 흐름을 한 번에 확인해보세요.'}</p>
+
+      <div className="week-strip compact">
+        {recentWeek.map((day) => (
+          <article key={day.key} className={`day-pill ${day.done ? 'done' : ''}`}>
+            <span>{day.label}</span>
+            <strong>{day.done ? (isEnglish ? 'Done' : '완료') : '-'}</strong>
+          </article>
+        ))}
+      </div>
+
+        <div className="history-list grouped compact">
+        {loading && (
+          <div className="skeleton-stack">
+            {Array.from({ length: 2 }).map((_, index) => (
+              <div key={index} className="skeleton-card history">
+                <span className="skeleton-line short" />
+                <div className="skeleton-row">
+                  <span className="skeleton-avatar small" />
+                  <div className="skeleton-copy">
+                    <span className="skeleton-line medium" />
+                    <span className="skeleton-line long" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {history.length === 0 && (
+          <div className="empty-state-card">
+            <span className="empty-state-badge">{isEnglish ? 'Timeline' : '타임라인 시작 전'}</span>
+            <strong>{isEnglish ? 'Your workout history will start here.' : '운동 기록 타임라인이 여기서 시작돼요.'}</strong>
+            <p>
+              {isEnglish
+                ? 'Save your first workout and you will see the last 7 days and timeline cards fill in here.'
+                : '첫 운동 기록을 남기면 지난 7일 스트립과 타임라인 카드가 여기서부터 채워지기 시작해요.'}
+            </p>
+          </div>
+        )}
+
+        {groupedHistory.map((group) => (
+          <section key={group.date} className="history-group">
+            <div className="history-group-header">
+              <div className="history-group-title">
+                <strong>{formatDate(group.date, language)}</strong>
+                <span>{isEnglish ? `${group.items.length} logs` : `${group.items.length}개 기록`}</span>
+              </div>
+            </div>
+
+            <div className="history-group-items">
+              {group.items.map((item) => (
+                <HistoryItem key={item.id} item={item} onUpdate={onUpdate} onDelete={onDelete} loading={loading} />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </section>
+  )
+}
+
