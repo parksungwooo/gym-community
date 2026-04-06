@@ -8,6 +8,16 @@ const badgeLabels = {
   streak3: { ko: '3일 연속', en: '3-Day Streak' },
   streak7: { ko: '7일 연속', en: '7-Day Streak' },
   highFitness: { ko: '상위 체력', en: 'High Fitness' },
+  first_workout: { ko: '첫 운동 기록', en: 'First Workout' },
+  first_photo_proof: { ko: '첫 사진 인증', en: 'First Photo Proof' },
+  streak_3: { ko: '3일 연속', en: '3-Day Streak' },
+  streak_7: { ko: '7일 연속', en: '7-Day Streak' },
+  streak_14: { ko: '14일 연속', en: '14-Day Streak' },
+  goal_first_clear: { ko: '주간 목표 달성', en: 'Weekly Goal Clear' },
+  first_test: { ko: '첫 체력 테스트', en: 'First Fitness Test' },
+  weight_goal_25: { ko: '체중 목표 25%', en: '25% Weight Goal' },
+  weight_goal_100: { ko: '체중 목표 달성', en: 'Weight Goal Complete' },
+  workout_100: { ko: '운동 100회', en: '100 Workouts' },
 }
 
 const workoutTypeLabels = {

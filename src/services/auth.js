@@ -1,23 +1,13 @@
 ﻿import { supabase } from '../lib/supabaseClient'
 
-export async function ensureGuestUser() {
+export async function getCurrentUser() {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
 
   if (sessionError) {
     throw sessionError
   }
 
-  if (sessionData.session?.user) {
-    return sessionData.session.user
-  }
-
-  const { data, error } = await supabase.auth.signInAnonymously()
-
-  if (error) {
-    throw error
-  }
-
-  return data.user
+  return sessionData.session?.user ?? null
 }
 
 export async function signInWithOAuth(provider) {

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import UserAvatar from './UserAvatar'
 import { useI18n } from '../i18n.js'
 import { localizeLevelText } from '../utils/level'
 
@@ -33,22 +34,25 @@ export default function RankingBoard({
   actionLoading,
 }) {
   const { language, isEnglish } = useI18n()
+  const t = (ko, en) => (isEnglish ? en : ko)
   const [expanded, setExpanded] = useState(false)
   const visibleRows = useMemo(() => (expanded ? rows : rows.slice(0, 3)), [expanded, rows])
 
   return (
-    <section className="card community-block-card ranking-surface compact">
+    <section className="card community-block-card ranking-surface compact community-ranking-redesign">
       <div className="app-section-heading compact">
         <div>
-          <span className="app-section-kicker">{isEnglish ? 'Board' : '보드'}</span>
-          <h2>{isEnglish ? 'Weekly Ranking' : '주간 랭킹'}</h2>
+          <span className="app-section-kicker">{t('보드', 'Board')}</span>
+          <h2>{t('주간 활동 랭킹', 'Weekly activity ranking')}</h2>
         </div>
-        <span className="community-mini-pill accent">{isEnglish ? 'Top movers' : '상위 기록'}</span>
+        <span className="community-mini-pill accent">{t('상위 활동 유저', 'Top movers')}</span>
       </div>
+
       <p className="subtext compact">
-        {isEnglish
-          ? 'Start with the top users, then expand when you want the full board.'
-          : '먼저 상위 유저만 보고, 필요할 때 전체 랭킹을 펼쳐보세요.'}
+        {t(
+          '이번 주 활동 포인트를 먼저 보고, 그다음 운동량과 체력 신호를 함께 반영한 보드예요.',
+          'This board weighs weekly activity points first, then workout volume and fitness signals.',
+        )}
       </p>
 
       {loading && (
@@ -67,14 +71,16 @@ export default function RankingBoard({
           ))}
         </div>
       )}
+
       {!loading && !rows.length && (
         <div className="empty-state-card warm">
-          <span className="empty-state-badge">{isEnglish ? 'Ranking' : '랭킹 준비 중'}</span>
-          <strong>{isEnglish ? 'The weekly board is still empty.' : '주간 랭킹이 아직 비어 있어요.'}</strong>
+          <span className="empty-state-badge">{t('랭킹 준비 중', 'Ranking loading up')}</span>
+          <strong>{t('이번 주 보드가 아직 비어 있어요.', 'The weekly board is still empty.')}</strong>
           <p>
-            {isEnglish
-              ? 'Once more people log workouts this week, the ranking board will start to fill in.'
-              : '이번 주 운동 기록이 조금 더 쌓이면 상위 기록 보드가 자연스럽게 채워질 거예요.'}
+            {t(
+              '기록과 포인트가 더 쌓이면 여기부터 커뮤니티 열기가 만들어질 거예요.',
+              'As more logs and points stack up, the community energy will start here.',
+            )}
           </p>
         </div>
       )}
@@ -87,26 +93,40 @@ export default function RankingBoard({
           return (
             <article
               key={item.user_id}
-              className={`ranking-card compact ${getRankTone(index)} ${selectedUserId === item.user_id ? 'active' : ''}`}
+              className={`ranking-card compact community-ranking-card ${getRankTone(index)} ${
+                selectedUserId === item.user_id ? 'active' : ''
+              }`}
             >
               <button type="button" className="ranking-select-btn" onClick={() => onSelectUser?.(item)}>
                 <div className="ranking-left">
                   <div className="ranking-rank">#{index + 1}</div>
-                  <div className="ranking-avatar">{item.avatar_emoji || 'RUN'}</div>
+                  <UserAvatar
+                    className="ranking-avatar"
+                    imageUrl={item.avatar_url}
+                    fallback={item.avatar_emoji || 'RUN'}
+                    alt={item.display_name || (isEnglish ? 'Ranked user' : '랭킹 유저')}
+                  />
                   <div>
                     <strong className="ranking-name">{item.display_name}</strong>
                     <p className="ranking-meta">
-                      {isEnglish
-                        ? `${item.weekly_count} this week · ${item.total_workouts} total`
-                        : `이번 주 ${item.weekly_count}회 · 누적 ${item.total_workouts}회`}
+                      {t(
+                        `주간 ${item.weekly_points ?? 0}P · ${item.weekly_count ?? 0}회 운동`,
+                        `${item.weekly_points ?? 0} pts · ${item.weekly_count ?? 0} workouts`,
+                      )}
                     </p>
                   </div>
                 </div>
+
                 <div className="ranking-score">
-                  <strong>{item.latest_score ? (isEnglish ? `${item.latest_score} pts` : `${item.latest_score}점`) : isEnglish ? 'No score' : '점수 없음'}</strong>
-                  <span>{item.latest_level ? localizeLevelText(item.latest_level, language) : isEnglish ? 'No level yet' : '레벨 미측정'}</span>
+                  <strong>{`Lv ${item.activity_level ?? 1}`}</strong>
+                  <span>
+                    {item.latest_level
+                      ? localizeLevelText(item.latest_level, language)
+                      : t(`총 ${item.total_xp ?? 0} XP`, `${item.total_xp ?? 0} XP total`)}
+                  </span>
                 </div>
               </button>
+
               {!isMe && (
                 <FollowButton
                   isFollowing={isFollowing}
@@ -121,14 +141,14 @@ export default function RankingBoard({
       </div>
 
       {!loading && rows.length > 3 && (
-        <button type="button" className="ghost-btn compact-toggle-btn" onClick={() => setExpanded((prev) => !prev)}>
+        <button
+          type="button"
+          className="ghost-btn compact-toggle-btn"
+          onClick={() => setExpanded((prev) => !prev)}
+        >
           {expanded
-            ? isEnglish
-              ? 'Show Top 3'
-              : '상위 3명만 보기'
-            : isEnglish
-              ? `See Full Ranking (${rows.length})`
-              : `전체 랭킹 보기 (${rows.length}명)`}
+            ? t('상위 3명만 보기', 'Show top 3')
+            : t(`전체 랭킹 보기 (${rows.length}명)`, `See full ranking (${rows.length})`)}
         </button>
       )}
     </section>

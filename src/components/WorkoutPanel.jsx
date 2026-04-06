@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getWorkoutTypeLabel, useI18n } from '../i18n.js'
+import { getOptimizedImageUrl } from '../utils/imageOptimization'
 
 const WORKOUT_OPTIONS = ['러닝', '웨이트', '스트레칭', '요가', '필라테스', '사이클', '기타']
 const QUICK_DURATION_OPTIONS = [20, 30, 45, 60]
@@ -53,7 +54,14 @@ function PhotoProofList({ items, isEnglish, onRemove, onMove }) {
     <div className="photo-proof-grid">
       {items.map((item, index) => (
         <article key={item.id} className="photo-proof-preview multi">
-          <img src={item.previewUrl} alt={isEnglish ? 'Workout proof preview' : '운동 인증 사진 미리보기'} />
+          <img
+            src={getOptimizedImageUrl(item.previewUrl, 'panelThumbnail')}
+            alt={isEnglish ? 'Workout proof preview' : '운동 인증 사진 미리보기'}
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
+            sizes="(max-width: 640px) 40vw, 160px"
+          />
           <div className="photo-proof-meta">
             <span>{item.label}</span>
             <div className="photo-proof-meta-actions">

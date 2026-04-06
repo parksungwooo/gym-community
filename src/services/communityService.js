@@ -1,6 +1,76 @@
 ﻿import { supabase } from '../lib/supabaseClient'
 import { getLevelValue } from '../utils/level'
 
+const WORKOUT_MET_MAP = {
+  러닝: 9.8,
+  웨이트: 6,
+  스트레칭: 2.8,
+  요가: 3,
+  필라테스: 3.8,
+  사이클: 7.5,
+  운동: 4.5,
+  기타: 4.5,
+  '빠른 체크인': 2,
+}
+
+function getWorkoutMet(workoutType) {
+  return WORKOUT_MET_MAP[workoutType] ?? WORKOUT_MET_MAP.운동
+}
+
+function calculateEstimatedCalories(workoutType, durationMinutes, weightKg) {
+  const parsedDuration = Number(durationMinutes)
+  const parsedWeight = Number(weightKg)
+
+  if (!Number.isFinite(parsedDuration) || parsedDuration <= 0) return null
+  if (!Number.isFinite(parsedWeight) || parsedWeight <= 0) return null
+
+  const met = getWorkoutMet(workoutType?.trim() || '운동')
+  return Math.round(met * parsedWeight * (parsedDuration / 60))
+}
+
+function trimNotificationText(text, maxLength = 80) {
+  if (!text) return ''
+  const normalized = text.replace(/\s+/g, ' ').trim()
+  if (normalized.length <= maxLength) return normalized
+  return `${normalized.slice(0, Math.max(0, maxLength - 1)).trim()}...`
+}
+
+async function fetchFeedPostSummary(postId) {
+  const { data, error } = await supabase
+    .from('feed_posts')
+    .select('id,user_id,type,content')
+    .eq('id', postId)
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+async function _fetchProfilesByIds(userIds) {
+  const safeIds = [...new Set((userIds ?? []).filter(Boolean))]
+
+  if (!safeIds.length) {
+    return {}
+  }
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('id,display_name,avatar_emoji,avatar_url')
+    .in('id', safeIds)
+
+  if (error) {
+    throw error
+  }
+
+  return (data ?? []).reduce((acc, profile) => {
+    acc[profile.id] = profile
+    return acc
+  }, {})
+}
+
 export async function upsertUser(userId) {
   const { error } = await supabase.from('users').upsert(
     {
@@ -20,7 +90,7 @@ export async function upsertUser(userId) {
 export async function getUserProfile(userId) {
   const { data, error } = await supabase
     .from('users')
-    .select('id,display_name,avatar_emoji,weekly_goal,height_cm,target_weight_kg,bio,fitness_tags,default_share_to_feed,created_at')
+    .select('id,display_name,avatar_emoji,avatar_url,weekly_goal,height_cm,target_weight_kg,bio,fitness_tags,default_share_to_feed,reminder_enabled,reminder_time,total_xp,weekly_points,activity_level,activity_level_label,streak_days,last_activity_date,is_admin,created_at')
     .eq('id', userId)
     .maybeSingle()
 
@@ -35,23 +105,31 @@ export async function updateUserProfile(userId, profile) {
   const fitnessTags = Array.isArray(profile.fitnessTags)
     ? profile.fitnessTags.filter(Boolean).slice(0, 4)
     : []
+  const avatarUrl = Object.prototype.hasOwnProperty.call(profile, 'avatarFile')
+    ? await resolveProfileAvatar(userId, profile.avatarFile)
+    : profile.avatarUrl
 
   const payload = {
     display_name: profile.displayName?.trim() || null,
     avatar_emoji: profile.avatarEmoji?.trim() || null,
+    avatar_url: avatarUrl || null,
     weekly_goal: Number(profile.weeklyGoal) || 4,
     height_cm: Number(profile.heightCm) > 0 ? Number(profile.heightCm) : null,
     target_weight_kg: Number(profile.targetWeightKg) > 0 ? Number(profile.targetWeightKg) : null,
     bio: profile.bio?.trim() || null,
     fitness_tags: fitnessTags,
     default_share_to_feed: profile.defaultShareToFeed !== false,
+    reminder_enabled: profile.reminderEnabled === true,
+    reminder_time: typeof profile.reminderTime === 'string' && /^\d{2}:\d{2}$/.test(profile.reminderTime)
+      ? profile.reminderTime
+      : '19:00',
   }
 
   const { data, error } = await supabase
     .from('users')
     .update(payload)
     .eq('id', userId)
-    .select('id,display_name,avatar_emoji,weekly_goal,height_cm,target_weight_kg,bio,fitness_tags,default_share_to_feed,created_at')
+    .select('id,display_name,avatar_emoji,avatar_url,weekly_goal,height_cm,target_weight_kg,bio,fitness_tags,default_share_to_feed,reminder_enabled,reminder_time,total_xp,weekly_points,activity_level,activity_level_label,streak_days,last_activity_date,is_admin,created_at')
     .single()
 
   if (error) {
@@ -68,6 +146,37 @@ export async function fetchWeightLogs(userId) {
     .eq('user_id', userId)
     .order('recorded_at', { ascending: false })
     .limit(12)
+
+  if (error) {
+    throw error
+  }
+
+  return data ?? []
+}
+
+export async function fetchRecentActivityEvents(userId, limit = 12) {
+  const safeLimit = Math.min(40, Math.max(1, Number(limit) || 12))
+
+  const { data, error } = await supabase
+    .from('xp_events')
+    .select('id,event_type,xp_amount,weekly_points,reference_type,reference_id,week_key,metadata,created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(safeLimit)
+
+  if (error) {
+    throw error
+  }
+
+  return data ?? []
+}
+
+export async function fetchAchievementBadges(userId) {
+  const { data, error } = await supabase
+    .from('user_badges')
+    .select('id,badge_key,metadata,awarded_at')
+    .eq('user_id', userId)
+    .order('awarded_at', { ascending: false })
 
   if (error) {
     throw error
@@ -143,6 +252,103 @@ export async function fetchFollowingIds(userId) {
   return (data ?? []).map((item) => item.following_id)
 }
 
+export async function fetchBlockedIds(userId) {
+  const { data, error } = await supabase
+    .from('blocks')
+    .select('blocked_id')
+    .eq('blocker_id', userId)
+
+  if (error) {
+    throw error
+  }
+
+  return (data ?? []).map((item) => item.blocked_id)
+}
+
+export async function blockUser(userId, targetUserId) {
+  if (!targetUserId || userId === targetUserId) return null
+
+  const { data, error } = await supabase
+    .from('blocks')
+    .insert({
+      blocker_id: userId,
+      blocked_id: targetUserId,
+    })
+    .select('id,blocker_id,blocked_id,created_at')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export async function unblockUser(userId, targetUserId) {
+  const { error } = await supabase
+    .from('blocks')
+    .delete()
+    .eq('blocker_id', userId)
+    .eq('blocked_id', targetUserId)
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function submitReport(reporterId, report) {
+  const reason = report.reason?.trim()
+
+  if (!reason) {
+    throw new Error('신고 사유를 선택해주세요.')
+  }
+
+  const { data, error } = await supabase
+    .from('reports')
+    .insert({
+      reporter_id: reporterId,
+      target_user_id: report.targetUserId ?? null,
+      post_id: report.postId ?? null,
+      reason,
+      details: report.details?.trim() || null,
+    })
+    .select('id,reporter_id,target_user_id,post_id,reason,details,created_at')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export async function fetchModerationReports(status = 'open', limit = 30) {
+  const { data, error } = await supabase.rpc('get_moderation_reports', {
+    status_filter: status,
+    limit_count: Math.min(50, Math.max(1, Number(limit) || 30)),
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return data ?? []
+}
+
+export async function resolveModerationReport(reportId, status, resolutionNote = '') {
+  const { data, error } = await supabase.rpc('resolve_report', {
+    report_id: reportId,
+    next_status: status,
+    review_note: resolutionNote?.trim() || null,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
 export async function fetchFollowStats(userId) {
   const [{ count: followerCount, error: followerError }, { count: followingCount, error: followingError }] = await Promise.all([
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', userId),
@@ -160,6 +366,172 @@ export async function fetchFollowStats(userId) {
   return {
     followerCount: followerCount ?? 0,
     followingCount: followingCount ?? 0,
+  }
+}
+
+export async function createNotification({
+  userId,
+  actorUserId,
+  type,
+  title,
+  body,
+  entityType = null,
+  entityId = null,
+  metadata = {},
+}) {
+  if (!userId || !actorUserId || userId === actorUserId) return null
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert({
+      user_id: userId,
+      actor_user_id: actorUserId,
+      type,
+      title,
+      body,
+      entity_type: entityType,
+      entity_id: entityId,
+      metadata,
+    })
+    .select('id,user_id,actor_user_id,type,title,body,entity_type,entity_id,metadata,read_at,created_at')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export async function createFollowNotification(actorUserId, targetUserId) {
+  return createNotification({
+    userId: targetUserId,
+    actorUserId,
+    type: 'follow',
+    title: '새 팔로워',
+    body: '회원님을 팔로우하기 시작했어요.',
+    entityType: 'user',
+    entityId: targetUserId,
+  })
+}
+
+export async function createLikeNotification(actorUserId, postId) {
+  const post = await fetchFeedPostSummary(postId)
+
+  if (!post?.user_id || post.user_id === actorUserId) {
+    return null
+  }
+
+  return createNotification({
+    userId: post.user_id,
+    actorUserId,
+    type: 'like',
+    title: '새 좋아요',
+    body: '회원님의 커뮤니티 기록을 좋아해요.',
+    entityType: 'feed_post',
+    entityId: post.id,
+    metadata: {
+      postType: post.type,
+      postPreview: trimNotificationText(post.content),
+    },
+  })
+}
+
+export async function createCommentNotification(actorUserId, postId, commentContent) {
+  const post = await fetchFeedPostSummary(postId)
+
+  if (!post?.user_id || post.user_id === actorUserId) {
+    return null
+  }
+
+  return createNotification({
+    userId: post.user_id,
+    actorUserId,
+    type: 'comment',
+    title: '새 댓글',
+    body: '회원님의 커뮤니티 기록에 댓글을 남겼어요.',
+    entityType: 'feed_post',
+    entityId: post.id,
+    metadata: {
+      postType: post.type,
+      postPreview: trimNotificationText(post.content),
+      commentPreview: trimNotificationText(commentContent, 100),
+    },
+  })
+}
+
+export async function fetchNotifications(userId, limit = 30) {
+  if (!userId) {
+    return {
+      notifications: [],
+      unreadCount: 0,
+    }
+  }
+
+  const safeLimit = Math.min(50, Math.max(1, Number(limit) || 30))
+
+  const { data, error } = await supabase.rpc('get_notification_inbox', {
+    limit_count: safeLimit,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  const notifications = (data ?? []).map((item) => ({
+    ...item,
+    actorDisplayName: item.actor_display_name ?? null,
+    actorAvatarEmoji: item.actor_avatar_emoji ?? 'RUN',
+    actorAvatarUrl: item.actor_avatar_url ?? null,
+    unread: !item.read_at,
+  }))
+
+  return {
+    notifications,
+    unreadCount: Number(notifications[0]?.unread_count ?? 0),
+  }
+}
+
+export async function fetchUnreadNotificationCount(userId) {
+  const { count, error } = await supabase
+    .from('notifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .is('read_at', null)
+
+  if (error) {
+    throw error
+  }
+
+  return count ?? 0
+}
+
+export async function markNotificationRead(userId, notificationId) {
+  const { data, error } = await supabase
+    .from('notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('id', notificationId)
+    .is('read_at', null)
+    .select('id,read_at')
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export async function markAllNotificationsRead(userId) {
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .is('read_at', null)
+
+  if (error) {
+    throw error
   }
 }
 
@@ -181,7 +553,7 @@ export async function getLatestTestResult(userId) {
 export async function fetchWorkoutHistory(userId) {
   const { data, error } = await supabase
     .from('workout_logs')
-    .select('id,date,workout_type,duration_minutes,note,photo_url,photo_urls,share_to_feed,created_at')
+    .select('id,date,workout_type,duration_minutes,estimated_calories,note,photo_url,photo_urls,share_to_feed,created_at')
     .eq('user_id', userId)
     .eq('completed', true)
     .order('created_at', { ascending: false })
@@ -192,7 +564,33 @@ export async function fetchWorkoutHistory(userId) {
     throw error
   }
 
-  return data
+  const history = data ?? []
+
+  if (!history.length) {
+    return history
+  }
+
+  const historyIds = history.map((item) => item.id)
+  const { data: xpRows, error: xpError } = await supabase
+    .from('xp_events')
+    .select('reference_id,xp_amount')
+    .eq('user_id', userId)
+    .eq('reference_type', 'workout_log')
+    .in('reference_id', historyIds)
+
+  if (xpError) {
+    throw xpError
+  }
+
+  const xpMap = (xpRows ?? []).reduce((acc, item) => {
+    acc[item.reference_id] = Number(item.xp_amount) || 0
+    return acc
+  }, {})
+
+  return history.map((item) => ({
+    ...item,
+    xp_amount: xpMap[item.id] ?? 0,
+  }))
 }
 
 export async function fetchWorkoutTemplates(userId) {
@@ -254,6 +652,7 @@ export async function deleteWorkoutTemplate(userId, templateId) {
 export async function getWorkoutStats(userId) {
   const history = await fetchWorkoutHistory(userId)
   const dates = history.map((item) => item.date)
+  const calories = history.map((item) => Number(item.estimated_calories) || 0)
   const dateSet = new Set(dates)
   const today = new Date()
   const todayKey = today.toLocaleDateString('sv-SE')
@@ -285,14 +684,25 @@ export async function getWorkoutStats(userId) {
   const weekKey = weekAgo.toLocaleDateString('sv-SE')
   const weeklyCount = dates.filter((date) => date >= weekKey).length
   const todayCount = dates.filter((date) => date === todayKey).length
+  const weeklyCalories = history
+    .filter((item) => item.date >= weekKey)
+    .reduce((total, item) => total + (Number(item.estimated_calories) || 0), 0)
+  const todayCalories = history
+    .filter((item) => item.date === todayKey)
+    .reduce((total, item) => total + (Number(item.estimated_calories) || 0), 0)
+  const totalCalories = calories.reduce((total, value) => total + value, 0)
 
   return {
     streak,
     todayCount,
+    todayCalories,
     weeklyCount,
+    weeklyCalories,
+    totalCalories,
     lastWorkoutDate: history[0]?.date ?? null,
     lastWorkoutType: history[0]?.workout_type ?? null,
     lastWorkoutDuration: history[0]?.duration_minutes ?? null,
+    lastWorkoutCalories: history[0]?.estimated_calories ?? null,
     lastWorkoutNote: history[0]?.note ?? null,
     typeCounts,
   }
@@ -354,6 +764,7 @@ export async function saveTestResult(userId, score, level) {
 export async function completeWorkout(userId, date, details = {}) {
   const workoutType = details.workoutType?.trim() || '운동'
   const durationMinutes = Number(details.durationMinutes) || 0
+  const estimatedCalories = calculateEstimatedCalories(workoutType, durationMinutes, details.weightKg)
   const note = details.note?.trim() || null
   const shareToFeed = details.shareToFeed !== false
   const photoUrls = await resolvePhotoItems(userId, details.photoItems ?? details.photoFiles ?? [])
@@ -367,6 +778,7 @@ export async function completeWorkout(userId, date, details = {}) {
       completed: true,
       workout_type: workoutType,
       duration_minutes: durationMinutes,
+      estimated_calories: estimatedCalories,
       note,
       photo_url: photoUrl,
       photo_urls: photoUrls,
@@ -397,6 +809,7 @@ export async function completeWorkout(userId, date, details = {}) {
 export async function updateWorkoutLog(userId, workoutLogId, details = {}) {
   const workoutType = details.workoutType?.trim() || '운동'
   const durationMinutes = Number(details.durationMinutes) || 0
+  const estimatedCalories = calculateEstimatedCalories(workoutType, durationMinutes, details.weightKg)
   const note = details.note?.trim() || null
   const photoUrls = Object.prototype.hasOwnProperty.call(details, 'photoItems')
     ? await resolvePhotoItems(userId, details.photoItems)
@@ -404,6 +817,7 @@ export async function updateWorkoutLog(userId, workoutLogId, details = {}) {
   const updatePayload = {
     workout_type: workoutType,
     duration_minutes: durationMinutes,
+    estimated_calories: estimatedCalories,
     note,
   }
 
@@ -429,7 +843,7 @@ export async function updateWorkoutLog(userId, workoutLogId, details = {}) {
   return data
 }
 
-async function uploadWorkoutPhoto(userId, file) {
+async function uploadImageToBucket(bucketId, userId, file, options = {}) {
   if (!(file instanceof File)) return null
   const preparedFile = await compressImageFile(file)
   const extension = preparedFile.name.split('.').pop()?.toLowerCase() || 'jpg'
@@ -437,9 +851,9 @@ async function uploadWorkoutPhoto(userId, file) {
   const filePath = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${safeExtension}`
 
   const { error: uploadError } = await supabase.storage
-    .from('workout-photos')
+    .from(bucketId)
     .upload(filePath, preparedFile, {
-      cacheControl: '3600',
+      cacheControl: options.cacheControl ?? '3600',
       upsert: false,
       contentType: preparedFile.type || `image/${safeExtension}`,
     })
@@ -448,11 +862,21 @@ async function uploadWorkoutPhoto(userId, file) {
     throw uploadError
   }
 
-  const { data } = supabase.storage.from('workout-photos').getPublicUrl(filePath)
+  const { data } = supabase.storage.from(bucketId).getPublicUrl(filePath)
   return data?.publicUrl ?? null
 }
 
-async function uploadWorkoutPhotos(userId, files) {
+async function uploadWorkoutPhoto(userId, file) {
+  return uploadImageToBucket('workout-photos', userId, file)
+}
+
+async function resolveProfileAvatar(userId, avatarFile) {
+  if (avatarFile === null) return null
+  if (!(avatarFile instanceof File)) return null
+  return uploadImageToBucket('profile-avatars', userId, avatarFile, { cacheControl: '86400' })
+}
+
+async function _uploadWorkoutPhotos(userId, files) {
   const uploads = await Promise.all(
     (files ?? []).slice(0, 4).map((file) => uploadWorkoutPhoto(userId, file)),
   )
@@ -496,7 +920,7 @@ async function compressImageFile(file) {
       img.src = imageUrl
     })
 
-    const maxDimension = 1600
+    const maxDimension = 1280
     const scale = Math.min(1, maxDimension / Math.max(image.width, image.height))
     const width = Math.max(1, Math.round(image.width * scale))
     const height = Math.max(1, Math.round(image.height * scale))
@@ -508,9 +932,22 @@ async function compressImageFile(file) {
     if (!context) return file
 
     context.drawImage(image, 0, 0, width, height)
-    const blob = await new Promise((resolve) => {
-      canvas.toBlob(resolve, 'image/jpeg', 0.82)
-    })
+    const candidateQualities = [0.78, 0.68, 0.58]
+    let blob = null
+
+    for (const quality of candidateQualities) {
+      // Try progressively smaller JPEGs until we meaningfully reduce transfer size.
+      const nextBlob = await new Promise((resolve) => {
+        canvas.toBlob(resolve, 'image/jpeg', quality)
+      })
+
+      if (!nextBlob) continue
+      blob = nextBlob
+
+      if (nextBlob.size <= 350 * 1024 || nextBlob.size <= file.size * 0.72) {
+        break
+      }
+    }
 
     if (!blob || blob.size >= file.size) return file
 
@@ -588,10 +1025,10 @@ export async function addComment(userId, postId, content) {
   }
 }
 
-export async function fetchFeedWithRelations(currentUserId) {
+export async function fetchFeedWithRelations(currentUserId, blockedUserIds = []) {
   const { data: posts, error: postError } = await supabase
     .from('feed_posts')
-    .select('*')
+    .select('id,user_id,content,type,metadata,created_at')
     .order('created_at', { ascending: false })
     .limit(50)
 
@@ -599,12 +1036,14 @@ export async function fetchFeedWithRelations(currentUserId) {
     throw postError
   }
 
-  if (!posts.length) {
+  const visiblePosts = (posts ?? []).filter((post) => !blockedUserIds.includes(post.user_id))
+
+  if (!visiblePosts.length) {
     return []
   }
 
-  const postIds = posts.map((post) => post.id)
-  const userIds = [...new Set(posts.map((post) => post.user_id).filter(Boolean))]
+  const postIds = visiblePosts.map((post) => post.id)
+  const userIds = [...new Set(visiblePosts.map((post) => post.user_id).filter(Boolean))]
 
   const [
     { data: likes, error: likeError },
@@ -620,7 +1059,7 @@ export async function fetchFeedWithRelations(currentUserId) {
       .order('created_at', { ascending: true }),
     supabase
       .from('users')
-      .select('id,display_name,avatar_emoji')
+      .select('id,display_name,avatar_emoji,avatar_url')
       .in('id', userIds),
     supabase
       .from('test_results')
@@ -681,10 +1120,11 @@ export async function fetchFeedWithRelations(currentUserId) {
     return acc
   }, {})
 
-  return posts.map((post) => ({
+  return visiblePosts.map((post) => ({
     ...post,
     authorDisplayName: profileMap[post.user_id]?.display_name ?? null,
     authorAvatarEmoji: profileMap[post.user_id]?.avatar_emoji ?? null,
+    authorAvatarUrl: profileMap[post.user_id]?.avatar_url ?? null,
     authorLevel: latestResultMap[post.user_id]?.level ?? null,
     authorScore: latestResultMap[post.user_id]?.score ?? null,
     likeCount: likeMap[post.id]?.count ?? 0,
@@ -696,6 +1136,41 @@ export async function fetchFeedWithRelations(currentUserId) {
 export async function fetchLeaderboard(limit = 10) {
   const { data, error } = await supabase.rpc('get_public_leaderboard', {
     limit_count: limit,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return data ?? []
+}
+
+export async function fetchPublicProfile(userId) {
+  if (!userId) return null
+
+  const { data, error } = await supabase.rpc('get_public_profile', {
+    profile_user_id: userId,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return data?.[0] ?? null
+}
+
+export async function searchPublicUsers(query, limit = 12) {
+  const trimmedQuery = query?.trim()
+
+  if (!trimmedQuery || trimmedQuery.length < 2) {
+    return []
+  }
+
+  const safeLimit = Math.min(20, Math.max(1, Number(limit) || 12))
+
+  const { data, error } = await supabase.rpc('search_public_users', {
+    search_query: trimmedQuery,
+    limit_count: safeLimit,
   })
 
   if (error) {
