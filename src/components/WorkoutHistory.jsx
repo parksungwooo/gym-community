@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getWorkoutTypeLabel, useI18n } from '../i18n.js'
-import { getOptimizedImageUrl } from '../utils/imageOptimization'
+import OptimizedImage from './OptimizedImage'
 
 const WORKOUT_OPTIONS = ['러닝', '웨이트', '스트레칭', '요가', '필라테스', '사이클', '기타', '빠른 체크인']
 const MAX_PHOTOS = 4
@@ -108,8 +108,9 @@ function PhotoGrid({ items, isEnglish, onOpen, onRemove, onMove, editable = fals
         <article key={item.id} className="history-photo-card">
           <button type="button" className="image-open-btn" onClick={() => onOpen?.(item.previewUrl)}>
             <div className="history-photo-preview">
-              <img
-                src={getOptimizedImageUrl(item.previewUrl, editable ? 'panelThumbnail' : 'historyThumbnail')}
+              <OptimizedImage
+                imageUrl={item.previewUrl}
+                preset={editable ? 'panelThumbnail' : 'historyThumbnail'}
                 alt={isEnglish ? 'Workout proof' : '운동 인증 사진'}
                 loading="lazy"
                 decoding="async"

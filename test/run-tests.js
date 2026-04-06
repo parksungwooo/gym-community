@@ -6,6 +6,7 @@ import { buildCommunityAccessResult } from '../src/features/community/communityF
 import { buildNotificationNavigation } from '../src/features/notifications/notificationFlow.js'
 import { getActivityEventMeta, getActivityLevelProgress } from '../src/utils/activityLevel.js'
 import { getHashForView, parseViewFromHash } from '../src/utils/appRouting.js'
+import { getImageSourceCandidates } from '../src/utils/imageOptimization.js'
 import { getPaywallCopy, isProMember, PREMIUM_CONTEXT } from '../src/utils/premium.js'
 
 const tests = [
@@ -139,6 +140,19 @@ const tests = [
 
       assert.equal(copy.kicker, 'Pro Reports')
       assert.match(copy.title, /Read the change/i)
+    },
+  },
+  {
+    name: 'image source candidates fall back to the original public URL',
+    run() {
+      const candidates = getImageSourceCandidates(
+        'https://demo.supabase.co/storage/v1/object/public/workout-photos/user/sample.jpg',
+        'feedThumbnail',
+      )
+
+      assert.equal(candidates.length, 2)
+      assert.match(candidates[0], /\/storage\/v1\/render\/image\/public\/workout-photos\/user\/sample\.jpg/)
+      assert.equal(candidates[1], 'https://demo.supabase.co/storage/v1/object/public/workout-photos/user/sample.jpg')
     },
   },
   {

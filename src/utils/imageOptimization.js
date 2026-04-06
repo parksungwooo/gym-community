@@ -41,3 +41,15 @@ export function getOptimizedImageUrl(sourceUrl, preset = 'feedThumbnail', overri
     return sourceUrl
   }
 }
+
+export function getImageSourceCandidates(sourceUrl, preset = 'feedThumbnail', overrides = {}) {
+  if (!sourceUrl || typeof sourceUrl !== 'string') return []
+
+  const optimizedUrl = getOptimizedImageUrl(sourceUrl, preset, overrides)
+
+  if (!optimizedUrl || optimizedUrl === sourceUrl) {
+    return [sourceUrl]
+  }
+
+  return [optimizedUrl, sourceUrl]
+}

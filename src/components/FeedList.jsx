@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import UserAvatar from './UserAvatar'
 import { formatDateTimeByLanguage, getWorkoutTypeLabel, useI18n } from '../i18n.js'
-import { getOptimizedImageUrl } from '../utils/imageOptimization'
+import OptimizedImage from './OptimizedImage'
 import { localizeLevelText } from '../utils/level'
 
 const FILTERS = {
@@ -194,8 +194,9 @@ function FeedCard({
               onClick={() => onOpenImage(url)}
             >
               <div className="feed-photo-preview">
-                <img
-                  src={getOptimizedImageUrl(url, 'feedThumbnail')}
+                <OptimizedImage
+                  imageUrl={url}
+                  preset="feedThumbnail"
                   alt={isEnglish ? 'Workout proof' : '운동 인증 사진'}
                   loading="lazy"
                   decoding="async"

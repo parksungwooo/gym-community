@@ -1,4 +1,4 @@
-import { getOptimizedImageUrl } from '../utils/imageOptimization'
+import OptimizedImage from './OptimizedImage'
 
 export default function UserAvatar({
   imageUrl,
@@ -11,9 +11,10 @@ export default function UserAvatar({
   return (
     <div className={classes}>
       {imageUrl ? (
-        <img
+        <OptimizedImage
           className="user-avatar-image"
-          src={getOptimizedImageUrl(imageUrl, 'avatar')}
+          imageUrl={imageUrl}
+          preset="avatar"
           alt={alt}
           decoding="async"
         />
