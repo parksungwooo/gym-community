@@ -20,7 +20,7 @@ export async function upsertUser(userId) {
 export async function getUserProfile(userId) {
   const { data, error } = await supabase
     .from('users')
-    .select('id,display_name,avatar_emoji,weekly_goal,created_at')
+    .select('id,display_name,avatar_emoji,weekly_goal,height_cm,target_weight_kg,created_at')
     .eq('id', userId)
     .maybeSingle()
 
@@ -36,13 +36,53 @@ export async function updateUserProfile(userId, profile) {
     display_name: profile.displayName?.trim() || null,
     avatar_emoji: profile.avatarEmoji?.trim() || null,
     weekly_goal: Number(profile.weeklyGoal) || 4,
+    height_cm: Number(profile.heightCm) > 0 ? Number(profile.heightCm) : null,
+    target_weight_kg: Number(profile.targetWeightKg) > 0 ? Number(profile.targetWeightKg) : null,
   }
 
   const { data, error } = await supabase
     .from('users')
     .update(payload)
     .eq('id', userId)
-    .select('id,display_name,avatar_emoji,weekly_goal,created_at')
+    .select('id,display_name,avatar_emoji,weekly_goal,height_cm,target_weight_kg,created_at')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export async function fetchWeightLogs(userId) {
+  const { data, error } = await supabase
+    .from('weight_logs')
+    .select('id,weight_kg,recorded_at,created_at')
+    .eq('user_id', userId)
+    .order('recorded_at', { ascending: false })
+    .limit(12)
+
+  if (error) {
+    throw error
+  }
+
+  return data ?? []
+}
+
+export async function saveWeightLog(userId, weightKg) {
+  const parsedWeight = Number(weightKg)
+
+  if (!Number.isFinite(parsedWeight) || parsedWeight <= 0) {
+    throw new Error('몸무게를 올바르게 입력해주세요.')
+  }
+
+  const { data, error } = await supabase
+    .from('weight_logs')
+    .insert({
+      user_id: userId,
+      weight_kg: parsedWeight,
+    })
+    .select('id,weight_kg,recorded_at,created_at')
     .single()
 
   if (error) {

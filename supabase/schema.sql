@@ -8,12 +8,16 @@ create table if not exists public.users (
   display_name text,
   avatar_emoji text,
   weekly_goal int not null default 4,
+  height_cm numeric(5,2),
+  target_weight_kg numeric(5,2),
   created_at timestamptz not null default now()
 );
 
 alter table public.users add column if not exists display_name text;
 alter table public.users add column if not exists avatar_emoji text;
 alter table public.users add column if not exists weekly_goal int;
+alter table public.users add column if not exists height_cm numeric(5,2);
+alter table public.users add column if not exists target_weight_kg numeric(5,2);
 alter table public.users alter column weekly_goal set default 4;
 update public.users set weekly_goal = 4 where weekly_goal is null;
 alter table public.users alter column weekly_goal set not null;
@@ -54,6 +58,14 @@ create table if not exists public.workout_templates (
   unique (user_id, name)
 );
 
+create table if not exists public.weight_logs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users(id) on delete cascade,
+  weight_kg numeric(5,2) not null check (weight_kg > 0 and weight_kg < 500),
+  recorded_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
+);
+
 alter table public.workout_templates add column if not exists workout_type text;
 alter table public.workout_templates add column if not exists duration_minutes int;
 alter table public.workout_templates add column if not exists note text;
@@ -87,6 +99,7 @@ create table if not exists public.comments (
 create index if not exists idx_test_results_user_created_at on public.test_results (user_id, created_at desc);
 create index if not exists idx_workout_logs_user_date on public.workout_logs (user_id, date desc);
 create index if not exists idx_workout_templates_user_updated_at on public.workout_templates (user_id, updated_at desc);
+create index if not exists idx_weight_logs_user_recorded_at on public.weight_logs (user_id, recorded_at desc);
 create index if not exists idx_feed_posts_created_at on public.feed_posts (created_at desc);
 create index if not exists idx_feed_posts_user_created_at on public.feed_posts (user_id, created_at desc);
 create index if not exists idx_likes_post_id on public.likes (post_id);
@@ -96,6 +109,7 @@ alter table public.users enable row level security;
 alter table public.test_results enable row level security;
 alter table public.workout_logs enable row level security;
 alter table public.workout_templates enable row level security;
+alter table public.weight_logs enable row level security;
 alter table public.feed_posts enable row level security;
 alter table public.likes enable row level security;
 alter table public.comments enable row level security;
@@ -122,6 +136,63 @@ begin
     before update on public.workout_templates
     for each row
     execute function public.set_updated_at();
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'weight_logs' and policyname = 'users can read own weight logs'
+  ) then
+    create policy "users can read own weight logs"
+    on public.weight_logs
+    for select
+    using (auth.uid() = user_id);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'weight_logs' and policyname = 'users can insert own weight logs'
+  ) then
+    create policy "users can insert own weight logs"
+    on public.weight_logs
+    for insert
+    with check (auth.uid() = user_id);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'weight_logs' and policyname = 'users can update own weight logs'
+  ) then
+    create policy "users can update own weight logs"
+    on public.weight_logs
+    for update
+    using (auth.uid() = user_id)
+    with check (auth.uid() = user_id);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'weight_logs' and policyname = 'users can delete own weight logs'
+  ) then
+    create policy "users can delete own weight logs"
+    on public.weight_logs
+    for delete
+    using (auth.uid() = user_id);
   end if;
 end
 $$;

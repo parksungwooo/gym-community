@@ -1,4 +1,5 @@
 import { getWorkoutTypeLabel, useI18n } from '../i18n.js'
+import { getBmiCategory } from '../utils/bodyMetrics'
 import { localizeLevelText } from '../utils/level'
 
 function HomeStatPill({ label, value }) {
@@ -36,6 +37,7 @@ function RoutineStartCard({ routine, onStart }) {
 
 export default function HomeDashboard({
   profile,
+  bodyMetrics,
   todayDone,
   currentLevel,
   stats,
@@ -74,6 +76,19 @@ export default function HomeDashboard({
     : `이번 주 ${challenge.current}/${challenge.goal}`
 
   const todaySummary = isEnglish ? `${stats.todayCount} logs` : `${stats.todayCount}개`
+  const latestWeightSummary = bodyMetrics?.latestWeightKg != null
+    ? `${bodyMetrics.latestWeightKg} kg`
+    : (isEnglish ? 'No weight yet' : '체중 기록 없음')
+  const bmiSummary = bodyMetrics?.bmi != null
+    ? `${bodyMetrics.bmi} BMI`
+    : (isEnglish ? 'BMI pending' : 'BMI 대기 중')
+  const goalSummary = bodyMetrics?.targetDeltaKg != null
+    ? bodyMetrics.targetDeltaKg === 0
+      ? (isEnglish ? 'Goal reached' : '목표 달성')
+      : bodyMetrics.targetDeltaKg > 0
+        ? (isEnglish ? `${bodyMetrics.targetDeltaKg} kg to lose` : `${bodyMetrics.targetDeltaKg}kg 감량`)
+        : (isEnglish ? `${Math.abs(bodyMetrics.targetDeltaKg)} kg above goal gain` : `${Math.abs(bodyMetrics.targetDeltaKg)}kg 증량`)
+    : (isEnglish ? 'Set target weight' : '목표 체중 설정')
 
   const lastWorkoutSummary = stats.lastWorkoutType
     ? getWorkoutTypeLabel(stats.lastWorkoutType, language)
@@ -157,6 +172,23 @@ export default function HomeDashboard({
             <span>{isEnglish ? 'This week' : '이번 주'}</span>
             <strong>{weeklySummary}</strong>
           </div>
+        </div>
+
+        <div className="home-context-row body">
+          <div className="home-context-block">
+            <span>{isEnglish ? 'Latest weight' : '최신 체중'}</span>
+            <strong>{latestWeightSummary}</strong>
+          </div>
+          <div className="home-context-block">
+            <span>{isEnglish ? 'BMI' : 'BMI'}</span>
+            <strong>{bmiSummary}</strong>
+          </div>
+        </div>
+
+        <div className="home-body-goal-callout">
+          <span>{isEnglish ? 'Body goal' : '체중 목표'}</span>
+          <strong>{goalSummary}</strong>
+          <p>{bodyMetrics?.bmi != null ? getBmiCategory(bodyMetrics.bmi, isEnglish) : (isEnglish ? 'Add height and target weight in profile.' : '프로필에서 키와 목표 체중을 입력해보세요.')}</p>
         </div>
       </section>
     </section>

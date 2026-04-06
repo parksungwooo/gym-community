@@ -21,6 +21,7 @@ import {
   deleteWorkoutLog,
   fetchLeaderboard,
   fetchFeedWithRelations,
+  fetchWeightLogs,
   fetchWorkoutHistory,
   fetchWorkoutTemplates,
   getLatestTestResult,
@@ -29,11 +30,13 @@ import {
   hasWorkoutCompleted,
   saveWorkoutTemplate,
   saveTestResult,
+  saveWeightLog,
   toggleLike,
   updateUserProfile,
   updateWorkoutLog,
   upsertUser,
 } from './services/communityService'
+import { buildBodyMetrics } from './utils/bodyMetrics'
 import { getLevelByScore, getLevelValue } from './utils/level'
 
 const VIEW = {
@@ -205,6 +208,7 @@ export default function App() {
   const [workoutTemplates, setWorkoutTemplates] = useState([])
   const [workoutStats, setWorkoutStats] = useState(INITIAL_STATS)
   const [profile, setProfile] = useState(null)
+  const [weightLogs, setWeightLogs] = useState([])
   const [selectedCommunityUser, setSelectedCommunityUser] = useState(null)
   const [showTestForm, setShowTestForm] = useState(false)
   const [showWorkoutPanel, setShowWorkoutPanel] = useState(false)
@@ -227,6 +231,7 @@ export default function App() {
     if (sameLevelRows.length) return sameLevelRows.slice(0, 2)
     return leaderboard.filter((item) => item.user_id !== user?.id).slice(0, 2)
   }, [leaderboard, latestResult?.level, testResult?.level, user?.id])
+  const bodyMetrics = useMemo(() => buildBodyMetrics(profile, weightLogs), [profile, weightLogs])
 
   const refreshFeed = useCallback(async (userId) => {
     setLoadingFeed(true)
@@ -244,12 +249,13 @@ export default function App() {
   }, [isEnglish])
 
   const refreshUserSummary = useCallback(async (userId) => {
-    const [result, stats, history, templates, nextProfile] = await Promise.all([
+    const [result, stats, history, templates, nextProfile, nextWeightLogs] = await Promise.all([
       withTimeout(getLatestTestResult(userId), 10000, isEnglish ? 'Could not load your latest test.' : '최근 테스트를 불러오지 못했어요.'),
       withTimeout(getWorkoutStats(userId), 10000, isEnglish ? 'Could not load workout stats.' : '운동 통계를 불러오지 못했어요.'),
       withTimeout(fetchWorkoutHistory(userId), 10000, isEnglish ? 'Could not load workout history.' : '운동 기록 리스트를 불러오지 못했어요.'),
       withTimeout(fetchWorkoutTemplates(userId), 10000, isEnglish ? 'Could not load saved routines.' : '저장된 루틴을 불러오지 못했어요.'),
       withTimeout(getUserProfile(userId), 10000, isEnglish ? 'Could not load profile.' : '프로필 정보를 불러오지 못했어요.'),
+      withTimeout(fetchWeightLogs(userId), 10000, isEnglish ? 'Could not load weight logs.' : '몸무게 기록을 불러오지 못했어요.'),
     ])
 
     setLatestResult(result)
@@ -257,8 +263,9 @@ export default function App() {
     setWorkoutHistory(history)
     setWorkoutTemplates(templates)
     setProfile(nextProfile)
+    setWeightLogs(nextWeightLogs)
 
-    return { result, stats, history, templates, profile: nextProfile }
+    return { result, stats, history, templates, profile: nextProfile, weightLogs: nextWeightLogs }
   }, [isEnglish])
 
   const loadUserData = useCallback(async (nextUser) => {
@@ -563,25 +570,48 @@ export default function App() {
       const previousName = profile?.display_name ?? ''
       const previousAvatar = profile?.avatar_emoji ?? ''
       const previousGoal = profile?.weekly_goal ?? 4
+      const previousHeight = profile?.height_cm ?? null
+      const previousTargetWeight = profile?.target_weight_kg ?? null
       const savedProfile = await updateUserProfile(user.id, nextProfile)
       setProfile(savedProfile)
 
       const changedName = (savedProfile.display_name ?? '') !== previousName
       const changedAvatar = (savedProfile.avatar_emoji ?? '') !== previousAvatar
       const changedGoal = (savedProfile.weekly_goal ?? 4) !== previousGoal
+      const changedHeight = (savedProfile.height_cm ?? null) !== previousHeight
+      const changedTargetWeight = (savedProfile.target_weight_kg ?? null) !== previousTargetWeight
 
-      if (changedName || changedAvatar || changedGoal) {
+      if (changedName || changedAvatar || changedGoal || changedHeight || changedTargetWeight) {
         const profileLabel = savedProfile.display_name || 'profile'
         await createFeedPost(user.id, `${profileLabel} updated`, 'profile_update', {
           display_name: savedProfile.display_name,
           avatar_emoji: savedProfile.avatar_emoji,
           weekly_goal: savedProfile.weekly_goal,
+          height_cm: savedProfile.height_cm,
+          target_weight_kg: savedProfile.target_weight_kg,
         })
         await Promise.all([refreshFeed(user.id), refreshLeaderboard()])
       }
       showSuccess(isEnglish ? 'Settings saved.' : '설정을 저장했어요.', 'info')
     } catch (error) {
       setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to save profile.' : '프로필 저장에 실패했습니다.', isEnglish))
+    } finally {
+      setLoadingAction(false)
+    }
+  }
+
+  const handleSaveWeight = async (weightKg) => {
+    if (!user?.id) return
+
+    setLoadingAction(true)
+    setErrorMessage('')
+
+    try {
+      await saveWeightLog(user.id, weightKg)
+      await refreshUserSummary(user.id)
+      showSuccess(isEnglish ? 'Weight saved.' : '몸무게를 기록했어요.', 'success')
+    } catch (error) {
+      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to save weight.' : '몸무게 저장에 실패했습니다.', isEnglish))
     } finally {
       setLoadingAction(false)
     }
@@ -658,6 +688,7 @@ export default function App() {
               )}
               <HomeDashboard
                 profile={profile}
+                bodyMetrics={bodyMetrics}
                 todayDone={todayDone}
                 currentLevel={latestResult?.level ?? testResult?.level ?? null}
                 stats={workoutStats}
@@ -711,7 +742,13 @@ export default function App() {
 
               {showTestForm && <TestForm onSubmit={handleSubmitTest} loading={loadingAction} />}
               {testResult && <ResultView score={testResult.score} level={testResult.level} onStartWorkout={() => setView(VIEW.HOME)} />}
-              <ProgressPanel stats={workoutStats} latestResult={latestResult} badges={badges} weeklyGoal={profile?.weekly_goal || 4} />
+              <ProgressPanel
+                stats={workoutStats}
+                latestResult={latestResult}
+                badges={badges}
+                weeklyGoal={profile?.weekly_goal || 4}
+                bodyMetrics={bodyMetrics}
+              />
               <MonthlyCalendar history={workoutHistory} />
               <WorkoutHistory history={workoutHistory} onUpdate={handleUpdateWorkout} onDelete={handleDeleteWorkout} loading={loadingAction} />
             </div>
@@ -739,6 +776,7 @@ export default function App() {
                 stats={workoutStats}
                 badges={badges}
                 challenge={challenge}
+                bodyMetrics={bodyMetrics}
                 loading={loadingAction}
                 authLoading={loadingAuth}
                 language={language}
@@ -747,6 +785,7 @@ export default function App() {
                 onKakaoSignIn={handleKakaoSignIn}
                 onSignOut={handleSignOut}
                 onSaveProfile={handleUpdateProfile}
+                onSaveWeight={handleSaveWeight}
               />
             </div>
           )}
