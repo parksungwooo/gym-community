@@ -258,13 +258,17 @@ export default function App() {
   const [initStatus, setInitStatus] = useState(isEnglish ? 'Checking session...' : '세션을 확인하는 중입니다...')
   const isAuthenticated = Boolean(user?.id)
 
-  const navigateToView = useCallback((nextView) => {
+  const navigateToView = useCallback((nextView, options = {}) => {
     setView(nextView)
 
     if (typeof window !== 'undefined') {
       const nextHash = getHashForView(nextView)
       if (window.location.hash !== nextHash) {
-        window.history.replaceState(null, '', nextHash)
+        if (options.replace) {
+          window.history.replaceState(null, '', nextHash)
+        } else {
+          window.location.hash = nextHash
+        }
       }
     }
   }, [])
@@ -584,7 +588,7 @@ export default function App() {
           await loadUserData(session.user)
         } else {
           await loadPublicData()
-          navigateToView(VIEW.HOME)
+          navigateToView(VIEW.HOME, { replace: true })
         }
       } catch (error) {
         setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to sync auth state.' : '인증 상태 동기화에 실패했습니다.', isEnglish))
@@ -784,7 +788,7 @@ export default function App() {
 
     setAuthPrompt(authState.authPrompt)
     return true
-  }, [isAuthenticated, openAuthPrompt])
+  }, [isAuthenticated])
 
   const handleGoogleSignIn = async () => {
     setLoadingAuth(true)
@@ -817,7 +821,7 @@ export default function App() {
       await signOutUser()
       persistPendingAction(null)
       await loadPublicData()
-      navigateToView(VIEW.HOME)
+      navigateToView(VIEW.HOME, { replace: true })
     } catch (error) {
       setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Sign-out failed.' : '로그아웃에 실패했습니다.', isEnglish))
     } finally {
