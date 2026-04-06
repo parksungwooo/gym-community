@@ -257,6 +257,34 @@ export default function App() {
   const [initStatus, setInitStatus] = useState(isEnglish ? 'Checking session...' : '세션을 확인하는 중입니다...')
   const isAuthenticated = Boolean(user?.id)
 
+  const navigateToView = useCallback((nextView) => {
+    setView(nextView)
+
+    if (typeof window !== 'undefined') {
+      const nextHash = getHashForView(nextView)
+      if (window.location.hash !== nextHash) {
+        window.history.replaceState(null, '', nextHash)
+      }
+    }
+  }, [])
+
+  const openAuthPrompt = useCallback((reason, pendingAction = null) => {
+    const authState = createAuthPromptState(false, reason, pendingAction)
+    setAuthPrompt(authState.authPrompt)
+  }, [])
+
+  const closeAuthPrompt = useCallback(() => {
+    setAuthPrompt(null)
+  }, [])
+
+  const openPaywall = useCallback((context = PREMIUM_CONTEXT.GENERAL) => {
+    setPaywallContext(context)
+  }, [])
+
+  const closePaywall = useCallback(() => {
+    setPaywallContext(null)
+  }, [])
+
   const badges = useMemo(() => buildBadges(workoutStats, latestResult), [latestResult, workoutStats])
   const challenge = useMemo(() => buildChallenge(workoutStats, profile, isEnglish), [isEnglish, profile, workoutStats])
   const suggestedUsers = useMemo(
@@ -698,23 +726,6 @@ export default function App() {
     todayDone,
     user?.id,
   ])
-
-  const openAuthPrompt = useCallback((reason, pendingAction = null) => {
-    const authState = createAuthPromptState(false, reason, pendingAction)
-    setAuthPrompt(authState.authPrompt)
-  }, [])
-
-  const closeAuthPrompt = useCallback(() => {
-    setAuthPrompt(null)
-  }, [])
-
-  const openPaywall = useCallback((context = PREMIUM_CONTEXT.GENERAL) => {
-    setPaywallContext(context)
-  }, [])
-
-  const closePaywall = useCallback(() => {
-    setPaywallContext(null)
-  }, [])
 
   const openNotificationCenter = useCallback(async () => {
     if (!user?.id) return
@@ -1410,17 +1421,6 @@ export default function App() {
 
     window.addEventListener('hashchange', syncViewFromHash)
     return () => window.removeEventListener('hashchange', syncViewFromHash)
-  }, [])
-
-  const navigateToView = useCallback((nextView) => {
-    setView(nextView)
-
-    if (typeof window !== 'undefined') {
-      const nextHash = getHashForView(nextView)
-      if (window.location.hash !== nextHash) {
-        window.history.replaceState(null, '', nextHash)
-      }
-    }
   }, [])
 
   const handleChangeView = useCallback((nextView) => {
