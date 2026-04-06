@@ -19,11 +19,14 @@ import {
   createFeedPost,
   deleteWorkoutTemplate,
   deleteWorkoutLog,
+  fetchFollowStats,
   fetchLeaderboard,
   fetchFeedWithRelations,
+  fetchFollowingIds,
   fetchWeightLogs,
   fetchWorkoutHistory,
   fetchWorkoutTemplates,
+  followUser,
   getLatestTestResult,
   getUserProfile,
   getWorkoutStats,
@@ -32,6 +35,7 @@ import {
   saveTestResult,
   saveWeightLog,
   toggleLike,
+  unfollowUser,
   updateUserProfile,
   updateWorkoutLog,
   upsertUser,
@@ -209,6 +213,8 @@ export default function App() {
   const [workoutStats, setWorkoutStats] = useState(INITIAL_STATS)
   const [profile, setProfile] = useState(null)
   const [weightLogs, setWeightLogs] = useState([])
+  const [followingIds, setFollowingIds] = useState([])
+  const [followStats, setFollowStats] = useState({ followerCount: 0, followingCount: 0 })
   const [selectedCommunityUser, setSelectedCommunityUser] = useState(null)
   const [showTestForm, setShowTestForm] = useState(false)
   const [showWorkoutPanel, setShowWorkoutPanel] = useState(false)
@@ -249,13 +255,15 @@ export default function App() {
   }, [isEnglish])
 
   const refreshUserSummary = useCallback(async (userId) => {
-    const [result, stats, history, templates, nextProfile, nextWeightLogs] = await Promise.all([
+    const [result, stats, history, templates, nextProfile, nextWeightLogs, nextFollowingIds, nextFollowStats] = await Promise.all([
       withTimeout(getLatestTestResult(userId), 10000, isEnglish ? 'Could not load your latest test.' : '최근 테스트를 불러오지 못했어요.'),
       withTimeout(getWorkoutStats(userId), 10000, isEnglish ? 'Could not load workout stats.' : '운동 통계를 불러오지 못했어요.'),
       withTimeout(fetchWorkoutHistory(userId), 10000, isEnglish ? 'Could not load workout history.' : '운동 기록 리스트를 불러오지 못했어요.'),
       withTimeout(fetchWorkoutTemplates(userId), 10000, isEnglish ? 'Could not load saved routines.' : '저장된 루틴을 불러오지 못했어요.'),
       withTimeout(getUserProfile(userId), 10000, isEnglish ? 'Could not load profile.' : '프로필 정보를 불러오지 못했어요.'),
       withTimeout(fetchWeightLogs(userId), 10000, isEnglish ? 'Could not load weight logs.' : '몸무게 기록을 불러오지 못했어요.'),
+      withTimeout(fetchFollowingIds(userId), 10000, isEnglish ? 'Could not load follows.' : '팔로잉 목록을 불러오지 못했어요.'),
+      withTimeout(fetchFollowStats(userId), 10000, isEnglish ? 'Could not load follow stats.' : '팔로우 통계를 불러오지 못했어요.'),
     ])
 
     setLatestResult(result)
@@ -264,8 +272,19 @@ export default function App() {
     setWorkoutTemplates(templates)
     setProfile(nextProfile)
     setWeightLogs(nextWeightLogs)
+    setFollowingIds(nextFollowingIds)
+    setFollowStats(nextFollowStats)
 
-    return { result, stats, history, templates, profile: nextProfile, weightLogs: nextWeightLogs }
+    return {
+      result,
+      stats,
+      history,
+      templates,
+      profile: nextProfile,
+      weightLogs: nextWeightLogs,
+      followingIds: nextFollowingIds,
+      followStats: nextFollowStats,
+    }
   }, [isEnglish])
 
   const loadUserData = useCallback(async (nextUser) => {
@@ -412,12 +431,14 @@ export default function App() {
           workoutType: preset.workout_type || preset.workoutType || workoutStats.lastWorkoutType || '러닝',
           durationMinutes: preset.duration_minutes || preset.durationMinutes || workoutStats.lastWorkoutDuration || 30,
           note: preset.note || '',
+          defaultShareToFeed: profile?.default_share_to_feed !== false,
         }
       : {
           name: '',
           workoutType: workoutStats.lastWorkoutType || '러닝',
           durationMinutes: workoutStats.lastWorkoutDuration || 30,
           note: '',
+          defaultShareToFeed: profile?.default_share_to_feed !== false,
         }
 
     setWorkoutPreset(nextPreset)
@@ -426,7 +447,7 @@ export default function App() {
     window.setTimeout(() => {
       document.querySelector('.home-workout-panel-shell')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 40)
-  }, [workoutStats.lastWorkoutDuration, workoutStats.lastWorkoutType])
+  }, [profile?.default_share_to_feed, workoutStats.lastWorkoutDuration, workoutStats.lastWorkoutType])
 
   const closeWorkoutComposer = useCallback(() => {
     setShowWorkoutPanel(false)
@@ -572,6 +593,9 @@ export default function App() {
       const previousGoal = profile?.weekly_goal ?? 4
       const previousHeight = profile?.height_cm ?? null
       const previousTargetWeight = profile?.target_weight_kg ?? null
+      const previousBio = profile?.bio ?? ''
+      const previousTags = JSON.stringify(profile?.fitness_tags ?? [])
+      const previousDefaultShare = profile?.default_share_to_feed !== false
       const savedProfile = await updateUserProfile(user.id, nextProfile)
       setProfile(savedProfile)
 
@@ -580,8 +604,11 @@ export default function App() {
       const changedGoal = (savedProfile.weekly_goal ?? 4) !== previousGoal
       const changedHeight = (savedProfile.height_cm ?? null) !== previousHeight
       const changedTargetWeight = (savedProfile.target_weight_kg ?? null) !== previousTargetWeight
+      const changedBio = (savedProfile.bio ?? '') !== previousBio
+      const changedTags = JSON.stringify(savedProfile.fitness_tags ?? []) !== previousTags
+      const changedDefaultShare = (savedProfile.default_share_to_feed !== false) !== previousDefaultShare
 
-      if (changedName || changedAvatar || changedGoal || changedHeight || changedTargetWeight) {
+      if (changedName || changedAvatar || changedGoal || changedHeight || changedTargetWeight || changedBio || changedTags || changedDefaultShare) {
         const profileLabel = savedProfile.display_name || 'profile'
         await createFeedPost(user.id, `${profileLabel} updated`, 'profile_update', {
           display_name: savedProfile.display_name,
@@ -589,6 +616,9 @@ export default function App() {
           weekly_goal: savedProfile.weekly_goal,
           height_cm: savedProfile.height_cm,
           target_weight_kg: savedProfile.target_weight_kg,
+          bio: savedProfile.bio,
+          fitness_tags: savedProfile.fitness_tags,
+          default_share_to_feed: savedProfile.default_share_to_feed,
         })
         await Promise.all([refreshFeed(user.id), refreshLeaderboard()])
       }
@@ -612,6 +642,38 @@ export default function App() {
       showSuccess(isEnglish ? 'Weight saved.' : '몸무게를 기록했어요.', 'success')
     } catch (error) {
       setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to save weight.' : '몸무게 저장에 실패했습니다.', isEnglish))
+    } finally {
+      setLoadingAction(false)
+    }
+  }
+
+  const handleToggleFollow = async (targetUserId, isFollowing) => {
+    if (!user?.id || !targetUserId || user.id === targetUserId) return
+
+    setLoadingAction(true)
+    setErrorMessage('')
+
+    try {
+      if (isFollowing) {
+        await unfollowUser(user.id, targetUserId)
+      } else {
+        await followUser(user.id, targetUserId)
+      }
+
+      const [nextFollowingIds, nextFollowStats] = await Promise.all([
+        fetchFollowingIds(user.id),
+        fetchFollowStats(user.id),
+      ])
+      setFollowingIds(nextFollowingIds)
+      setFollowStats(nextFollowStats)
+      showSuccess(
+        isFollowing
+          ? (isEnglish ? 'Unfollowed user.' : '언팔로우했어요.')
+          : (isEnglish ? 'Now following user.' : '팔로우했어요.'),
+        'info',
+      )
+    } catch (error) {
+      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to update follow.' : '팔로우 상태 변경에 실패했습니다.', isEnglish))
     } finally {
       setLoadingAction(false)
     }
@@ -760,16 +822,45 @@ export default function App() {
                 <h2>{isEnglish ? 'Community' : '커뮤니티'}</h2>
                 <p className="subtext">{isEnglish ? 'Start with people who feel close to your level.' : '비슷한 사람부터 가볍게 둘러보세요.'}</p>
               </section>
-              <SuggestedUsers rows={suggestedUsers} currentLevel={latestResult?.level ?? testResult?.level ?? null} loading={loadingFeed} selectedUserId={selectedCommunityUser?.user_id ?? null} onSelectUser={handleSelectCommunityUser} />
-              <RankingBoard rows={leaderboard} loading={loadingFeed} selectedUserId={selectedCommunityUser?.user_id ?? null} onSelectUser={handleSelectCommunityUser} />
-              <FeedList posts={feedPosts} onToggleLike={handleToggleLike} onSubmitComment={handleSubmitComment} loading={loadingFeed} currentLevel={latestResult?.level ?? testResult?.level ?? null} selectedUser={selectedCommunityUser} onClearSelectedUser={handleClearCommunityUser} />
+              <SuggestedUsers
+                rows={suggestedUsers}
+                currentLevel={latestResult?.level ?? testResult?.level ?? null}
+                loading={loadingFeed}
+                selectedUserId={selectedCommunityUser?.user_id ?? null}
+                onSelectUser={handleSelectCommunityUser}
+                currentUserId={user?.id ?? null}
+                followingIds={followingIds}
+                onToggleFollow={handleToggleFollow}
+                actionLoading={loadingAction}
+              />
+              <RankingBoard
+                rows={leaderboard}
+                loading={loadingFeed}
+                selectedUserId={selectedCommunityUser?.user_id ?? null}
+                onSelectUser={handleSelectCommunityUser}
+                currentUserId={user?.id ?? null}
+                followingIds={followingIds}
+                onToggleFollow={handleToggleFollow}
+                actionLoading={loadingAction}
+              />
+              <FeedList
+                posts={feedPosts}
+                onToggleLike={handleToggleLike}
+                onSubmitComment={handleSubmitComment}
+                loading={loadingFeed}
+                currentLevel={latestResult?.level ?? testResult?.level ?? null}
+                selectedUser={selectedCommunityUser}
+                onClearSelectedUser={handleClearCommunityUser}
+                followingIds={followingIds}
+                currentUserId={user?.id ?? null}
+              />
             </div>
           )}
 
           {view === VIEW.PROFILE && (
             <div key={VIEW.PROFILE} className="view-stage">
               <ProfilePanel
-                key={`${profile?.display_name ?? ''}-${profile?.avatar_emoji ?? ''}-${profile?.weekly_goal ?? 4}-${user?.id ?? 'guest'}-${language}`}
+                key={`${profile?.display_name ?? ''}-${profile?.avatar_emoji ?? ''}-${profile?.weekly_goal ?? 4}-${profile?.bio ?? ''}-${JSON.stringify(profile?.fitness_tags ?? [])}-${profile?.default_share_to_feed !== false}-${user?.id ?? 'guest'}-${language}`}
                 user={user}
                 profile={profile}
                 latestResult={latestResult}
@@ -777,6 +868,7 @@ export default function App() {
                 badges={badges}
                 challenge={challenge}
                 bodyMetrics={bodyMetrics}
+                followStats={followStats}
                 loading={loadingAction}
                 authLoading={loadingAuth}
                 language={language}

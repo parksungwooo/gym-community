@@ -43,12 +43,42 @@ select 'table.comments', exists (
   where table_schema = 'public' and table_name = 'comments'
 )
 union all
+select 'bucket.workout-photos', exists (
+  select 1
+  from storage.buckets
+  where id = 'workout-photos'
+)
+union all
 select 'column.users.weekly_goal', exists (
   select 1
   from information_schema.columns
   where table_schema = 'public'
     and table_name = 'users'
     and column_name = 'weekly_goal'
+)
+union all
+select 'column.users.bio', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'users'
+    and column_name = 'bio'
+)
+union all
+select 'column.users.fitness_tags', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'users'
+    and column_name = 'fitness_tags'
+)
+union all
+select 'column.users.default_share_to_feed', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'users'
+    and column_name = 'default_share_to_feed'
 )
 union all
 select 'column.workout_logs.workout_type', exists (
@@ -73,6 +103,30 @@ select 'column.workout_logs.note', exists (
   where table_schema = 'public'
     and table_name = 'workout_logs'
     and column_name = 'note'
+)
+union all
+select 'column.workout_logs.photo_url', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'workout_logs'
+    and column_name = 'photo_url'
+)
+union all
+select 'column.workout_logs.photo_urls', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'workout_logs'
+    and column_name = 'photo_urls'
+)
+union all
+select 'column.workout_logs.share_to_feed', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'workout_logs'
+    and column_name = 'share_to_feed'
 )
 union all
 select 'function.get_public_leaderboard', to_regprocedure('public.get_public_leaderboard(integer)') is not null

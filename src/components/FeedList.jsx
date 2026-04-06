@@ -1,10 +1,11 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { formatDateTimeByLanguage, getWorkoutTypeLabel, useI18n } from '../i18n.js'
 import { getLevelLabel, localizeLevelText } from '../utils/level'
 
 const FILTERS = {
   ko: [
     { key: 'all', label: '전체' },
+    { key: 'following', label: '팔로잉' },
     { key: 'same_level', label: '내 레벨' },
     { key: 'workout_complete', label: '운동' },
     { key: 'level_up', label: '레벨업' },
@@ -13,6 +14,7 @@ const FILTERS = {
   ],
   en: [
     { key: 'all', label: 'All' },
+    { key: 'following', label: 'Following' },
     { key: 'same_level', label: 'My Level' },
     { key: 'workout_complete', label: 'Workout' },
     { key: 'level_up', label: 'Level Up' },
@@ -33,29 +35,36 @@ function getPostContent(post, language) {
   switch (post.type) {
     case 'workout_complete': {
       const workoutType = getWorkoutTypeLabel(post.metadata?.workoutType, language)
-      const durationText = post.metadata?.durationMinutes ? isEnglish ? ` ${post.metadata.durationMinutes} min` : ` ${post.metadata.durationMinutes}분` : ''
+      const durationText = post.metadata?.durationMinutes ? (isEnglish ? ` ${post.metadata.durationMinutes} min` : ` ${post.metadata.durationMinutes}분`) : ''
       const noteText = post.metadata?.note ? ` · ${post.metadata.note}` : ''
-      return isEnglish ? `${workoutType}${durationText} completed 💪${noteText}` : `${workoutType}${durationText} 운동 완료 💪${noteText}`
+      return isEnglish ? `${workoutType}${durationText} completed${noteText}` : `${workoutType}${durationText} 운동 완료${noteText}`
     }
     case 'test_result':
       return isEnglish
         ? `Logged a fitness test result: ${localizeLevelText(post.metadata?.level, language)} (${post.metadata?.score ?? 0} pts).`
         : `체력 테스트 결과 ${localizeLevelText(post.metadata?.level, language)} (${post.metadata?.score ?? 0}점)를 기록했어요.`
     case 'level_up':
-      return `${getLevelLabel(post.metadata?.from, language)} -> ${getLevelLabel(post.metadata?.to, language)} ${isEnglish ? 'level up' : '상승'} 🎉`
+      return `${getLevelLabel(post.metadata?.from, language)} -> ${getLevelLabel(post.metadata?.to, language)} ${isEnglish ? 'level up' : '상승'}`
     case 'profile_update':
-      return isEnglish ? 'Updated profile and weekly goal ✨' : '프로필과 주간 목표를 업데이트했어요 ✨'
+      return isEnglish ? 'Updated profile and weekly goal.' : '프로필과 주간 목표를 업데이트했어요.'
     case 'challenge_complete':
-      return isEnglish ? `Completed the weekly ${post.metadata?.goal ?? 0}-workout challenge 🏅` : `주간 ${post.metadata?.goal ?? 0}회 운동 챌린지를 달성했어요 🏅`
+      return isEnglish ? `Completed the weekly ${post.metadata?.goal ?? 0}-workout challenge.` : `주간 ${post.metadata?.goal ?? 0}회 운동 챌린지를 달성했어요.`
     default:
       return post.content
   }
 }
 
-function FeedCard({ post, onToggleLike, onSubmitComment }) {
+function getPostPhotoUrls(post) {
+  if (Array.isArray(post.metadata?.photoUrls) && post.metadata.photoUrls.length) return post.metadata.photoUrls
+  if (post.metadata?.photoUrl) return [post.metadata.photoUrl]
+  return []
+}
+
+function FeedCard({ post, onToggleLike, onSubmitComment, onOpenImage }) {
   const { language, isEnglish } = useI18n()
   const [comment, setComment] = useState('')
   const [commentOpen, setCommentOpen] = useState(false)
+  const photoUrls = getPostPhotoUrls(post)
   const typeLabelMap = {
     workout_complete: isEnglish ? 'Workout' : '운동',
     level_up: isEnglish ? 'Level Up' : '레벨업',
@@ -83,12 +92,23 @@ function FeedCard({ post, onToggleLike, onSubmitComment }) {
             </div>
           </div>
           <div className="feed-meta-row">
-            <span className="feed-level-chip">{post.authorLevel ? localizeLevelText(post.authorLevel, language) : isEnglish ? 'No level yet' : '레벨 미측정'}</span>
+            <span className="feed-level-chip">{post.authorLevel ? localizeLevelText(post.authorLevel, language) : (isEnglish ? 'No level yet' : '레벨 미측정')}</span>
             <span>{formatDateTimeByLanguage(post.created_at, language, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
           </div>
         </div>
       </div>
       <p className="feed-content compact">{getPostContent(post, language)}</p>
+      {!!photoUrls.length && (
+        <div className={`feed-photo-grid ${photoUrls.length > 1 ? 'multi' : ''}`}>
+          {photoUrls.map((url, index) => (
+            <button key={`${post.id}-photo-${index}`} type="button" className="image-open-btn" onClick={() => onOpenImage(url)}>
+              <div className="feed-photo-preview">
+                <img src={url} alt={isEnglish ? 'Workout proof' : '운동 인증 사진'} />
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="feed-stats-row compact">
         <span>{isEnglish ? `Likes ${post.likeCount}` : `좋아요 ${post.likeCount}`}</span>
@@ -106,13 +126,7 @@ function FeedCard({ post, onToggleLike, onSubmitComment }) {
 
       {commentOpen && (
         <form className="comment-form compact" onSubmit={submitComment}>
-          <input
-            type="text"
-            value={comment}
-            onChange={(event) => setComment(event.target.value)}
-            placeholder={isEnglish ? 'Leave a short comment' : '짧은 댓글 남기기'}
-            maxLength={120}
-          />
+          <input type="text" value={comment} onChange={(event) => setComment(event.target.value)} placeholder={isEnglish ? 'Leave a short comment' : '짧은 댓글 남기기'} maxLength={120} />
           <button type="submit">{isEnglish ? 'Send' : '등록'}</button>
         </form>
       )}
@@ -131,13 +145,25 @@ function FeedCard({ post, onToggleLike, onSubmitComment }) {
   )
 }
 
-export default function FeedList({ posts, onToggleLike, onSubmitComment, loading, currentLevel, selectedUser, onClearSelectedUser }) {
+export default function FeedList({
+  posts,
+  onToggleLike,
+  onSubmitComment,
+  loading,
+  currentLevel,
+  selectedUser,
+  onClearSelectedUser,
+  followingIds = [],
+  currentUserId,
+}) {
   const { language, isEnglish } = useI18n()
   const [filter, setFilter] = useState('all')
+  const [openImageUrl, setOpenImageUrl] = useState('')
 
   const visiblePosts = posts.filter((post) => {
     if (selectedUser?.user_id && post.user_id !== selectedUser.user_id) return false
     if (filter === 'all') return true
+    if (filter === 'following') return post.user_id === currentUserId || followingIds.includes(post.user_id)
     if (filter === 'same_level') return Boolean(currentLevel) && post.authorLevel === currentLevel
     return post.type === filter
   })
@@ -195,22 +221,28 @@ export default function FeedList({ posts, onToggleLike, onSubmitComment, loading
       )}
       {!loading && !visiblePosts.length && (
         <div className="empty-state-card cool">
-          <span className="empty-state-badge">{isEnglish ? 'Feed' : '피드 비어 있음'}</span>
-          <strong>{isEnglish ? 'There is nothing in the feed yet.' : '아직 피드에 표시할 기록이 없어요.'}</strong>
-          <p>
-            {isEnglish
-              ? 'Once workouts, level tests, or profile updates are saved, the community feed will begin to move.'
-              : '운동 기록이나 레벨 테스트, 프로필 업데이트가 쌓이면 커뮤니티 피드가 자연스럽게 움직이기 시작해요.'}
-          </p>
+          <span className="empty-state-badge">{filter === 'following' ? (isEnglish ? 'Following' : '팔로잉 비어 있음') : (isEnglish ? 'Feed' : '피드 비어 있음')}</span>
+          <strong>{filter === 'following' ? (isEnglish ? 'No posts from people you follow yet.' : '팔로우한 사람의 게시물이 아직 없어요.') : (isEnglish ? 'There is nothing in the feed yet.' : '아직 피드에 표시할 기록이 없어요.')}</strong>
+          <p>{filter === 'following' ? (isEnglish ? 'Follow a few active users to make this tab feel alive.' : '활발한 유저를 몇 명 팔로우하면 이 탭이 더 빨리 채워져요.') : (isEnglish ? 'Once workouts, level tests, or profile updates are saved, the community feed will begin to move.' : '운동 기록이나 레벨 테스트, 프로필 업데이트가 쌓이면 커뮤니티 피드가 자연스럽게 움직이기 시작해요.')}</p>
         </div>
       )}
 
       <div className="feed-list">
         {visiblePosts.map((post) => (
-          <FeedCard key={post.id} post={post} onToggleLike={onToggleLike} onSubmitComment={onSubmitComment} />
+          <FeedCard key={post.id} post={post} onToggleLike={onToggleLike} onSubmitComment={onSubmitComment} onOpenImage={setOpenImageUrl} />
         ))}
       </div>
+
+      {openImageUrl && (
+        <div className="lightbox-backdrop" role="dialog" aria-modal="true" onClick={() => setOpenImageUrl('')}>
+          <div className="lightbox-card" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="lightbox-close" onClick={() => setOpenImageUrl('')}>
+              {isEnglish ? 'Close' : '닫기'}
+            </button>
+            <img src={openImageUrl} alt={isEnglish ? 'Expanded workout image' : '확대된 운동 이미지'} />
+          </div>
+        </div>
+      )}
     </section>
   )
 }
-

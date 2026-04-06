@@ -20,7 +20,7 @@ export async function upsertUser(userId) {
 export async function getUserProfile(userId) {
   const { data, error } = await supabase
     .from('users')
-    .select('id,display_name,avatar_emoji,weekly_goal,height_cm,target_weight_kg,created_at')
+    .select('id,display_name,avatar_emoji,weekly_goal,height_cm,target_weight_kg,bio,fitness_tags,default_share_to_feed,created_at')
     .eq('id', userId)
     .maybeSingle()
 
@@ -32,19 +32,26 @@ export async function getUserProfile(userId) {
 }
 
 export async function updateUserProfile(userId, profile) {
+  const fitnessTags = Array.isArray(profile.fitnessTags)
+    ? profile.fitnessTags.filter(Boolean).slice(0, 4)
+    : []
+
   const payload = {
     display_name: profile.displayName?.trim() || null,
     avatar_emoji: profile.avatarEmoji?.trim() || null,
     weekly_goal: Number(profile.weeklyGoal) || 4,
     height_cm: Number(profile.heightCm) > 0 ? Number(profile.heightCm) : null,
     target_weight_kg: Number(profile.targetWeightKg) > 0 ? Number(profile.targetWeightKg) : null,
+    bio: profile.bio?.trim() || null,
+    fitness_tags: fitnessTags,
+    default_share_to_feed: profile.defaultShareToFeed !== false,
   }
 
   const { data, error } = await supabase
     .from('users')
     .update(payload)
     .eq('id', userId)
-    .select('id,display_name,avatar_emoji,weekly_goal,height_cm,target_weight_kg,created_at')
+    .select('id,display_name,avatar_emoji,weekly_goal,height_cm,target_weight_kg,bio,fitness_tags,default_share_to_feed,created_at')
     .single()
 
   if (error) {
@@ -92,6 +99,70 @@ export async function saveWeightLog(userId, weightKg) {
   return data
 }
 
+export async function followUser(userId, targetUserId) {
+  if (!targetUserId || userId === targetUserId) return null
+
+  const { data, error } = await supabase
+    .from('follows')
+    .insert({
+      follower_id: userId,
+      following_id: targetUserId,
+    })
+    .select('id,follower_id,following_id,created_at')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export async function unfollowUser(userId, targetUserId) {
+  const { error } = await supabase
+    .from('follows')
+    .delete()
+    .eq('follower_id', userId)
+    .eq('following_id', targetUserId)
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function fetchFollowingIds(userId) {
+  const { data, error } = await supabase
+    .from('follows')
+    .select('following_id')
+    .eq('follower_id', userId)
+
+  if (error) {
+    throw error
+  }
+
+  return (data ?? []).map((item) => item.following_id)
+}
+
+export async function fetchFollowStats(userId) {
+  const [{ count: followerCount, error: followerError }, { count: followingCount, error: followingError }] = await Promise.all([
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', userId),
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', userId),
+  ])
+
+  if (followerError) {
+    throw followerError
+  }
+
+  if (followingError) {
+    throw followingError
+  }
+
+  return {
+    followerCount: followerCount ?? 0,
+    followingCount: followingCount ?? 0,
+  }
+}
+
 export async function getLatestTestResult(userId) {
   const { data, error } = await supabase
     .from('test_results')
@@ -110,7 +181,7 @@ export async function getLatestTestResult(userId) {
 export async function fetchWorkoutHistory(userId) {
   const { data, error } = await supabase
     .from('workout_logs')
-    .select('id,date,workout_type,duration_minutes,note,created_at')
+    .select('id,date,workout_type,duration_minutes,note,photo_url,photo_urls,share_to_feed,created_at')
     .eq('user_id', userId)
     .eq('completed', true)
     .order('created_at', { ascending: false })
@@ -284,6 +355,9 @@ export async function completeWorkout(userId, date, details = {}) {
   const workoutType = details.workoutType?.trim() || '운동'
   const durationMinutes = Number(details.durationMinutes) || 0
   const note = details.note?.trim() || null
+  const shareToFeed = details.shareToFeed !== false
+  const photoUrls = await resolvePhotoItems(userId, details.photoItems ?? details.photoFiles ?? [])
+  const photoUrl = photoUrls[0] ?? null
 
   const { data, error } = await supabase
     .from('workout_logs')
@@ -294,6 +368,9 @@ export async function completeWorkout(userId, date, details = {}) {
       workout_type: workoutType,
       duration_minutes: durationMinutes,
       note,
+      photo_url: photoUrl,
+      photo_urls: photoUrls,
+      share_to_feed: shareToFeed,
     })
     .select('*')
     .single()
@@ -305,12 +382,14 @@ export async function completeWorkout(userId, date, details = {}) {
   const durationText = durationMinutes > 0 ? ` ${durationMinutes}분` : ''
   const noteText = note ? ` - ${note}` : ''
 
-  await createFeedPost(
-    userId,
-    `${workoutType}${durationText} 운동 완료 💪${noteText}`,
-    'workout_complete',
-    { date, workoutType, durationMinutes, note },
-  )
+  if (shareToFeed) {
+    await createFeedPost(
+      userId,
+      `${workoutType}${durationText} 운동 완료 💪${noteText}`,
+      'workout_complete',
+      { date, workoutType, durationMinutes, note, photoUrl, photoUrls },
+    )
+  }
 
   return data
 }
@@ -319,14 +398,25 @@ export async function updateWorkoutLog(userId, workoutLogId, details = {}) {
   const workoutType = details.workoutType?.trim() || '운동'
   const durationMinutes = Number(details.durationMinutes) || 0
   const note = details.note?.trim() || null
+  const photoUrls = Object.prototype.hasOwnProperty.call(details, 'photoItems')
+    ? await resolvePhotoItems(userId, details.photoItems)
+    : null
+  const updatePayload = {
+    workout_type: workoutType,
+    duration_minutes: durationMinutes,
+    note,
+  }
+
+  if (photoUrls) {
+    updatePayload.photo_urls = photoUrls
+    updatePayload.photo_url = photoUrls[0] ?? null
+  } else if (Object.prototype.hasOwnProperty.call(details, 'photoUrl')) {
+    updatePayload.photo_url = details.photoUrl
+  }
 
   const { data, error } = await supabase
     .from('workout_logs')
-    .update({
-      workout_type: workoutType,
-      duration_minutes: durationMinutes,
-      note,
-    })
+    .update(updatePayload)
     .eq('id', workoutLogId)
     .eq('user_id', userId)
     .select('*')
@@ -337,6 +427,103 @@ export async function updateWorkoutLog(userId, workoutLogId, details = {}) {
   }
 
   return data
+}
+
+async function uploadWorkoutPhoto(userId, file) {
+  if (!(file instanceof File)) return null
+  const preparedFile = await compressImageFile(file)
+  const extension = preparedFile.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const safeExtension = ['jpg', 'jpeg', 'png', 'webp'].includes(extension) ? extension : 'jpg'
+  const filePath = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${safeExtension}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('workout-photos')
+    .upload(filePath, preparedFile, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: preparedFile.type || `image/${safeExtension}`,
+    })
+
+  if (uploadError) {
+    throw uploadError
+  }
+
+  const { data } = supabase.storage.from('workout-photos').getPublicUrl(filePath)
+  return data?.publicUrl ?? null
+}
+
+async function uploadWorkoutPhotos(userId, files) {
+  const uploads = await Promise.all(
+    (files ?? []).slice(0, 4).map((file) => uploadWorkoutPhoto(userId, file)),
+  )
+
+  return uploads.filter(Boolean)
+}
+
+async function resolvePhotoItems(userId, items) {
+  if (!Array.isArray(items) || !items.length) return []
+
+  const orderedUrls = []
+
+  for (const item of items.slice(0, 4)) {
+    if (item?.kind === 'existing' && item.url) {
+      orderedUrls.push(item.url)
+      continue
+    }
+
+    const file = item instanceof File ? item : item?.file
+    if (file instanceof File) {
+      const uploadedUrl = await uploadWorkoutPhoto(userId, file)
+      if (uploadedUrl) orderedUrls.push(uploadedUrl)
+    }
+  }
+
+  return orderedUrls
+}
+
+async function compressImageFile(file) {
+  if (!(file instanceof File)) return file
+  if (!file.type.startsWith('image/') || file.type === 'image/gif' || file.type === 'image/svg+xml') return file
+  if (typeof document === 'undefined') return file
+
+  const imageUrl = URL.createObjectURL(file)
+
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => resolve(img)
+      img.onerror = reject
+      img.src = imageUrl
+    })
+
+    const maxDimension = 1600
+    const scale = Math.min(1, maxDimension / Math.max(image.width, image.height))
+    const width = Math.max(1, Math.round(image.width * scale))
+    const height = Math.max(1, Math.round(image.height * scale))
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const context = canvas.getContext('2d')
+
+    if (!context) return file
+
+    context.drawImage(image, 0, 0, width, height)
+    const blob = await new Promise((resolve) => {
+      canvas.toBlob(resolve, 'image/jpeg', 0.82)
+    })
+
+    if (!blob || blob.size >= file.size) return file
+
+    const compressedName = file.name.replace(/\.[^.]+$/, '') || 'workout-photo'
+    return new File([blob], `${compressedName}.jpg`, {
+      type: 'image/jpeg',
+      lastModified: Date.now(),
+    })
+  } catch {
+    return file
+  } finally {
+    URL.revokeObjectURL(imageUrl)
+  }
 }
 
 export async function deleteWorkoutLog(userId, workoutLogId) {

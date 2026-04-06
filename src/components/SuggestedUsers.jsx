@@ -1,4 +1,4 @@
-﻿import { useI18n } from '../i18n.js'
+import { useI18n } from '../i18n.js'
 import { localizeLevelText } from '../utils/level'
 
 function buildReason(item, currentLevel, language) {
@@ -17,7 +17,30 @@ function buildReason(item, currentLevel, language) {
   return language === 'en' ? 'Suggested for you' : '커뮤니티 추천 유저'
 }
 
-export default function SuggestedUsers({ rows, currentLevel, loading, selectedUserId, onSelectUser }) {
+function FollowButton({ isFollowing, disabled, onClick, isEnglish }) {
+  return (
+    <button
+      type="button"
+      className={`follow-chip ${isFollowing ? 'active' : ''}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {isFollowing ? (isEnglish ? 'Following' : '팔로잉') : (isEnglish ? 'Follow' : '팔로우')}
+    </button>
+  )
+}
+
+export default function SuggestedUsers({
+  rows,
+  currentLevel,
+  loading,
+  selectedUserId,
+  onSelectUser,
+  currentUserId,
+  followingIds = [],
+  onToggleFollow,
+  actionLoading,
+}) {
   const { language, isEnglish } = useI18n()
 
   return (
@@ -69,34 +92,47 @@ export default function SuggestedUsers({ rows, currentLevel, loading, selectedUs
       )}
 
       <div className="suggested-user-list compact">
-        {rows.map((item) => (
-          <button
-            key={item.user_id}
-            type="button"
-            className={`suggested-user-card compact ${selectedUserId === item.user_id ? 'active' : ''}`}
-            onClick={() => onSelectUser?.(item)}
-          >
-            <div className="suggested-user-top">
-              <div className="suggested-user-avatar">{item.avatar_emoji || 'RUN'}</div>
-              <div>
-                <strong className="suggested-user-name">{item.display_name}</strong>
-                <p className="suggested-user-meta">
-                  {buildReason(item, currentLevel, language)} · {isEnglish ? `${item.weekly_count} this week` : `이번 주 ${item.weekly_count}회`}
-                </p>
-              </div>
-            </div>
+        {rows.map((item) => {
+          const isMe = item.user_id === currentUserId
+          const isFollowing = followingIds.includes(item.user_id)
 
-            <div className="suggested-user-tags">
-              <span className="suggested-user-chip">{item.latest_level ? localizeLevelText(item.latest_level, language) : isEnglish ? 'No level yet' : '레벨 미측정'}</span>
-              <span className="suggested-user-chip subtle">{isEnglish ? `${item.total_workouts} total` : `누적 ${item.total_workouts}회`}</span>
-              <span className="suggested-user-chip subtle">
-                {item.latest_score ? (isEnglish ? `${item.latest_score} pts` : `${item.latest_score}점`) : isEnglish ? 'No score' : '점수 없음'}
-              </span>
-            </div>
-          </button>
-        ))}
+          return (
+            <article
+              key={item.user_id}
+              className={`suggested-user-card compact ${selectedUserId === item.user_id ? 'active' : ''}`}
+            >
+              <button type="button" className="suggested-user-select-btn" onClick={() => onSelectUser?.(item)}>
+                <div className="suggested-user-top">
+                  <div className="suggested-user-avatar">{item.avatar_emoji || 'RUN'}</div>
+                  <div>
+                    <strong className="suggested-user-name">{item.display_name}</strong>
+                    <p className="suggested-user-meta">
+                      {buildReason(item, currentLevel, language)} · {isEnglish ? `${item.weekly_count} this week` : `이번 주 ${item.weekly_count}회`}
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              <div className="suggested-user-tags">
+                <span className="suggested-user-chip">{item.latest_level ? localizeLevelText(item.latest_level, language) : isEnglish ? 'No level yet' : '레벨 미측정'}</span>
+                <span className="suggested-user-chip subtle">{isEnglish ? `${item.total_workouts} total` : `누적 ${item.total_workouts}회`}</span>
+                <span className="suggested-user-chip subtle">
+                  {item.latest_score ? (isEnglish ? `${item.latest_score} pts` : `${item.latest_score}점`) : isEnglish ? 'No score' : '점수 없음'}
+                </span>
+              </div>
+
+              {!isMe && (
+                <FollowButton
+                  isFollowing={isFollowing}
+                  disabled={actionLoading}
+                  isEnglish={isEnglish}
+                  onClick={() => onToggleFollow?.(item.user_id, isFollowing)}
+                />
+              )}
+            </article>
+          )
+        })}
       </div>
     </section>
   )
 }
-

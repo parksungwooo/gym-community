@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useI18n } from '../i18n.js'
 import { localizeLevelText } from '../utils/level'
 
@@ -9,7 +9,29 @@ function getRankTone(index) {
   return 'default'
 }
 
-export default function RankingBoard({ rows, loading, selectedUserId, onSelectUser }) {
+function FollowButton({ isFollowing, disabled, onClick, isEnglish }) {
+  return (
+    <button
+      type="button"
+      className={`follow-chip ${isFollowing ? 'active' : ''}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {isFollowing ? (isEnglish ? 'Following' : '팔로잉') : (isEnglish ? 'Follow' : '팔로우')}
+    </button>
+  )
+}
+
+export default function RankingBoard({
+  rows,
+  loading,
+  selectedUserId,
+  onSelectUser,
+  currentUserId,
+  followingIds = [],
+  onToggleFollow,
+  actionLoading,
+}) {
   const { language, isEnglish } = useI18n()
   const [expanded, setExpanded] = useState(false)
   const visibleRows = useMemo(() => (expanded ? rows : rows.slice(0, 3)), [expanded, rows])
@@ -58,31 +80,44 @@ export default function RankingBoard({ rows, loading, selectedUserId, onSelectUs
       )}
 
       <div className="ranking-list">
-        {visibleRows.map((item, index) => (
-          <button
-            key={item.user_id}
-            type="button"
-            className={`ranking-card compact ${getRankTone(index)} ${selectedUserId === item.user_id ? 'active' : ''}`}
-            onClick={() => onSelectUser?.(item)}
-          >
-            <div className="ranking-left">
-              <div className="ranking-rank">#{index + 1}</div>
-              <div className="ranking-avatar">{item.avatar_emoji || 'RUN'}</div>
-              <div>
-                <strong className="ranking-name">{item.display_name}</strong>
-                <p className="ranking-meta">
-                  {isEnglish
-                    ? `${item.weekly_count} this week · ${item.total_workouts} total`
-                    : `이번 주 ${item.weekly_count}회 · 누적 ${item.total_workouts}회`}
-                </p>
-              </div>
-            </div>
-            <div className="ranking-score">
-              <strong>{item.latest_score ? (isEnglish ? `${item.latest_score} pts` : `${item.latest_score}점`) : isEnglish ? 'No score' : '점수 없음'}</strong>
-              <span>{item.latest_level ? localizeLevelText(item.latest_level, language) : isEnglish ? 'No level yet' : '레벨 미측정'}</span>
-            </div>
-          </button>
-        ))}
+        {visibleRows.map((item, index) => {
+          const isMe = item.user_id === currentUserId
+          const isFollowing = followingIds.includes(item.user_id)
+
+          return (
+            <article
+              key={item.user_id}
+              className={`ranking-card compact ${getRankTone(index)} ${selectedUserId === item.user_id ? 'active' : ''}`}
+            >
+              <button type="button" className="ranking-select-btn" onClick={() => onSelectUser?.(item)}>
+                <div className="ranking-left">
+                  <div className="ranking-rank">#{index + 1}</div>
+                  <div className="ranking-avatar">{item.avatar_emoji || 'RUN'}</div>
+                  <div>
+                    <strong className="ranking-name">{item.display_name}</strong>
+                    <p className="ranking-meta">
+                      {isEnglish
+                        ? `${item.weekly_count} this week · ${item.total_workouts} total`
+                        : `이번 주 ${item.weekly_count}회 · 누적 ${item.total_workouts}회`}
+                    </p>
+                  </div>
+                </div>
+                <div className="ranking-score">
+                  <strong>{item.latest_score ? (isEnglish ? `${item.latest_score} pts` : `${item.latest_score}점`) : isEnglish ? 'No score' : '점수 없음'}</strong>
+                  <span>{item.latest_level ? localizeLevelText(item.latest_level, language) : isEnglish ? 'No level yet' : '레벨 미측정'}</span>
+                </div>
+              </button>
+              {!isMe && (
+                <FollowButton
+                  isFollowing={isFollowing}
+                  disabled={actionLoading}
+                  isEnglish={isEnglish}
+                  onClick={() => onToggleFollow?.(item.user_id, isFollowing)}
+                />
+              )}
+            </article>
+          )
+        })}
       </div>
 
       {!loading && rows.length > 3 && (
@@ -99,4 +134,3 @@ export default function RankingBoard({ rows, loading, selectedUserId, onSelectUs
     </section>
   )
 }
-

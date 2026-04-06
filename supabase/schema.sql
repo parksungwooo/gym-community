@@ -10,6 +10,9 @@ create table if not exists public.users (
   weekly_goal int not null default 4,
   height_cm numeric(5,2),
   target_weight_kg numeric(5,2),
+  bio text,
+  fitness_tags jsonb not null default '[]'::jsonb,
+  default_share_to_feed boolean not null default true,
   created_at timestamptz not null default now()
 );
 
@@ -18,8 +21,12 @@ alter table public.users add column if not exists avatar_emoji text;
 alter table public.users add column if not exists weekly_goal int;
 alter table public.users add column if not exists height_cm numeric(5,2);
 alter table public.users add column if not exists target_weight_kg numeric(5,2);
+alter table public.users add column if not exists bio text;
+alter table public.users add column if not exists fitness_tags jsonb not null default '[]'::jsonb;
+alter table public.users add column if not exists default_share_to_feed boolean not null default true;
 alter table public.users alter column weekly_goal set default 4;
 update public.users set weekly_goal = 4 where weekly_goal is null;
+update public.users set fitness_tags = '[]'::jsonb where fitness_tags is null;
 alter table public.users alter column weekly_goal set not null;
 
 create table if not exists public.test_results (
@@ -38,12 +45,23 @@ create table if not exists public.workout_logs (
   workout_type text,
   duration_minutes int,
   note text,
+  photo_url text,
+  photo_urls jsonb not null default '[]'::jsonb,
+  share_to_feed boolean not null default true,
   created_at timestamptz not null default now()
 );
 
 alter table public.workout_logs add column if not exists workout_type text;
 alter table public.workout_logs add column if not exists duration_minutes int;
 alter table public.workout_logs add column if not exists note text;
+alter table public.workout_logs add column if not exists photo_url text;
+alter table public.workout_logs add column if not exists photo_urls jsonb not null default '[]'::jsonb;
+alter table public.workout_logs add column if not exists share_to_feed boolean not null default true;
+update public.workout_logs
+set photo_urls = case
+  when photo_url is not null and coalesce(jsonb_array_length(photo_urls), 0) = 0 then jsonb_build_array(photo_url)
+  else coalesce(photo_urls, '[]'::jsonb)
+end;
 alter table public.workout_logs drop constraint if exists workout_logs_user_id_date_key;
 
 create table if not exists public.workout_templates (
@@ -96,6 +114,15 @@ create table if not exists public.comments (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.follows (
+  id uuid primary key default gen_random_uuid(),
+  follower_id uuid not null references public.users(id) on delete cascade,
+  following_id uuid not null references public.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (follower_id, following_id),
+  check (follower_id <> following_id)
+);
+
 create index if not exists idx_test_results_user_created_at on public.test_results (user_id, created_at desc);
 create index if not exists idx_workout_logs_user_date on public.workout_logs (user_id, date desc);
 create index if not exists idx_workout_templates_user_updated_at on public.workout_templates (user_id, updated_at desc);
@@ -104,6 +131,14 @@ create index if not exists idx_feed_posts_created_at on public.feed_posts (creat
 create index if not exists idx_feed_posts_user_created_at on public.feed_posts (user_id, created_at desc);
 create index if not exists idx_likes_post_id on public.likes (post_id);
 create index if not exists idx_comments_post_id on public.comments (post_id);
+create index if not exists idx_follows_follower_id on public.follows (follower_id);
+create index if not exists idx_follows_following_id on public.follows (following_id);
+
+insert into storage.buckets (id, name, public)
+select 'workout-photos', 'workout-photos', true
+where not exists (
+  select 1 from storage.buckets where id = 'workout-photos'
+);
 
 alter table public.users enable row level security;
 alter table public.test_results enable row level security;
@@ -113,6 +148,7 @@ alter table public.weight_logs enable row level security;
 alter table public.feed_posts enable row level security;
 alter table public.likes enable row level security;
 alter table public.comments enable row level security;
+alter table public.follows enable row level security;
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -136,6 +172,117 @@ begin
     before update on public.workout_templates
     for each row
     execute function public.set_updated_at();
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects' and policyname = 'anyone can read workout photos'
+  ) then
+    create policy "anyone can read workout photos"
+    on storage.objects
+    for select
+    using (bucket_id = 'workout-photos');
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects' and policyname = 'users can upload own workout photos'
+  ) then
+    create policy "users can upload own workout photos"
+    on storage.objects
+    for insert
+    with check (
+      bucket_id = 'workout-photos'
+      and auth.uid()::text = (storage.foldername(name))[1]
+    );
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects' and policyname = 'users can update own workout photos'
+  ) then
+    create policy "users can update own workout photos"
+    on storage.objects
+    for update
+    using (
+      bucket_id = 'workout-photos'
+      and auth.uid()::text = (storage.foldername(name))[1]
+    )
+    with check (
+      bucket_id = 'workout-photos'
+      and auth.uid()::text = (storage.foldername(name))[1]
+    );
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects' and policyname = 'users can delete own workout photos'
+  ) then
+    create policy "users can delete own workout photos"
+    on storage.objects
+    for delete
+    using (
+      bucket_id = 'workout-photos'
+      and auth.uid()::text = (storage.foldername(name))[1]
+    );
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'follows' and policyname = 'anyone can read follows'
+  ) then
+    create policy "anyone can read follows"
+    on public.follows
+    for select
+    using (true);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'follows' and policyname = 'users can insert own follows'
+  ) then
+    create policy "users can insert own follows"
+    on public.follows
+    for insert
+    with check (auth.uid() = follower_id);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'follows' and policyname = 'users can delete own follows'
+  ) then
+    create policy "users can delete own follows"
+    on public.follows
+    for delete
+    using (auth.uid() = follower_id);
   end if;
 end
 $$;

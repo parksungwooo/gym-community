@@ -1,7 +1,8 @@
-﻿import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { getWorkoutTypeLabel, useI18n } from '../i18n.js'
 
 const WORKOUT_OPTIONS = ['러닝', '웨이트', '스트레칭', '요가', '필라테스', '사이클', '기타', '빠른 체크인']
+const MAX_PHOTOS = 4
 
 function getWorkoutMark(type) {
   switch (type) {
@@ -25,28 +26,106 @@ function formatDate(date, language) {
 }
 
 function formatDuration(minutes, isEnglish) {
-  if (!minutes) {
-    return isEnglish ? 'No duration' : '시간 미입력'
-  }
-
+  if (!minutes) return isEnglish ? 'No duration' : '시간 미입력'
   return isEnglish ? `${minutes} min` : `${minutes}분`
 }
 
 function formatTime(dateTime, language) {
   if (!dateTime) return ''
-
   return new Date(dateTime).toLocaleTimeString(language === 'en' ? 'en-US' : 'ko-KR', {
     hour: '2-digit',
     minute: '2-digit',
   })
 }
 
-function HistoryItem({ item, onUpdate, onDelete, loading }) {
+function getPhotoUrls(item) {
+  if (Array.isArray(item.photo_urls) && item.photo_urls.length) return item.photo_urls
+  return item.photo_url ? [item.photo_url] : []
+}
+
+function moveItem(items, fromIndex, toIndex) {
+  if (toIndex < 0 || toIndex >= items.length) return items
+  const next = [...items]
+  const [picked] = next.splice(fromIndex, 1)
+  next.splice(toIndex, 0, picked)
+  return next
+}
+
+function buildExistingPhotoItems(item) {
+  return getPhotoUrls(item).map((url, index) => ({
+    id: `${item.id}-existing-${index}`,
+    kind: 'existing',
+    url,
+    previewUrl: url,
+    label: `photo-${index + 1}`,
+  }))
+}
+
+function buildNewPhotoItems(files) {
+  return files.map((file, index) => ({
+    id: `${file.name}-${file.lastModified}-${index}-${Math.random().toString(36).slice(2, 6)}`,
+    kind: 'new',
+    file,
+    previewUrl: URL.createObjectURL(file),
+    label: file.name,
+  }))
+}
+
+function PhotoGrid({ items, isEnglish, onOpen, onRemove, onMove, editable = false }) {
+  if (!items.length) return null
+
+  return (
+    <div className={`history-photo-grid ${items.length > 1 ? 'multi' : ''}`}>
+      {items.map((item, index) => (
+        <article key={item.id} className="history-photo-card">
+          <button type="button" className="image-open-btn" onClick={() => onOpen?.(item.previewUrl)}>
+            <div className="history-photo-preview">
+              <img src={item.previewUrl} alt={isEnglish ? 'Workout proof' : '운동 인증 사진'} />
+            </div>
+          </button>
+          {editable && (
+            <div className="photo-proof-meta edit">
+              <span>{item.label}</span>
+              <div className="photo-proof-meta-actions">
+                <button type="button" className="mini-btn" onClick={() => onMove(index, index - 1)} disabled={index === 0}>
+                  {isEnglish ? 'Up' : '앞'}
+                </button>
+                <button type="button" className="mini-btn" onClick={() => onMove(index, index + 1)} disabled={index === items.length - 1}>
+                  {isEnglish ? 'Down' : '뒤'}
+                </button>
+                <button type="button" className="mini-btn danger" onClick={() => onRemove(index)}>
+                  {isEnglish ? 'Remove' : '제거'}
+                </button>
+              </div>
+            </div>
+          )}
+        </article>
+      ))}
+    </div>
+  )
+}
+
+function HistoryItem({ item, onUpdate, onDelete, loading, onOpenImage }) {
   const { language, isEnglish } = useI18n()
+  const fileInputRef = useRef(null)
+  const cameraInputRef = useRef(null)
   const [editing, setEditing] = useState(false)
   const [workoutType, setWorkoutType] = useState(item.workout_type ?? '운동')
   const [durationMinutes, setDurationMinutes] = useState(String(item.duration_minutes ?? ''))
   const [note, setNote] = useState(item.note ?? '')
+  const [photoItems, setPhotoItems] = useState(() => buildExistingPhotoItems(item))
+
+  useEffect(() => {
+    if (!editing) {
+      setPhotoItems(buildExistingPhotoItems(item))
+    }
+  }, [editing, item])
+
+  useEffect(() => () => {
+    photoItems.forEach((photoItem) => {
+      if (photoItem.kind === 'new' && photoItem.previewUrl) URL.revokeObjectURL(photoItem.previewUrl)
+    })
+  }, [photoItems])
 
   const handleSave = async (event) => {
     event.preventDefault()
@@ -56,10 +135,28 @@ function HistoryItem({ item, onUpdate, onDelete, loading }) {
       durationMinutes: Number(durationMinutes) || 0,
       note: note.trim(),
       date: item.date,
+      photoItems,
     })
 
     setEditing(false)
   }
+
+  const handleAddPhotos = (event) => {
+    const nextFiles = Array.from(event.target.files ?? [])
+    if (!nextFiles.length) return
+    setPhotoItems((prev) => [...prev, ...buildNewPhotoItems(nextFiles)].slice(0, MAX_PHOTOS))
+    event.target.value = ''
+  }
+
+  const handleRemovePhoto = (targetIndex) => {
+    setPhotoItems((prev) => {
+      const target = prev[targetIndex]
+      if (target?.kind === 'new' && target.previewUrl) URL.revokeObjectURL(target.previewUrl)
+      return prev.filter((_, index) => index !== targetIndex)
+    })
+  }
+
+  const displayPhotoItems = editing ? photoItems : buildExistingPhotoItems(item)
 
   return (
     <article className="history-timeline-item">
@@ -85,6 +182,7 @@ function HistoryItem({ item, onUpdate, onDelete, loading }) {
               </div>
               <span className="history-time-badge">{formatDuration(item.duration_minutes, isEnglish)}</span>
             </div>
+            <PhotoGrid items={displayPhotoItems} isEnglish={isEnglish} onOpen={onOpenImage} />
             {item.note && <p className="history-note">{item.note}</p>}
             <div className="history-actions">
               <button type="button" className="mini-btn" onClick={() => setEditing(true)} disabled={loading}>{isEnglish ? 'Edit' : '수정'}</button>
@@ -122,6 +220,27 @@ function HistoryItem({ item, onUpdate, onDelete, loading }) {
               </label>
             </div>
 
+            <section className="history-edit-photos">
+              <div className="photo-proof-header">
+                <span className="field-label-text">{isEnglish ? 'Photos' : '사진'}</span>
+                <span className="photo-proof-helper">
+                  {isEnglish ? `Add, remove, or reorder up to ${MAX_PHOTOS}.` : `최대 ${MAX_PHOTOS}장까지 추가, 삭제, 순서 변경이 가능해요.`}
+                </span>
+              </div>
+              <div className="photo-proof-actions">
+                <button type="button" className="secondary-btn photo-proof-btn" onClick={() => fileInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
+                  {isEnglish ? 'Add Photos' : '사진 추가'}
+                </button>
+                <button type="button" className="ghost-btn photo-proof-btn" onClick={() => cameraInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
+                  {isEnglish ? 'Open Camera' : '카메라 열기'}
+                </button>
+                <span className="photo-proof-count">{isEnglish ? `${photoItems.length}/${MAX_PHOTOS} selected` : `${photoItems.length}/${MAX_PHOTOS}장 선택됨`}</span>
+              </div>
+              <input ref={fileInputRef} className="hidden-file-input" type="file" accept="image/*" multiple onChange={handleAddPhotos} />
+              <input ref={cameraInputRef} className="hidden-file-input" type="file" accept="image/*" capture="environment" multiple onChange={handleAddPhotos} />
+              <PhotoGrid items={photoItems} isEnglish={isEnglish} onOpen={onOpenImage} onRemove={handleRemovePhoto} onMove={(from, to) => setPhotoItems((prev) => moveItem(prev, from, to))} editable />
+            </section>
+
             <div className="history-edit-sheet-actions">
               <div className="history-edit-sheet-copy">
                 <strong>{getWorkoutTypeLabel(workoutType, language)}</strong>
@@ -141,6 +260,7 @@ function HistoryItem({ item, onUpdate, onDelete, loading }) {
 
 export default function WorkoutHistory({ history, onUpdate, onDelete, loading }) {
   const { language, isEnglish } = useI18n()
+  const [openImageUrl, setOpenImageUrl] = useState('')
   const recentWeek = Array.from({ length: 7 }, (_, index) => {
     const date = new Date()
     date.setDate(date.getDate() - (6 - index))
@@ -189,7 +309,7 @@ export default function WorkoutHistory({ history, onUpdate, onDelete, loading })
         ))}
       </div>
 
-        <div className="history-list grouped compact">
+      <div className="history-list grouped compact">
         {loading && (
           <div className="skeleton-stack">
             {Array.from({ length: 2 }).map((_, index) => (
@@ -230,13 +350,23 @@ export default function WorkoutHistory({ history, onUpdate, onDelete, loading })
 
             <div className="history-group-items">
               {group.items.map((item) => (
-                <HistoryItem key={item.id} item={item} onUpdate={onUpdate} onDelete={onDelete} loading={loading} />
+                <HistoryItem key={item.id} item={item} onUpdate={onUpdate} onDelete={onDelete} loading={loading} onOpenImage={setOpenImageUrl} />
               ))}
             </div>
           </section>
         ))}
       </div>
+
+      {openImageUrl && (
+        <div className="lightbox-backdrop" role="dialog" aria-modal="true" onClick={() => setOpenImageUrl('')}>
+          <div className="lightbox-card" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="lightbox-close" onClick={() => setOpenImageUrl('')}>
+              {isEnglish ? 'Close' : '닫기'}
+            </button>
+            <img src={openImageUrl} alt={isEnglish ? 'Expanded workout image' : '확대된 운동 이미지'} />
+          </div>
+        </div>
+      )}
     </section>
   )
 }
-
