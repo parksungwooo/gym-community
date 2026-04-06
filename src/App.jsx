@@ -203,6 +203,7 @@ export default function App() {
   const { language, setLanguage, isEnglish } = useI18n()
   const initInProgressRef = useRef(false)
   const notificationRefreshTimeoutRef = useRef(null)
+  const blockedIdsRef = useRef([])
   const [user, setUser] = useState(null)
   const [authPrompt, setAuthPrompt] = useState(null)
   const [view, setView] = useState(() => (
@@ -342,11 +343,19 @@ export default function App() {
   const isAdmin = effectiveProfile?.is_admin === true
   const isPro = isProMember(effectiveProfile)
 
-  const refreshFeed = useCallback(async (userId, blockedIdSnapshot = blockedIds) => {
+  useEffect(() => {
+    blockedIdsRef.current = blockedIds
+  }, [blockedIds])
+
+  const refreshFeed = useCallback(async (userId, blockedIdSnapshot) => {
+    const effectiveBlockedIds = Array.isArray(blockedIdSnapshot)
+      ? blockedIdSnapshot
+      : blockedIdsRef.current
+
     setLoadingFeed(true)
     try {
       const posts = await withTimeout(
-        fetchFeedWithRelations(userId, blockedIdSnapshot),
+        fetchFeedWithRelations(userId, effectiveBlockedIds),
         12000,
         isEnglish ? 'Feed is taking longer to load. Please try again soon.' : '피드를 불러오는 시간이 길어지고 있어요. 잠시 후 다시 시도해주세요.',
       )
@@ -354,7 +363,7 @@ export default function App() {
     } finally {
       setLoadingFeed(false)
     }
-  }, [blockedIds, isEnglish])
+  }, [isEnglish])
 
   const refreshNotifications = useCallback(async (userId) => {
     if (!userId) {
