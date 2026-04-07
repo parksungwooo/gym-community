@@ -423,21 +423,25 @@
 .auth-modal-backdrop.home-workout-sheet-overlay {
   z-index: 72;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   justify-content: center;
   padding: 0;
+  background: rgba(8, 17, 29, 0.98);
+  backdrop-filter: blur(12px);
   animation: fade-in-sheet 180ms ease;
 }
 
 .auth-modal-backdrop.home-workout-sheet-overlay .home-workout-sheet-panel {
-  position: relative;
-  width: min(520px, 100%);
-  height: min(94dvh, 960px);
-  max-height: min(94dvh, 960px);
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
   margin: 0 auto;
-  border-radius: 28px 28px 0 0;
-  overflow: visible;
-  background: transparent;
+  border-radius: 0;
+  overflow: hidden;
+  background: var(--bg-shell);
   animation: slide-up-sheet 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -449,13 +453,25 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+  padding: 0 0 max(24px, calc(env(safe-area-inset-bottom) + 16px));
 }
 
 .home-workout-panel-shell .workout-capture-card {
   margin: 0;
-  border-radius: 28px 28px 0 0;
-  box-shadow: 0 24px 56px rgba(15, 23, 42, 0.24);
+  min-height: 100dvh;
+  padding-top: max(16px, calc(env(safe-area-inset-top) + 8px));
+  border-radius: 0;
+  box-shadow: none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  background:
+    radial-gradient(circle at top right, rgba(90, 169, 255, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(16, 27, 45, 0.98) 0%, rgba(13, 23, 38, 1) 100%);
+}
+
+.home-workout-panel-shell .sheet-handle {
+  display: none;
 }
 
 .app-surface {

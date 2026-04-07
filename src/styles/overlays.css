@@ -1396,13 +1396,13 @@
 
   .auth-modal-backdrop.home-workout-sheet-overlay .home-workout-sheet-panel,
   .home-workout-panel-shell {
-    height: 96dvh;
-    max-height: 96dvh;
+    height: 100dvh;
+    max-height: 100dvh;
   }
 
   .auth-modal-backdrop.home-workout-sheet-overlay .home-workout-sheet-panel,
   .home-workout-panel-shell .workout-capture-card {
-    border-radius: 24px 24px 0 0;
+    border-radius: 0;
   }
 
   .home-growth-side-grid,
