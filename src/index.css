@@ -401,17 +401,17 @@ button:active {
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, #ff8a3d 0%, #ffb84d 100%);
-  color: #101828;
-  box-shadow: 0 10px 24px rgba(255, 138, 61, 0.32);
+  background: linear-gradient(135deg, #1f4fd8 0%, #5aa9ff 100%);
+  color: #eff6ff;
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.28);
 }
 
 .tab-btn.active .tab-icon {
-  background: rgba(15, 23, 42, 0.1);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .tab-btn.active .tab-icon svg {
-  stroke: #101828;
+  stroke: #eff6ff;
 }
 
 .social-grid {
@@ -938,7 +938,7 @@ button:active {
   padding: 13px 14px;
   border-radius: 18px;
   background: var(--surface-white);
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  border: 1px solid var(--line-soft);
 }
 
 .health-stat-tile.compact {
@@ -956,20 +956,20 @@ button:active {
 }
 
 .health-stat-label {
-  color: #64748b;
+  color: var(--text-sub);
   font-size: 0.78rem;
   font-weight: 700;
 }
 
 .health-stat-value {
-  color: #122033;
+  color: var(--text-main);
   font-size: 1.06rem;
   line-height: 1.35;
   font-weight: 900;
 }
 
 .health-stat-meta {
-  color: #6c7b90;
+  color: var(--text-sub);
   font-size: 0.82rem;
   line-height: 1.4;
 }
@@ -984,7 +984,7 @@ button:active {
 }
 
 .record-module-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 249, 255, 0.96) 100%);
+  background: var(--surface-white);
 }
 
 .record-highlight-block {
@@ -993,8 +993,8 @@ button:active {
   gap: 6px;
   padding: 14px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(239, 246, 255, 0.92) 0%, rgba(255, 255, 255, 0.96) 100%);
-  border: 1px solid rgba(37, 99, 235, 0.12);
+  background: var(--surface-neutral);
+  border: 1px solid var(--line-soft);
 }
 
 .record-highlight-block.compact {
@@ -1005,13 +1005,13 @@ button:active {
 }
 
 .record-highlight-title {
-  color: #122033;
+  color: var(--text-main);
   font-size: 1.04rem;
 }
 
 .record-highlight-meta {
   margin: 0;
-  color: #64748b;
+  color: var(--text-sub);
   font-size: 0.88rem;
   line-height: 1.45;
 }
@@ -1242,16 +1242,16 @@ button:active {
   width: 32px;
   height: 32px;
   border-radius: 12px;
-  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
-  color: #1d4ed8;
+  background: var(--surface-blue);
+  color: var(--accent-record);
   font-size: 0.72rem;
   font-weight: 900;
   flex-shrink: 0;
 }
 
 .workout-mark.quick {
-  background: linear-gradient(180deg, #fff7d4 0%, #ffeab4 100%);
-  color: #9a5800;
+  background: var(--surface-neutral);
+  color: var(--accent-xp);
 }
 
 .history-duration-inline {
@@ -1471,16 +1471,16 @@ button:active {
 }
 
 .type-stat-card strong {
-  color: #122033;
+  color: var(--text-main);
 }
 
 .type-stat-card span {
-  color: #2563eb;
+  color: var(--accent-record);
   font-weight: 800;
 }
 
 .type-stat-bar {
-  background: #e8eef7;
+  background: rgba(148, 163, 184, 0.18);
 }
 
 .type-stat-fill {
@@ -2655,6 +2655,10 @@ button:active {
   border-radius: 14px;
 }
 
+.selected-user-banner.compact p {
+  display: none;
+}
+
 .ghost-chip {
   border: 1px solid rgba(37, 99, 235, 0.18);
   border-radius: 999px;
@@ -3448,11 +3452,11 @@ button:active {
 }
 
 .like-btn {
-  border: none;
+  border: 1px solid rgba(20, 33, 61, 0.08);
   border-radius: 12px;
-  background: #e9eff7;
+  background: rgba(255, 255, 255, 0.84);
   color: #334155;
-  padding: 9px 12px;
+  padding: 8px 11px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -3463,11 +3467,11 @@ button:active {
 }
 
 .comment-toggle-btn {
-  border: none;
+  border: 1px solid rgba(20, 33, 61, 0.08);
   border-radius: 12px;
-  background: #eef2f7;
+  background: rgba(255, 255, 255, 0.84);
   color: #334155;
-  padding: 9px 12px;
+  padding: 8px 11px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -4120,13 +4124,13 @@ button:active {
   height: 12px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(226, 232, 240, 0.9);
+  background: rgba(148, 163, 184, 0.18);
 }
 
 .goal-progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #fb923c 0%, #f59e0b 100%);
+  background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
 }
 
 .weight-trend-shell {
@@ -4149,12 +4153,12 @@ button:active {
 }
 
 .weight-trend-point strong {
-  color: #122033;
+  color: var(--text-main);
   font-size: 0.84rem;
 }
 
 .weight-trend-point small {
-  color: #64748b;
+  color: var(--text-sub);
   font-size: 0.72rem;
   text-align: center;
 }
@@ -4167,8 +4171,8 @@ button:active {
   justify-content: center;
   padding: 8px 0;
   border-radius: 16px;
-  background: linear-gradient(180deg, #f8fbff 0%, #edf4fb 100%);
-  border: 1px solid rgba(203, 213, 225, 0.8);
+  background: var(--surface-neutral);
+  border: 1px solid var(--line-soft);
 }
 
 .weight-trend-bar span {
@@ -5296,6 +5300,12 @@ button:active {
   align-items: center;
   gap: 10px;
   min-width: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
 }
 
 .feed-author-trigger {
@@ -6213,13 +6223,13 @@ button:active {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 
 .feed-score-chip,
 .feed-story-time {
   color: #64748b;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 700;
 }
 
@@ -6233,11 +6243,11 @@ button:active {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  padding: 8px 12px;
+  padding: 7px 11px;
   border-radius: 999px;
   background: rgba(37, 99, 235, 0.08);
   color: #1d4ed8;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 800;
 }
 
@@ -6265,7 +6275,7 @@ button:active {
 
 .feed-story-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   align-items: center;
   flex-wrap: wrap;
@@ -7068,6 +7078,15 @@ button:active {
 
 :root[data-theme='dark'] .workout-capture-card,
 :root[data-theme='dark'] .capture-helper-card,
+:root[data-theme='dark'] .record-health-hero,
+:root[data-theme='dark'] .record-hub-card,
+:root[data-theme='dark'] .health-stat-tile,
+:root[data-theme='dark'] .health-stat-tile.cool,
+:root[data-theme='dark'] .health-stat-tile.warm,
+:root[data-theme='dark'] .record-highlight-block,
+:root[data-theme='dark'] .activity-event-item,
+:root[data-theme='dark'] .type-stat-card,
+:root[data-theme='dark'] .weight-trend-point,
 :root[data-theme='dark'] .public-profile-stat,
 :root[data-theme='dark'] .feed-story-stat,
 :root[data-theme='dark'] .feed-comment-item,
@@ -7076,6 +7095,12 @@ button:active {
     linear-gradient(180deg, rgba(18, 31, 51, 0.98) 0%, rgba(12, 22, 36, 0.98) 100%);
   border-color: var(--line-soft);
   box-shadow: none;
+}
+
+:root[data-theme='dark'] .record-health-hero {
+  background:
+    radial-gradient(circle at top right, rgba(96, 165, 250, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(18, 31, 51, 0.98), rgba(12, 22, 36, 0.98));
 }
 
 :root[data-theme='dark'] .settings-goal-summary {
@@ -7120,6 +7145,13 @@ button:active {
 
 :root[data-theme='dark'] .field-label,
 :root[data-theme='dark'] .field-label-text,
+:root[data-theme='dark'] .record-health-headline strong,
+:root[data-theme='dark'] .health-stat-value,
+:root[data-theme='dark'] .record-highlight-title,
+:root[data-theme='dark'] .activity-event-copy strong,
+:root[data-theme='dark'] .activity-event-score strong,
+:root[data-theme='dark'] .type-stat-title-row strong,
+:root[data-theme='dark'] .weight-trend-point strong,
 :root[data-theme='dark'] .routine-template-copy strong,
 :root[data-theme='dark'] .capture-helper-value,
 :root[data-theme='dark'] .reuse-workout-btn,
@@ -7135,6 +7167,12 @@ button:active {
 
 :root[data-theme='dark'] .routine-template-copy span,
 :root[data-theme='dark'] .routine-template-note,
+:root[data-theme='dark'] .health-stat-label,
+:root[data-theme='dark'] .health-stat-meta,
+:root[data-theme='dark'] .record-highlight-meta,
+:root[data-theme='dark'] .activity-event-copy span,
+:root[data-theme='dark'] .activity-event-score span,
+:root[data-theme='dark'] .weight-trend-point small,
 :root[data-theme='dark'] .capture-helper-label,
 :root[data-theme='dark'] .reuse-workout-btn span,
 :root[data-theme='dark'] .settings-goal-summary span,
@@ -7149,4 +7187,22 @@ button:active {
 
 :root[data-theme='dark'] .public-profile-footnote {
   color: rgba(228, 236, 245, 0.76);
+}
+
+:root[data-theme='dark'] .activity-event-item {
+  padding: 0.8rem 0.9rem;
+  border-radius: 16px;
+}
+
+:root[data-theme='dark'] .activity-event-score strong,
+:root[data-theme='dark'] .health-stat-value {
+  color: #eff6ff;
+}
+
+:root[data-theme='dark'] .activity-event-score span {
+  color: #93c5fd;
+}
+
+:root[data-theme='dark'] .weight-trend-bar {
+  background: rgba(255, 255, 255, 0.08);
 }

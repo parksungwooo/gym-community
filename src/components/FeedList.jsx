@@ -26,7 +26,14 @@ const FILTERS = {
 }
 
 function shortUser(userId, displayName, isEnglish) {
-  if (displayName) return displayName
+  if (displayName?.trim()) {
+    if (displayName.includes('@')) {
+      const localName = displayName.split('@')[0]?.trim()
+      if (localName) return localName
+    }
+    return displayName.trim()
+  }
+
   if (!userId) return isEnglish ? 'Guest' : '게스트'
   return `${isEnglish ? 'Guest' : '게스트'}-${userId.slice(0, 6)}`
 }
@@ -60,7 +67,7 @@ function getPostContent(post, language) {
     case 'test_result':
       return isEnglish
         ? `Logged a fitness test result: ${localizeLevelText(post.metadata?.level, language)} (${post.metadata?.score ?? 0} pts).`
-        : `체력 테스트 결과 ${localizeLevelText(post.metadata?.level, language)} (${post.metadata?.score ?? 0}점)을 기록했어요.`
+        : `체력 테스트 결과 ${localizeLevelText(post.metadata?.level, language)} (${post.metadata?.score ?? 0}점)를 기록했어요.`
     case 'level_up':
       return isEnglish
         ? `Reached ${localizeLevelText(post.metadata?.to, language)}.`
@@ -95,15 +102,6 @@ function getWorkoutStoryMeta(post, language, isEnglish) {
   return parts.join(' · ')
 }
 
-function FeedStat({ label, value }) {
-  return (
-    <span className="feed-story-stat">
-      <strong>{value}</strong>
-      <small>{label}</small>
-    </span>
-  )
-}
-
 function FeedCard({
   post,
   onToggleLike,
@@ -115,7 +113,6 @@ function FeedCard({
   currentUserId,
 }) {
   const { language, isEnglish } = useI18n()
-  const t = (ko, en) => (isEnglish ? en : ko)
   const [comment, setComment] = useState('')
   const [commentOpen, setCommentOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -124,7 +121,7 @@ function FeedCard({
   const authorName = shortUser(post.user_id, post.authorDisplayName, isEnglish)
   const authorLevel = post.authorLevel
     ? localizeLevelText(post.authorLevel, language)
-    : t('레벨 준비 중', 'Level pending')
+    : isEnglish ? 'Level pending' : '레벨 준비 중'
 
   const submitComment = async (event) => {
     event.preventDefault()
@@ -139,15 +136,17 @@ function FeedCard({
       <div className="feed-story-header">
         <button
           type="button"
-          className="feed-author-main feed-story-author"
-          onClick={() => onSelectUser?.({
-            user_id: post.user_id,
-            display_name: post.authorDisplayName,
-            avatar_emoji: post.authorAvatarEmoji,
-            avatar_url: post.authorAvatarUrl,
-            latest_level: post.authorLevel,
-            latest_score: post.authorScore,
-          })}
+          className="feed-author-main feed-author-trigger feed-story-author"
+          onClick={() =>
+            onSelectUser?.({
+              user_id: post.user_id,
+              display_name: post.authorDisplayName,
+              avatar_emoji: post.authorAvatarEmoji,
+              avatar_url: post.authorAvatarUrl,
+              latest_level: post.authorLevel,
+              latest_score: post.authorScore,
+            })
+          }
         >
           <UserAvatar
             className="feed-author-avatar"
@@ -161,7 +160,7 @@ function FeedCard({
               <span className="feed-level-chip">{authorLevel}</span>
               {post.authorScore ? (
                 <span className="feed-score-chip">
-                  {t(`체력 ${post.authorScore}점`, `${post.authorScore} pts`)}
+                  {isEnglish ? `${post.authorScore} pts` : `체력 ${post.authorScore}점`}
                 </span>
               ) : null}
             </div>
@@ -214,18 +213,13 @@ function FeedCard({
       )}
 
       <div className="feed-story-footer">
-        <div className="feed-story-stats">
-          <FeedStat label={t('좋아요', 'Likes')} value={post.likeCount} />
-          <FeedStat label={t('댓글', 'Comments')} value={post.comments.length} />
-        </div>
-
         <div className="feed-actions compact">
           <button
             type="button"
             className={`like-btn ${post.likedByMe ? 'liked' : ''}`}
             onClick={() => onToggleLike(post.id, post.likedByMe)}
           >
-            {post.likedByMe ? (isEnglish ? 'Liked' : '좋아요함') : (isEnglish ? 'Like' : '좋아요')}
+            {isEnglish ? `Like ${post.likeCount}` : `좋아요 ${post.likeCount}`}
           </button>
           <button
             type="button"
@@ -235,7 +229,9 @@ function FeedCard({
               setMenuOpen(false)
             }}
           >
-            {commentOpen ? (isEnglish ? 'Close' : '닫기') : (isEnglish ? 'Comment' : '댓글')}
+            {commentOpen
+              ? (isEnglish ? `Close comments (${post.comments.length})` : `댓글 닫기 ${post.comments.length}`)
+              : (isEnglish ? `Comments ${post.comments.length}` : `댓글 ${post.comments.length}`)}
           </button>
           {post.user_id !== currentUserId && (
             <div className="feed-more-wrap">
@@ -292,7 +288,7 @@ function FeedCard({
         <ul className="comment-list compact feed-comment-list">
           {post.comments.map((item) => (
             <li key={item.id} className="feed-comment-item">
-              <strong>{shortUser(item.user_id, null, isEnglish)}</strong>
+              <strong>{shortUser(item.user_id, item.authorDisplayName, isEnglish)}</strong>
               <span>{item.content}</span>
             </li>
           ))}
@@ -317,7 +313,6 @@ export default function FeedList({
   currentUserId,
 }) {
   const { language, isEnglish } = useI18n()
-  const t = (ko, en) => (isEnglish ? en : ko)
   const [filter, setFilter] = useState('all')
   const [openImageUrl, setOpenImageUrl] = useState('')
 
@@ -333,29 +328,19 @@ export default function FeedList({
     <section className="card community-feed-surface compact community-feed-redesign">
       <div className="app-section-heading compact">
         <div>
-          <span className="app-section-kicker">{t('피드', 'Feed')}</span>
-          <h2>{t('커뮤니티 스토리', 'Community stories')}</h2>
+          <span className="app-section-kicker">{isEnglish ? 'Feed' : '피드'}</span>
+          <h2>{isEnglish ? 'Community stories' : '커뮤니티 스토리'}</h2>
         </div>
         <span className="community-mini-pill">{isEnglish ? `${visiblePosts.length} posts` : `${visiblePosts.length}개`}</span>
       </div>
 
-      <p className="subtext compact">
-        {t(
-          '인증 사진, 운동 흐름, 레벨 변화를 한 화면에서 가볍게 둘러보세요.',
-          'Browse workout proof, momentum, and level changes in one flowing view.',
-        )}
-      </p>
-
       {selectedUser?.user_id && (
         <div className="selected-user-banner compact community-focus-banner">
-          <div>
-            <strong>
-              {isEnglish
-                ? `${selectedUser.display_name}'s posts`
-                : `${selectedUser.display_name}님의 게시물`}
-            </strong>
-            <p>{t('아래 피드는 선택한 유저 기준으로 좁혀져 있어요.', 'The feed below is filtered to this person.')}</p>
-          </div>
+          <strong>
+            {isEnglish
+              ? `${shortUser(selectedUser.user_id, selectedUser.display_name, isEnglish)}'s posts`
+              : `${shortUser(selectedUser.user_id, selectedUser.display_name, isEnglish)}님의 게시물`}
+          </strong>
           <button type="button" className="ghost-chip" onClick={onClearSelectedUser}>
             {isEnglish ? 'Show All' : '전체 보기'}
           </button>
@@ -407,18 +392,16 @@ export default function FeedList({
           <strong>
             {filter === 'following'
               ? (isEnglish ? 'No posts from people you follow yet.' : '팔로우한 사람의 게시물이 아직 없어요.')
-              : (isEnglish ? 'There is nothing in the feed yet.' : '아직 피드에 올라온 기록이 없어요.')}
+              : (isEnglish ? 'There is nothing in the feed yet.' : '아직 피드에 보일 기록이 없어요.')}
           </strong>
           <p>
             {filter === 'following'
-              ? t(
-                '조금 더 활동적인 사람을 팔로우하면 이 탭이 빠르게 살아나요.',
-                'Follow a few more active people to make this tab come alive faster.',
-              )
-              : t(
-                '운동 기록, 레벨 테스트, 프로필 업데이트가 쌓이면 커뮤니티 피드가 자연스럽게 움직이기 시작해요.',
-                'As workouts, tests, and profile updates stack up, the community feed will start moving naturally.',
-              )}
+              ? (isEnglish
+                ? 'Follow a few more active people to make this tab come alive faster.'
+                : '조금 더 활동적인 사람을 팔로우하면 이 탭이 더 빨리 살아나요.')
+              : (isEnglish
+                ? 'As workouts, tests, and profile updates stack up, the community feed will start moving naturally.'
+                : '운동 기록, 테스트, 프로필 업데이트가 쌓이면 커뮤니티 피드가 자연스럽게 움직이기 시작해요.')}
           </p>
         </div>
       )}
@@ -450,7 +433,7 @@ export default function FeedList({
             <button type="button" className="lightbox-close" onClick={() => setOpenImageUrl('')}>
               {isEnglish ? 'Close' : '닫기'}
             </button>
-            <img src={openImageUrl} alt={isEnglish ? 'Expanded workout image' : '확대된 운동 이미지'} />
+            <img src={openImageUrl} alt={isEnglish ? 'Expanded workout image' : '확대한 운동 이미지'} />
           </div>
         </div>
       )}
