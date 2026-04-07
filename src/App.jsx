@@ -1834,14 +1834,12 @@ export default function App() {
                 celebration={celebration}
                 isEnglish={isEnglish}
                 profile={profile}
-                bodyMetrics={bodyMetrics}
                 todayDone={todayDone}
                 currentLevel={latestResult?.level ?? testResult?.level ?? null}
                 stats={workoutStats}
                 challenge={challenge}
                 activitySummary={activitySummary}
                 achievementBadges={achievementBadges}
-                isPro={isPro}
                 reminder={reminderStatus}
                 reminderPermission={reminderPermission}
                 feedPreview={homeFeedPreview}
@@ -1856,7 +1854,6 @@ export default function App() {
                   navigateToView(VIEW.PROGRESS)
                   setShowTestForm(true)
                 }}
-                onOpenPaywall={openPaywall}
                 onSeeCommunity={() => handleChangeView(VIEW.COMMUNITY)}
                 onSelectFeedPreviewUser={(item) => {
                   handleSelectCommunityUser(item)
@@ -1890,6 +1887,7 @@ export default function App() {
                 recentActivityEvents={recentActivityEvents}
                 isPro={isPro}
                 onOpenPaywall={openPaywall}
+                onSaveWeight={handleSaveWeight}
                 workoutStats={workoutStats}
                 workoutHistory={workoutHistory}
                 onUpdateWorkout={handleUpdateWorkout}

@@ -6,14 +6,12 @@ export default function HomeRoute({
   celebration,
   isEnglish,
   profile,
-  bodyMetrics,
   todayDone,
   currentLevel,
   stats,
   challenge,
   activitySummary,
   achievementBadges,
-  isPro,
   reminder,
   reminderPermission,
   feedPreview,
@@ -22,7 +20,6 @@ export default function HomeRoute({
   onOpenWorkoutComposer,
   onStartRoutine,
   onOpenTest,
-  onOpenPaywall,
   onSeeCommunity,
   onSelectFeedPreviewUser,
   onRequestReminderPermission,
@@ -86,14 +83,12 @@ export default function HomeRoute({
       )}
       <HomeDashboard
         profile={profile}
-        bodyMetrics={bodyMetrics}
         todayDone={todayDone}
         currentLevel={currentLevel}
         stats={stats}
         challenge={challenge}
         activitySummary={activitySummary}
         achievementBadges={achievementBadges}
-        isPro={isPro}
         reminder={reminder}
         reminderPermission={reminderPermission}
         feedPreview={feedPreview}
@@ -102,7 +97,6 @@ export default function HomeRoute({
         onOpenWorkoutComposer={onOpenWorkoutComposer}
         onStartRoutine={onStartRoutine}
         onOpenTest={onOpenTest}
-        onOpenPaywall={onOpenPaywall}
         onSeeCommunity={onSeeCommunity}
         onSelectFeedPreviewUser={onSelectFeedPreviewUser}
         onRequestReminderPermission={onRequestReminderPermission}

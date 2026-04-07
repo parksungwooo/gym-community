@@ -118,6 +118,7 @@ function FeedCard({
   const t = (ko, en) => (isEnglish ? en : ko)
   const [comment, setComment] = useState('')
   const [commentOpen, setCommentOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const photoUrls = getPostPhotoUrls(post)
   const storyMeta = getWorkoutStoryMeta(post, language, isEnglish)
   const authorName = shortUser(post.user_id, post.authorDisplayName, isEnglish)
@@ -229,23 +230,47 @@ function FeedCard({
           <button
             type="button"
             className="comment-toggle-btn"
-            onClick={() => setCommentOpen((prev) => !prev)}
+            onClick={() => {
+              setCommentOpen((prev) => !prev)
+              setMenuOpen(false)
+            }}
           >
             {commentOpen ? (isEnglish ? 'Close' : '닫기') : (isEnglish ? 'Comment' : '댓글')}
           </button>
           {post.user_id !== currentUserId && (
-            <>
-              <button type="button" className="ghost-chip" onClick={() => onReportPost?.(post)}>
-                {isEnglish ? 'Report' : '신고'}
-              </button>
+            <div className="feed-more-wrap">
               <button
                 type="button"
-                className="ghost-chip danger-chip"
-                onClick={() => onBlockUser?.(post.user_id, post.authorDisplayName)}
+                className="ghost-chip feed-more-btn"
+                onClick={() => setMenuOpen((prev) => !prev)}
               >
-                {isEnglish ? 'Block' : '차단'}
+                {isEnglish ? 'More' : '더보기'}
               </button>
-            </>
+              {menuOpen && (
+                <div className="feed-action-menu">
+                  <button
+                    type="button"
+                    className="ghost-chip"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onReportPost?.(post)
+                    }}
+                  >
+                    {isEnglish ? 'Report' : '신고'}
+                  </button>
+                  <button
+                    type="button"
+                    className="ghost-chip danger-chip"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onBlockUser?.(post.user_id, post.authorDisplayName)
+                    }}
+                  >
+                    {isEnglish ? 'Block' : '차단'}
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
