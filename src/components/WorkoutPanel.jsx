@@ -220,7 +220,7 @@ export default function WorkoutPanel({
         </div>
 
         <div className="capture-header-actions">
-          <span className={`capture-status ${todayDone ? 'done' : ''}`}>
+          <span className={`capture-status subtle ${todayDone ? 'done' : ''}`}>
             {todayDone ? (isEnglish ? 'More logs available today' : '오늘은 더 기록할 수 있어요') : (isEnglish ? 'Ready to log' : '바로 기록할 수 있어요')}
           </span>
           {onClose ? (
@@ -229,24 +229,6 @@ export default function WorkoutPanel({
             </button>
           ) : null}
         </div>
-      </div>
-
-      <div className="sheet-summary-bar compact">
-        <div className="capture-helper-card compact">
-          <span className="capture-helper-label">{isEnglish ? "Today's Logs" : '오늘 기록 수'}</span>
-          <strong className="capture-helper-value">{todayCount}</strong>
-        </div>
-
-        {recentWorkout?.workoutType && (
-          <button type="button" className="reuse-workout-btn compact" onClick={handleReuseRecent} disabled={loading}>
-            {isEnglish ? 'Reuse Latest Workout' : '최근 운동 다시 쓰기'}
-            <span>
-              <span className="reuse-inline-mark">{getWorkoutMark(recentWorkout.workoutType)}</span>
-              {getWorkoutTypeLabel(recentWorkout.workoutType, language)}
-              {recentWorkout.durationMinutes ? (isEnglish ? ` · ${recentWorkout.durationMinutes} min` : ` · ${recentWorkout.durationMinutes}분`) : ''}
-            </span>
-          </button>
-        )}
       </div>
 
       <form className="workout-form" onSubmit={handleSubmit}>
@@ -308,6 +290,24 @@ export default function WorkoutPanel({
               <input className="workout-input compact" type="number" min="0" max="300" step="5" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} disabled={loading} />
             </label>
           </div>
+        </div>
+
+        <div className="sheet-summary-bar compact">
+          <div className="capture-helper-card compact">
+            <span className="capture-helper-label">{isEnglish ? "Today's Logs" : '오늘 기록 수'}</span>
+            <strong className="capture-helper-value">{todayCount}</strong>
+          </div>
+
+          {recentWorkout?.workoutType && (
+            <button type="button" className="reuse-workout-btn compact" onClick={handleReuseRecent} disabled={loading}>
+              {isEnglish ? 'Reuse Latest Workout' : '최근 운동 다시 쓰기'}
+              <span>
+                <span className="reuse-inline-mark">{getWorkoutMark(recentWorkout.workoutType)}</span>
+                {getWorkoutTypeLabel(recentWorkout.workoutType, language)}
+                {recentWorkout.durationMinutes ? (isEnglish ? ` · ${recentWorkout.durationMinutes} min` : ` · ${recentWorkout.durationMinutes}분`) : ''}
+              </span>
+            </button>
+          )}
         </div>
 
         {showRoutineTools && (
