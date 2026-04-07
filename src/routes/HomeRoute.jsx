@@ -47,12 +47,18 @@ export default function HomeRoute({
       }
     }
 
+    const handlePopState = () => {
+      onCloseWorkoutComposer?.()
+    }
+
     window.addEventListener('keydown', handleKeydown)
+    window.addEventListener('popstate', handlePopState)
 
     return () => {
       document.body.style.overflow = previousOverflow
       document.body.style.overscrollBehavior = previousOverscroll
       window.removeEventListener('keydown', handleKeydown)
+      window.removeEventListener('popstate', handlePopState)
     }
   }, [onCloseWorkoutComposer, showWorkoutPanel])
 
@@ -103,7 +109,7 @@ export default function HomeRoute({
       />
       {showWorkoutPanel && (
         <div
-          className="home-workout-sheet-overlay"
+          className="auth-modal-backdrop home-workout-sheet-overlay"
           role="presentation"
           onClick={onCloseWorkoutComposer}
         >

@@ -64,11 +64,17 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from './services/communityService'
-import { getHashForView, parseViewFromHash } from './utils/appRouting'
+import {
+  buildAppHistoryState,
+  getHashForView,
+  parseViewFromHash,
+  shouldPushHomeBackGuard,
+} from './utils/appRouting'
 import { getActivityLevelProgress } from './utils/activityLevel'
 import { buildBodyMetrics } from './utils/bodyMetrics'
 import { isProMember, PREMIUM_CONTEXT } from './utils/premium'
 import { getLevelByScore } from './utils/level'
+import { getNextThemeMode, resolveThemeMode, THEME_STORAGE_KEY } from './utils/theme'
 
 const HomeRoute = lazy(() => import('./routes/HomeRoute'))
 const ProgressRoute = lazy(() => import('./routes/ProgressRoute'))
@@ -128,6 +134,30 @@ function BellIcon() {
       <path d="M8 16.5V11a4 4 0 1 1 8 0v5.5" />
       <path d="M5 18h14" />
       <path d="M10 19.5a2 2 0 0 0 4 0" />
+    </svg>
+  )
+}
+
+function ThemeIcon({ themeMode }) {
+  if (themeMode === 'dark') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2.5v2.6" />
+      <path d="M12 18.9v2.6" />
+      <path d="M4.6 4.6 6.4 6.4" />
+      <path d="m17.6 17.6 1.8 1.8" />
+      <path d="M2.5 12h2.6" />
+      <path d="M18.9 12h2.6" />
+      <path d="m4.6 19.4 1.8-1.8" />
+      <path d="m17.6 6.4 1.8-1.8" />
     </svg>
   )
 }
@@ -256,6 +286,11 @@ export default function App() {
   const [reportTarget, setReportTarget] = useState(null)
   const [paywallContext, setPaywallContext] = useState(null)
   const [initStatus, setInitStatus] = useState(isEnglish ? 'Checking session...' : '세션을 확인하는 중입니다...')
+  const [historyTick, setHistoryTick] = useState(0)
+  const [themeMode, setThemeMode] = useState(() => {
+    if (typeof window === 'undefined') return 'dark'
+    return resolveThemeMode(window.localStorage.getItem(THEME_STORAGE_KEY))
+  })
   const isAuthenticated = Boolean(user?.id)
 
   const navigateToView = useCallback((nextView, options = {}) => {
@@ -915,9 +950,22 @@ export default function App() {
 
     setWorkoutPreset(nextPreset)
     setShowWorkoutPanel(true)
+
+    if (typeof window !== 'undefined' && window.history.state?.workoutSheet !== true) {
+      window.history.pushState(
+        { ...(window.history.state ?? {}), workoutSheet: true },
+        '',
+        window.location.href,
+      )
+    }
   }, [profile?.default_share_to_feed, workoutStats.lastWorkoutDuration, workoutStats.lastWorkoutType])
 
   const closeWorkoutComposer = useCallback(() => {
+    if (typeof window !== 'undefined' && window.history.state?.workoutSheet === true) {
+      window.history.back()
+      return
+    }
+
     setShowWorkoutPanel(false)
     setWorkoutPreset(null)
   }, [])
@@ -1454,13 +1502,51 @@ export default function App() {
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
 
-    const syncViewFromHash = () => {
+    const syncViewFromHistory = () => {
       setView(parseViewFromHash(window.location.hash, VIEW.HOME, Object.values(VIEW)))
+      setHistoryTick((current) => current + 1)
     }
 
-    window.addEventListener('hashchange', syncViewFromHash)
-    return () => window.removeEventListener('hashchange', syncViewFromHash)
+    window.addEventListener('hashchange', syncViewFromHistory)
+    window.addEventListener('popstate', syncViewFromHistory)
+    return () => {
+      window.removeEventListener('hashchange', syncViewFromHistory)
+      window.removeEventListener('popstate', syncViewFromHistory)
+    }
   }, [])
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+
+    document.documentElement.dataset.theme = themeMode
+    window.localStorage.setItem(THEME_STORAGE_KEY, themeMode)
+  }, [themeMode])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const currentHash = window.location.hash || getHashForView(view)
+    const normalizedState = buildAppHistoryState(view, window.history.state ?? {})
+
+    if (window.history.state?.appView !== view) {
+      window.history.replaceState(normalizedState, '', currentHash)
+    }
+
+    if (shouldPushHomeBackGuard(view, showWorkoutPanel, normalizedState)) {
+      window.history.pushState(
+        { ...normalizedState, appHomeGuard: true },
+        '',
+        currentHash,
+      )
+    }
+  }, [historyTick, showWorkoutPanel, view])
+
+  useEffect(() => {
+    if (view === VIEW.HOME || !showWorkoutPanel) return
+
+    setShowWorkoutPanel(false)
+    setWorkoutPreset(null)
+  }, [showWorkoutPanel, view])
 
   const handleChangeView = useCallback((nextView) => {
     const access = buildCommunityAccessResult(nextView, hasCommunityNickname, VIEW.COMMUNITY)
@@ -1495,6 +1581,10 @@ export default function App() {
       setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to update notifications.' : '알림 상태를 바꾸지 못했습니다.', isEnglish))
     }
   }, [isEnglish, showSuccess, unreadNotificationCount, user?.id])
+
+  const handleToggleTheme = useCallback(() => {
+    setThemeMode((current) => getNextThemeMode(current))
+  }, [])
 
   const handleOpenNotification = useCallback(async (notification) => {
     if (!notification || !user?.id) return
@@ -1694,8 +1784,24 @@ export default function App() {
         </section>
       ) : (
         <>
-          {isAuthenticated && (
-            <div className="app-utility-bar">
+          <div className="app-utility-bar">
+            <div className="app-utility-group">
+              <button
+                type="button"
+                className="theme-toggle-btn"
+                onClick={handleToggleTheme}
+                aria-label={isEnglish
+                  ? `Switch to ${themeMode === 'dark' ? 'light' : 'dark'} theme`
+                  : `${themeMode === 'dark' ? '라이트' : '다크'} 테마로 전환`}
+              >
+                <span className="theme-toggle-icon"><ThemeIcon themeMode={themeMode} /></span>
+                <span className="theme-toggle-text">
+                  {themeMode === 'dark'
+                    ? (isEnglish ? 'Dark navy' : '네이비 다크')
+                    : (isEnglish ? 'Light mode' : '라이트 모드')}
+                </span>
+              </button>
+              {isAuthenticated && (
               <button
                 type="button"
                 className={`notification-trigger ${showNotificationCenter ? 'active' : ''}`}
@@ -1709,8 +1815,9 @@ export default function App() {
                   </span>
                 )}
               </button>
+              )}
             </div>
-          )}
+          </div>
 
           <nav className="tab-nav">
             {tabs.map((tab) => (

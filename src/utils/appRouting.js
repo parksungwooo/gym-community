@@ -11,3 +11,14 @@ export function parseViewFromHash(hash, fallbackView = 'home', knownViews = []) 
 
   return knownViews.includes(normalized) ? normalized : fallbackView
 }
+
+export function buildAppHistoryState(view, currentState = {}) {
+  return {
+    ...currentState,
+    appView: view || 'home',
+  }
+}
+
+export function shouldPushHomeBackGuard(view, showOverlay, historyState = {}) {
+  return view === 'home' && !showOverlay && historyState?.appHomeGuard !== true
+}

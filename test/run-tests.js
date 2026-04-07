@@ -5,9 +5,10 @@ import { createAuthPromptState, sanitizePendingAction } from '../src/features/au
 import { buildCommunityAccessResult } from '../src/features/community/communityFlow.js'
 import { buildNotificationNavigation } from '../src/features/notifications/notificationFlow.js'
 import { getActivityEventMeta, getActivityLevelProgress } from '../src/utils/activityLevel.js'
-import { getHashForView, parseViewFromHash } from '../src/utils/appRouting.js'
+import { buildAppHistoryState, getHashForView, parseViewFromHash, shouldPushHomeBackGuard } from '../src/utils/appRouting.js'
 import { getImageSourceCandidates } from '../src/utils/imageOptimization.js'
 import { getPaywallCopy, isProMember, PREMIUM_CONTEXT } from '../src/utils/premium.js'
+import { getNextThemeMode, normalizeThemeMode, resolveThemeMode } from '../src/utils/theme.js'
 
 const tests = [
   {
@@ -109,6 +110,19 @@ const tests = [
     },
   },
   {
+    name: 'home back guard only activates on home without overlays',
+    run() {
+      assert.deepEqual(buildAppHistoryState('community', { workoutSheet: false }), {
+        workoutSheet: false,
+        appView: 'community',
+      })
+      assert.equal(shouldPushHomeBackGuard('home', false, {}), true)
+      assert.equal(shouldPushHomeBackGuard('home', true, {}), false)
+      assert.equal(shouldPushHomeBackGuard('community', false, {}), false)
+      assert.equal(shouldPushHomeBackGuard('home', false, { appHomeGuard: true }), false)
+    },
+  },
+  {
     name: 'activity level progress uses the shared XP thresholds',
     run() {
       const progress = getActivityLevelProgress(960)
@@ -161,6 +175,16 @@ const tests = [
       assert.equal(isProMember({ is_pro: true }), true)
       assert.equal(isProMember({ subscription_tier: 'pro' }), true)
       assert.equal(isProMember({ plan_tier: 'free' }), false)
+    },
+  },
+  {
+    name: 'theme helpers default to dark navy and toggle correctly',
+    run() {
+      assert.equal(normalizeThemeMode('light'), 'light')
+      assert.equal(normalizeThemeMode('sepia'), 'dark')
+      assert.equal(resolveThemeMode(null), 'dark')
+      assert.equal(getNextThemeMode('dark'), 'light')
+      assert.equal(getNextThemeMode('light'), 'dark')
     },
   },
 ]
