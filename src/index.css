@@ -6541,7 +6541,7 @@ button:active {
 :root[data-theme='dark'] {
   color-scheme: dark;
   --bg-app:
-    radial-gradient(circle at top left, rgba(255, 138, 61, 0.14), transparent 24%),
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.14), transparent 24%),
     radial-gradient(circle at top right, rgba(90, 169, 255, 0.16), transparent 26%),
     linear-gradient(180deg, #08111d 0%, #0d1726 100%);
   --bg-shell: #0d1726;
@@ -6559,8 +6559,8 @@ button:active {
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.28);
   --shadow-strong: 0 28px 70px rgba(0, 0, 0, 0.38);
   --surface-white: linear-gradient(180deg, rgba(18, 31, 51, 0.96) 0%, rgba(13, 23, 38, 0.98) 100%);
-  --surface-blue: linear-gradient(180deg, rgba(14, 30, 51, 0.96) 0%, rgba(10, 21, 37, 0.98) 100%);
-  --surface-warm: linear-gradient(180deg, rgba(51, 31, 15, 0.96) 0%, rgba(35, 21, 10, 0.98) 100%);
+  --surface-blue: linear-gradient(180deg, rgba(21, 38, 64, 0.96) 0%, rgba(11, 24, 42, 0.98) 100%);
+  --surface-warm: linear-gradient(180deg, rgba(21, 38, 64, 0.96) 0%, rgba(11, 24, 42, 0.98) 100%);
   --surface-neutral: linear-gradient(180deg, rgba(19, 32, 52, 0.96) 0%, rgba(12, 22, 36, 0.98) 100%);
 }
 
@@ -6652,7 +6652,7 @@ button:active {
 }
 
 :root[data-theme='dark'] .theme-toggle-icon {
-  background: linear-gradient(135deg, rgba(90, 169, 255, 0.24), rgba(255, 138, 61, 0.16));
+  background: linear-gradient(135deg, rgba(90, 169, 255, 0.24), rgba(59, 130, 246, 0.16));
   color: #dbeafe;
 }
 
@@ -6665,8 +6665,9 @@ button:active {
 }
 
 :root[data-theme='dark'] .primary-btn {
-  background: linear-gradient(135deg, #ff8a3d 0%, #ffb84d 100%);
-  color: #101828;
+  background: linear-gradient(135deg, #5aa9ff 0%, #7dd3fc 100%);
+  color: #08111d;
+  box-shadow: 0 16px 28px rgba(90, 169, 255, 0.22);
 }
 
 :root[data-theme='dark'] .secondary-btn {
@@ -6726,7 +6727,7 @@ button:active {
 :root[data-theme='dark'] .public-profile-card,
 :root[data-theme='dark'] .home-pro-preview-card.active {
   background:
-    radial-gradient(circle at top right, rgba(255, 138, 61, 0.16), transparent 30%),
+    radial-gradient(circle at top right, rgba(96, 165, 250, 0.16), transparent 30%),
     linear-gradient(135deg, #0f1d32 0%, #17345a 62%, #224b78 100%);
   color: #f4f7fb;
 }
@@ -6742,10 +6743,46 @@ button:active {
 :root[data-theme='dark'] .profile-progress-pill,
 :root[data-theme='dark'] .activity-card,
 :root[data-theme='dark'] .profile-activity-card,
-:root[data-theme='dark'] .home-feed-momentum-card,
 :root[data-theme='dark'] .empty-state-card.cool,
 :root[data-theme='dark'] .empty-state-card.warm {
   border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme='dark'] .home-feed-momentum-card,
+:root[data-theme='dark'] .celebration-card,
+:root[data-theme='dark'] .result-card,
+:root[data-theme='dark'] .home-reminder-card,
+:root[data-theme='dark'] .paywall-plan-card.highlighted,
+:root[data-theme='dark'] .community-block-card,
+:root[data-theme='dark'] .ranking-surface,
+:root[data-theme='dark'] .community-feed-surface,
+:root[data-theme='dark'] .empty-state-card.cool,
+:root[data-theme='dark'] .empty-state-card.warm {
+  background:
+    radial-gradient(circle at top right, rgba(96, 165, 250, 0.12), transparent 32%),
+    linear-gradient(180deg, rgba(18, 31, 51, 0.98), rgba(12, 22, 36, 0.98));
+  border-color: var(--line-soft);
+}
+
+:root[data-theme='dark'] .home-metric-pill.warm,
+:root[data-theme='dark'] .profile-progress-pill.warm,
+:root[data-theme='dark'] .summary-chip.warm,
+:root[data-theme='dark'] .health-stat-tile.warm,
+:root[data-theme='dark'] .stat-card.warm,
+:root[data-theme='dark'] .metric-tile.warm,
+:root[data-theme='dark'] .shortcut-tile.warm,
+:root[data-theme='dark'] .community-score-pill.warm,
+:root[data-theme='dark'] .community-mini-pill.accent,
+:root[data-theme='dark'] .profile-badge {
+  background:
+    linear-gradient(180deg, rgba(31, 52, 86, 0.96) 0%, rgba(18, 31, 51, 0.98) 100%);
+  color: #dbeafe;
+  border-color: rgba(96, 165, 250, 0.2);
+}
+
+:root[data-theme='dark'] .home-growth-card-accent,
+:root[data-theme='dark'] .activity-card {
+  box-shadow: 0 22px 44px rgba(8, 17, 29, 0.24);
 }
 
 :root[data-theme='dark'] .home-feed-preview-media,
