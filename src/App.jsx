@@ -30,6 +30,7 @@ import {
   completeWorkout,
   createFeedPost,
   createMatePost,
+  buildWorkoutStatsFromHistory,
   fetchAchievementBadges,
   fetchBlockedIds,
   fetchMatePosts,
@@ -51,7 +52,6 @@ import {
   followUser,
   getLatestTestResult,
   getUserProfile,
-  getWorkoutStats,
   hasWorkoutCompleted,
   submitReport,
   saveWorkoutTemplate,
@@ -243,6 +243,12 @@ function getActionableErrorMessage(error, fallbackMessage, isEnglish) {
   }
 
   return rawMessage || fallbackMessage
+}
+
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
 }
 
 
@@ -554,7 +560,6 @@ export default function App() {
   const refreshUserSummary = useCallback(async (userId) => {
     const [
       result,
-      stats,
       history,
       templates,
       nextProfile,
@@ -566,7 +571,6 @@ export default function App() {
       nextFollowStats,
     ] = await Promise.all([
       withTimeout(getLatestTestResult(userId), 10000, isEnglish ? 'Could not load your latest test.' : '최근 테스트를 불러오지 못했어요.'),
-      withTimeout(getWorkoutStats(userId), 10000, isEnglish ? 'Could not load workout stats.' : '운동 통계를 불러오지 못했어요.'),
       withTimeout(fetchWorkoutHistory(userId), 10000, isEnglish ? 'Could not load workout history.' : '운동 기록 리스트를 불러오지 못했어요.'),
       withTimeout(fetchWorkoutTemplates(userId), 10000, isEnglish ? 'Could not load saved routines.' : '저장된 루틴을 불러오지 못했어요.'),
       withTimeout(getUserProfile(userId), 10000, isEnglish ? 'Could not load profile.' : '프로필 정보를 불러오지 못했어요.'),
@@ -577,6 +581,7 @@ export default function App() {
       withTimeout(fetchBlockedIds(userId), 10000, isEnglish ? 'Could not load blocked users.' : '차단 목록을 불러오지 못했어요.'),
       withTimeout(fetchFollowStats(userId), 10000, isEnglish ? 'Could not load follow stats.' : '팔로우 통계를 불러오지 못했어요.'),
     ])
+    const stats = buildWorkoutStatsFromHistory(history)
 
     setLatestResult(result)
     setWorkoutStats(stats)
@@ -605,6 +610,40 @@ export default function App() {
     }
   }, [isEnglish])
 
+  const ensureUserProfileReady = useCallback(async (userId) => {
+    try {
+      await withTimeout(upsertUser(userId), 10000, '__user_setup_delay__')
+    } catch (error) {
+      if (!isTransientInitDelayMessage(error?.message)) {
+        throw error
+      }
+    }
+
+    for (const waitMs of [0, 250, 600]) {
+      try {
+        const nextProfile = await withTimeout(
+          getUserProfile(userId),
+          4000,
+          '__user_setup_delay__',
+        )
+
+        if (nextProfile?.id) {
+          return nextProfile
+        }
+      } catch (error) {
+        if (!isTransientInitDelayMessage(error?.message)) {
+          throw error
+        }
+      }
+
+      if (waitMs > 0) {
+        await delay(waitMs)
+      }
+    }
+
+    return null
+  }, [])
+
   const loadPublicData = useCallback(async () => {
     setUser(null)
     resetPrivateState()
@@ -616,14 +655,8 @@ export default function App() {
     if (!nextUser?.id) return
 
     setInitStatus(isEnglish ? 'Loading user...' : '사용자 정보를 불러오는 중입니다...')
-    try {
-      await withTimeout(upsertUser(nextUser.id), 10000, '__user_setup_delay__')
-    } catch (error) {
-      if (!isTransientInitDelayMessage(error?.message)) {
-        throw error
-      }
-    }
     setUser(nextUser)
+    await ensureUserProfileReady(nextUser.id)
 
     setInitStatus(isEnglish ? 'Checking today\'s log...' : '오늘 운동 기록을 확인하는 중입니다...')
     const doneToday = await withTimeout(hasWorkoutCompleted(nextUser.id, getTodayDateString()), 10000, isEnglish ? 'Workout lookup is taking too long.' : '운동 기록 조회가 지연되고 있어요.')
@@ -631,7 +664,7 @@ export default function App() {
 
     setInitStatus(isEnglish ? 'Loading dashboard...' : '홈 데이터를 불러오는 중입니다...')
     await Promise.all([refreshFeed(nextUser.id), refreshUserSummary(nextUser.id), refreshLeaderboard(), refreshNotifications(nextUser.id)])
-  }, [isEnglish, refreshFeed, refreshLeaderboard, refreshNotifications, refreshUserSummary])
+  }, [ensureUserProfileReady, isEnglish, refreshFeed, refreshLeaderboard, refreshNotifications, refreshUserSummary])
 
   const initializeApp = useCallback(async () => {
     initInProgressRef.current = true

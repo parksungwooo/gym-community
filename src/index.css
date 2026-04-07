@@ -1655,6 +1655,89 @@ button:active {
   gap: 8px;
 }
 
+.profile-menu-launcher {
+  display: grid;
+  gap: 12px;
+}
+
+.profile-menu-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(244, 248, 253, 0.96) 100%);
+  color: #122033;
+  text-align: left;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-menu-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(37, 99, 235, 0.2);
+  box-shadow: 0 16px 30px rgba(37, 99, 235, 0.08);
+}
+
+.profile-menu-button.active {
+  border-color: rgba(37, 99, 235, 0.42);
+  box-shadow: 0 18px 34px rgba(37, 99, 235, 0.12);
+}
+
+.profile-menu-button-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.profile-menu-button-copy strong {
+  font-size: 0.98rem;
+  color: inherit;
+}
+
+.profile-menu-button-copy span {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.profile-menu-button-arrow {
+  font-size: 1.3rem;
+  line-height: 1;
+  color: #94a3b8;
+}
+
+.profile-menu-summary-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.profile-menu-note-card {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 14px 15px;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.86);
+  background: linear-gradient(180deg, rgba(249, 251, 255, 0.98) 0%, rgba(243, 247, 253, 0.96) 100%);
+}
+
+.profile-menu-note-card strong {
+  font-size: 0.9rem;
+  color: #122033;
+}
+
+.profile-menu-note-card p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .settings-card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 255, 0.96) 100%);
 }
@@ -7102,6 +7185,7 @@ button:active {
 
 :root[data-theme='dark'] .subtext,
 :root[data-theme='dark'] .settings-row-copy span,
+:root[data-theme='dark'] .profile-menu-button-copy span,
 :root[data-theme='dark'] .home-level-track p,
 :root[data-theme='dark'] .home-feed-preview-meta,
 :root[data-theme='dark'] .home-feed-preview-time,
@@ -7118,6 +7202,35 @@ button:active {
 :root[data-theme='dark'] .paywall-feature-row span,
 :root[data-theme='dark'] .paywall-footer p,
 :root[data-theme='dark'] .theme-toggle-text {
+  color: var(--text-sub);
+}
+
+:root[data-theme='dark'] .profile-menu-button,
+:root[data-theme='dark'] .profile-menu-note-card {
+  background: var(--surface-white);
+  border-color: var(--line-soft);
+  color: var(--text-main);
+}
+
+:root[data-theme='dark'] .profile-menu-button.active {
+  border-color: rgba(90, 169, 255, 0.34);
+  box-shadow: 0 18px 34px rgba(10, 20, 36, 0.28);
+}
+
+:root[data-theme='dark'] .profile-menu-button:hover {
+  border-color: rgba(90, 169, 255, 0.24);
+  box-shadow: 0 16px 30px rgba(10, 20, 36, 0.22);
+}
+
+:root[data-theme='dark'] .profile-menu-button-arrow {
+  color: var(--text-sub);
+}
+
+:root[data-theme='dark'] .profile-menu-note-card strong {
+  color: var(--text-main);
+}
+
+:root[data-theme='dark'] .profile-menu-note-card p {
   color: var(--text-sub);
 }
 

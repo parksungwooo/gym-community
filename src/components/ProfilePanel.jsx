@@ -28,6 +28,22 @@ function SummaryStat({ label, value }) {
   )
 }
 
+function MenuButton({ label, meta, active, onClick }) {
+  return (
+    <button
+      type="button"
+      className={`profile-menu-button ${active ? 'active' : ''}`}
+      onClick={onClick}
+    >
+      <div className="profile-menu-button-copy">
+        <strong>{label}</strong>
+        <span>{meta}</span>
+      </div>
+      <span className="profile-menu-button-arrow" aria-hidden="true">›</span>
+    </button>
+  )
+}
+
 export default function ProfilePanel({
   user,
   profile,
@@ -67,6 +83,7 @@ export default function ProfilePanel({
   const [draftReminderTime, setDraftReminderTime] = useState(profile?.reminder_time ?? '19:00')
   const [draftAvatarUrl, setDraftAvatarUrl] = useState(avatarUrl)
   const [draftAvatarFile, setDraftAvatarFile] = useState(undefined)
+  const [activeSection, setActiveSection] = useState('profile')
 
   useEffect(() => {
     if (!draftAvatarUrl || !draftAvatarUrl.startsWith('blob:')) return undefined
@@ -106,6 +123,31 @@ export default function ProfilePanel({
       : reminderPermission === 'unsupported'
         ? t('브라우저 알림 미지원', 'Browser alerts unsupported')
         : t('브라우저 알림 미설정', 'Browser alerts not enabled yet')
+
+  const menuItems = [
+    {
+      key: 'profile',
+      label: t('프로필', 'Profile'),
+      meta: draftName.trim() || t('사진과 소개', 'Photo and bio'),
+    },
+    {
+      key: 'activity',
+      label: t('내 활동', 'My activity'),
+      meta: t(`주 ${draftGoal}회 목표`, `${draftGoal}/week goal`),
+    },
+    {
+      key: 'community',
+      label: t('커뮤니티', 'Community'),
+      meta: t(`팔로워 ${followStats?.followerCount ?? 0}명`, `${followStats?.followerCount ?? 0} followers`),
+    },
+    {
+      key: 'settings',
+      label: t('설정', 'Settings'),
+      meta: draftReminderEnabled ? t('리마인더 켜짐', 'Reminder on') : t('기본 설정', 'Preferences'),
+    },
+  ]
+
+  const activeSectionTitle = menuItems.find((item) => item.key === activeSection)?.label ?? t('프로필', 'Profile')
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -149,7 +191,7 @@ export default function ProfilePanel({
   }
 
   return (
-    <section className="profile-settings-screen compact-profile-screen">
+    <section className="profile-settings-screen compact-profile-screen profile-menu-screen">
       <section className="card profile-settings-hero compact profile-settings-hero-simple">
         <div className="profile-settings-top compact profile-settings-top-simple">
           <div className="profile-photo-stack">
@@ -158,28 +200,6 @@ export default function ProfilePanel({
               imageUrl={draftAvatarUrl}
               fallback={draftAvatar}
               alt={isEnglish ? 'Profile photo' : '프로필 사진'}
-            />
-            <div className="profile-photo-actions">
-              <button
-                type="button"
-                className="mini-btn primary"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={loading}
-              >
-                {t('사진', 'Photo')}
-              </button>
-              {!!draftAvatarUrl && (
-                <button type="button" className="mini-btn" onClick={clearAvatarImage} disabled={loading}>
-                  {t('제거', 'Remove')}
-                </button>
-              )}
-            </div>
-            <input
-              ref={fileInputRef}
-              className="hidden-file-input"
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarFileChange}
             />
           </div>
 
@@ -232,310 +252,372 @@ export default function ProfilePanel({
         </div>
       )}
 
-      <form className="profile-settings-stack compact" onSubmit={handleSubmit}>
-        <section className="card settings-card compact">
-          <div className="settings-card-header compact">
-            <span className="app-section-kicker">{t('내 정보', 'Identity')}</span>
-            <h2 className="app-section-title small">{t('프로필 기본 정보', 'Profile basics')}</h2>
+      <section className="card settings-card compact profile-menu-launcher">
+        <div className="app-section-heading compact">
+          <div>
+            <span className="app-section-kicker">{t('마이페이지', 'My page')}</span>
+            <h2 className="app-section-title small">{t('필요한 메뉴만 골라서 보세요', 'Open only the section you need')}</h2>
           </div>
+          <span className="community-mini-pill">{activeSectionTitle}</span>
+        </div>
 
-          <SettingRow
-            label={t('닉네임 (필수)', 'Nickname (Required)')}
-            helper={t('프로필을 저장하려면 닉네임이 필요해요.', 'A nickname is required before saving your profile.')}
-            compact
-          >
-            <div className="settings-input-stack">
-              <input
-                className={`workout-input settings-input compact ${nicknameMissing ? 'invalid' : ''}`}
-                type="text"
-                maxLength="20"
-                required
-                value={draftName}
-                onChange={(event) => setDraftName(event.target.value)}
-                placeholder={t('예: 러닝메이트', 'ex: RunningMate')}
+        <div className="profile-menu-grid">
+          {menuItems.map((item) => (
+            <MenuButton
+              key={item.key}
+              label={item.label}
+              meta={item.meta}
+              active={activeSection === item.key}
+              onClick={() => setActiveSection(item.key)}
+            />
+          ))}
+        </div>
+      </section>
+
+      <form className="profile-settings-stack compact" onSubmit={handleSubmit}>
+        <input
+          ref={fileInputRef}
+          className="hidden-file-input"
+          type="file"
+          accept="image/*"
+          onChange={handleAvatarFileChange}
+        />
+
+        {activeSection === 'profile' && (
+          <section className="card settings-card compact">
+            <div className="settings-card-header compact">
+              <span className="app-section-kicker">{t('내 정보', 'Identity')}</span>
+              <h2 className="app-section-title small">{t('프로필 기본 정보', 'Profile basics')}</h2>
+            </div>
+
+            <SettingRow
+              label={t('닉네임 (필수)', 'Nickname (Required)')}
+              helper={t('프로필을 저장하려면 닉네임이 필요해요.', 'A nickname is required before saving your profile.')}
+              compact
+            >
+              <div className="settings-input-stack">
+                <input
+                  className={`workout-input settings-input compact ${nicknameMissing ? 'invalid' : ''}`}
+                  type="text"
+                  maxLength="20"
+                  required
+                  value={draftName}
+                  onChange={(event) => setDraftName(event.target.value)}
+                  placeholder={t('예: 러닝메이트', 'ex: RunningMate')}
+                  disabled={loading}
+                />
+                {nicknameMissing && (
+                  <span className="field-error-text">
+                    {t('프로필을 저장하려면 닉네임을 입력해주세요.', 'Enter a nickname to save your profile.')}
+                  </span>
+                )}
+              </div>
+            </SettingRow>
+
+            <SettingRow
+              label={t('프로필 사진', 'Profile photo')}
+              helper={t('여기서 올린 사진은 커뮤니티 카드에도 같이 보여요.', 'This photo will also appear on community cards.')}
+              compact
+            >
+              <div className="profile-photo-field">
+                <UserAvatar
+                  className="profile-photo-preview"
+                  imageUrl={draftAvatarUrl}
+                  fallback={draftAvatar}
+                  alt={isEnglish ? 'Profile preview' : '프로필 미리보기'}
+                />
+                <div className="profile-photo-field-actions">
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={loading}
+                  >
+                    {t('사진 업로드', 'Upload photo')}
+                  </button>
+                  {!!draftAvatarUrl && (
+                    <button type="button" className="ghost-btn" onClick={clearAvatarImage} disabled={loading}>
+                      {t('사진 제거', 'Remove photo')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </SettingRow>
+
+            <SettingRow
+              label={t('기본 아바타 태그', 'Fallback avatar style')}
+              helper={t('프로필 사진이 없을 때 대신 보여주는 태그예요.', 'Shown when a profile photo is not set.')}
+              compact
+            >
+              <div className="avatar-grid settings-avatar-grid compact">
+                {AVATAR_OPTIONS.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    className={`avatar-btn compact ${draftAvatar === item ? 'active' : ''}`}
+                    onClick={() => setDraftAvatar(item)}
+                    disabled={loading}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </SettingRow>
+
+            <SettingRow
+              label={t('한줄 소개', 'Bio')}
+              helper={t('요즘 집중하는 운동 목표를 짧게 적어보세요.', 'Describe your current workout focus in one short line.')}
+              compact
+            >
+              <textarea
+                className="workout-textarea settings-textarea compact"
+                rows="3"
+                maxLength="90"
+                value={draftBio}
+                onChange={(event) => setDraftBio(event.target.value)}
+                placeholder={t('예: 주 3회 운동 습관 만드는 중이에요.', 'ex: Building a steady 3-day workout habit.')}
                 disabled={loading}
               />
-              {nicknameMissing && (
-                <span className="field-error-text">
-                  {t('프로필을 저장하려면 닉네임을 입력해주세요.', 'Enter a nickname to save your profile.')}
-                </span>
-              )}
-            </div>
-          </SettingRow>
+            </SettingRow>
 
-          <SettingRow
-            label={t('프로필 사진', 'Profile photo')}
-            helper={t('여기서 올린 사진은 커뮤니티 카드에도 같이 보여요.', 'This photo will also appear on community cards.')}
-            compact
-          >
-            <div className="profile-photo-field">
-              <UserAvatar
-                className="profile-photo-preview"
-                imageUrl={draftAvatarUrl}
-                fallback={draftAvatar}
-                alt={isEnglish ? 'Profile preview' : '프로필 미리보기'}
+            <SettingRow
+              label={t('운동 태그', 'Workout tags')}
+              helper={t('내 운동 스타일을 보여주는 태그를 최대 4개까지 골라보세요.', 'Choose up to four tags that describe your style.')}
+              compact
+            >
+              <div className="profile-tag-selector">
+                {activeTagOptions.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    className={`tag-chip ${draftTags.includes(tag) ? 'active' : ''}`}
+                    onClick={() => toggleTag(tag)}
+                    disabled={loading || (!draftTags.includes(tag) && draftTags.length >= 4)}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </SettingRow>
+          </section>
+        )}
+
+        {activeSection === 'activity' && (
+          <section className="card settings-card compact">
+            <div className="settings-card-header compact">
+              <span className="app-section-kicker">{t('내 활동', 'Activity')}</span>
+              <h2 className="app-section-title small">{t('목표와 운동 상태', 'Goals and current status')}</h2>
+            </div>
+
+            <div className="profile-summary-grid compact profile-menu-summary-grid">
+              <SummaryStat label={t('현재 레벨', 'Current level')} value={latestLevelLabel} />
+              <SummaryStat label={t('주간 목표', 'Weekly goal')} value={isEnglish ? `${stats.weeklyCount}/${draftGoal}` : `${stats.weeklyCount}/${draftGoal}회`} />
+              <SummaryStat label={t('팔로잉', 'Following')} value={String(followStats?.followingCount ?? 0)} />
+            </div>
+
+            <SettingRow
+              label={t('키', 'Height')}
+              helper={t('BMI 계산에 사용돼요.', 'Used for BMI calculation.')}
+              compact
+            >
+              <input
+                className="workout-input settings-input compact"
+                type="number"
+                min="1"
+                step="0.1"
+                value={draftHeight}
+                onChange={(event) => setDraftHeight(event.target.value)}
+                placeholder={t('키 (cm)', 'Height (cm)')}
+                disabled={loading}
               />
-              <div className="profile-photo-field-actions">
+            </SettingRow>
+
+            <SettingRow
+              label={t('목표 체중', 'Target weight')}
+              helper={t('체중 목표 진행률 계산에 사용돼요.', 'Used for weight-goal progress tracking.')}
+              compact
+            >
+              <input
+                className="workout-input settings-input compact"
+                type="number"
+                min="1"
+                step="0.1"
+                value={draftTargetWeight}
+                onChange={(event) => setDraftTargetWeight(event.target.value)}
+                placeholder={t('목표 체중 (kg)', 'Target weight (kg)')}
+                disabled={loading}
+              />
+            </SettingRow>
+
+            <SettingRow
+              label={t('운동 목표', 'Workout target')}
+              helper={t('홈 화면 주간 목표에 반영돼요.', 'Used for the challenge target on the home screen.')}
+              compact
+            >
+              <div className="goal-chip-row settings-goal-row compact">
+                {GOAL_OPTIONS.map((goal) => (
+                  <button
+                    key={goal}
+                    type="button"
+                    className={`goal-chip compact ${draftGoal === goal ? 'active' : ''}`}
+                    onClick={() => setDraftGoal(goal)}
+                    disabled={loading}
+                  >
+                    {isEnglish ? `${goal}/week` : `주 ${goal}회`}
+                  </button>
+                ))}
+              </div>
+            </SettingRow>
+
+            <p className="subtext compact settings-inline-note">
+              {t('체중 기록과 변화 추이는 기록 탭에서 바로 관리할 수 있어요.', 'Weight logging and trends now live in the Records tab.')}
+            </p>
+          </section>
+        )}
+
+        {activeSection === 'community' && (
+          <section className="card settings-card compact">
+            <div className="settings-card-header compact">
+              <span className="app-section-kicker">{t('커뮤니티', 'Community')}</span>
+              <h2 className="app-section-title small">{t('공개 범위와 연결 상태', 'Visibility and connections')}</h2>
+            </div>
+
+            <div className="profile-summary-grid compact profile-menu-summary-grid">
+              <SummaryStat label={t('팔로워', 'Followers')} value={String(followStats?.followerCount ?? 0)} />
+              <SummaryStat label={t('팔로잉', 'Following')} value={String(followStats?.followingCount ?? 0)} />
+              <SummaryStat label={t('닉네임 상태', 'Nickname')} value={nicknameMissing ? t('필요', 'Required') : t('완료', 'Ready')} />
+            </div>
+
+            <SettingRow
+              label={t('기본 피드 공개', 'Default feed sharing')}
+              helper={t('새 운동 기록은 이 공개값으로 시작해요.', 'New workout logs start with this sharing option.')}
+              compact
+            >
+              <button
+                type="button"
+                className={`toggle-chip ${draftDefaultShare ? 'active' : ''}`}
+                onClick={() => setDraftDefaultShare((prev) => !prev)}
+                disabled={loading}
+              >
+                {draftDefaultShare ? t('기본 공개', 'Public by default') : t('기본 비공개', 'Private by default')}
+              </button>
+            </SettingRow>
+
+            <div className="profile-menu-note-card">
+              <strong>{t('커뮤니티에서는 닉네임과 프로필 사진이 함께 보여요.', 'Nickname and profile photo appear together in community cards.')}</strong>
+              <p>{t('프로필을 간단히 정리해두면 팔로우나 메이트 모집글에서도 더 자연스럽게 보여요.', 'A simple profile helps your posts and mate board cards feel more complete.')}</p>
+            </div>
+          </section>
+        )}
+
+        {activeSection === 'settings' && (
+          <section className="card settings-card compact">
+            <div className="settings-card-header compact">
+              <span className="app-section-kicker">{t('설정', 'Settings')}</span>
+              <h2 className="app-section-title small">{t('리마인더, 언어, 계정', 'Reminders, language, and account')}</h2>
+            </div>
+
+            <SettingRow
+              label={t('운동 리마인더', 'Workout reminder')}
+              helper={t('선택한 시간에 홈 카드와 브라우저 알림으로 다시 알려줘요.', 'Shows a home reminder card and optional browser alert at the time you choose.')}
+              compact
+            >
+              <div className="settings-reminder-stack">
                 <button
                   type="button"
-                  className="secondary-btn"
-                  onClick={() => fileInputRef.current?.click()}
+                  className={`toggle-chip ${draftReminderEnabled ? 'active' : ''}`}
+                  onClick={() => setDraftReminderEnabled((prev) => !prev)}
                   disabled={loading}
                 >
-                  {t('사진 업로드', 'Upload photo')}
+                  {draftReminderEnabled ? t('리마인더 켜짐', 'Reminder on') : t('리마인더 꺼짐', 'Reminder off')}
                 </button>
-                {!!draftAvatarUrl && (
-                  <button type="button" className="ghost-btn" onClick={clearAvatarImage} disabled={loading}>
-                    {t('사진 제거', 'Remove photo')}
+
+                {draftReminderEnabled && (
+                  <>
+                    <input
+                      className="workout-input settings-input compact"
+                      type="time"
+                      value={draftReminderTime}
+                      onChange={(event) => setDraftReminderTime(event.target.value)}
+                      disabled={loading}
+                    />
+                    <div className="settings-reminder-meta">
+                      <span>{reminderPermissionLabel}</span>
+                      {reminderPermission !== 'granted' && reminderPermission !== 'unsupported' && (
+                        <button
+                          type="button"
+                          className="ghost-btn"
+                          onClick={onRequestReminderPermission}
+                          disabled={loading}
+                        >
+                          {t('브라우저 알림 허용', 'Allow browser alert')}
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            </SettingRow>
+
+            <SettingRow
+              label={t('언어', 'Language')}
+              helper={t('앱 전체에 사용할 언어를 선택해주세요.', 'Choose the language for the app.')}
+              compact
+            >
+              <div className="language-switcher settings-language-switcher segmented-language-switcher">
+                <button
+                  type="button"
+                  className={`lang-btn ${language === 'ko' ? 'active' : ''}`}
+                  onClick={() => onSetLanguage('ko')}
+                >
+                  한국어
+                </button>
+                <button
+                  type="button"
+                  className={`lang-btn ${language === 'en' ? 'active' : ''}`}
+                  onClick={() => onSetLanguage('en')}
+                >
+                  English
+                </button>
+              </div>
+            </SettingRow>
+
+            <SettingRow
+              label={t('계정', 'Account')}
+              helper={
+                isGuest
+                  ? t('지금은 게스트 체험 모드예요.', 'You are currently using the app in guest mode.')
+                  : t('연결된 계정으로 로그인된 상태예요.', 'Your connected account is active.')
+              }
+              compact
+            >
+              <div className="profile-auth-actions compact">
+                {isGuest ? (
+                  <button
+                    type="button"
+                    className="secondary-btn settings-signout-btn compact"
+                    onClick={onRequestAuth}
+                    disabled={authLoading}
+                  >
+                    {authLoading ? t('열고 있어요', 'Opening...') : t('로그인 / 회원가입', 'Log in / Sign up')}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="secondary-btn settings-signout-btn compact"
+                    onClick={onSignOut}
+                    disabled={authLoading}
+                  >
+                    {authLoading ? t('처리 중...', 'Working...') : t('로그아웃', 'Sign out')}
                   </button>
                 )}
               </div>
-            </div>
-          </SettingRow>
-
-          <SettingRow
-            label={t('기본 아바타 태그', 'Fallback avatar style')}
-            helper={t('프로필 사진이 없을 때 대신 보여주는 태그예요.', 'Shown when a profile photo is not set.')}
-            compact
-          >
-            <div className="avatar-grid settings-avatar-grid compact">
-              {AVATAR_OPTIONS.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={`avatar-btn compact ${draftAvatar === item ? 'active' : ''}`}
-                  onClick={() => setDraftAvatar(item)}
-                  disabled={loading}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </SettingRow>
-
-          <SettingRow
-            label={t('한줄 소개', 'Bio')}
-            helper={t('요즘 집중하는 운동 목표를 짧게 적어보세요.', 'Describe your current workout focus in one short line.')}
-            compact
-          >
-            <textarea
-              className="workout-textarea settings-textarea compact"
-              rows="3"
-              maxLength="90"
-              value={draftBio}
-              onChange={(event) => setDraftBio(event.target.value)}
-              placeholder={t('예: 주 3회 운동 습관 만드는 중이에요.', 'ex: Building a steady 3-day workout habit.')}
-              disabled={loading}
-            />
-          </SettingRow>
-
-          <SettingRow
-            label={t('운동 태그', 'Workout tags')}
-            helper={t('내 운동 스타일을 보여주는 태그를 최대 4개까지 골라보세요.', 'Choose up to four tags that describe your style.')}
-            compact
-          >
-            <div className="profile-tag-selector">
-              {activeTagOptions.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  className={`tag-chip ${draftTags.includes(tag) ? 'active' : ''}`}
-                  onClick={() => toggleTag(tag)}
-                  disabled={loading || (!draftTags.includes(tag) && draftTags.length >= 4)}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </SettingRow>
-        </section>
-
-        <section className="card settings-card compact">
-          <div className="settings-card-header compact">
-            <span className="app-section-kicker">{t('기본 설정', 'Preferences')}</span>
-            <h2 className="app-section-title small">{t('공개, 목표, 리마인더', 'Sharing, goals, and reminders')}</h2>
-          </div>
-
-          <SettingRow
-            label={t('키', 'Height')}
-            helper={t('BMI 계산에 사용돼요.', 'Used for BMI calculation.')}
-            compact
-          >
-            <input
-              className="workout-input settings-input compact"
-              type="number"
-              min="1"
-              step="0.1"
-              value={draftHeight}
-              onChange={(event) => setDraftHeight(event.target.value)}
-              placeholder={t('키 (cm)', 'Height (cm)')}
-              disabled={loading}
-            />
-          </SettingRow>
-
-          <SettingRow
-            label={t('목표 체중', 'Target weight')}
-            helper={t('체중 목표 진행률 계산에 사용돼요.', 'Used for weight-goal progress tracking.')}
-            compact
-          >
-            <input
-              className="workout-input settings-input compact"
-              type="number"
-              min="1"
-              step="0.1"
-              value={draftTargetWeight}
-              onChange={(event) => setDraftTargetWeight(event.target.value)}
-              placeholder={t('목표 체중 (kg)', 'Target weight (kg)')}
-              disabled={loading}
-            />
-          </SettingRow>
-
-          <SettingRow
-            label={t('기본 피드 공개', 'Default feed sharing')}
-            helper={t('새 운동 기록은 이 공개값으로 시작해요.', 'New workout logs start with this sharing option.')}
-            compact
-          >
-            <button
-              type="button"
-              className={`toggle-chip ${draftDefaultShare ? 'active' : ''}`}
-              onClick={() => setDraftDefaultShare((prev) => !prev)}
-              disabled={loading}
-            >
-              {draftDefaultShare ? t('기본 공개', 'Public by default') : t('기본 비공개', 'Private by default')}
-            </button>
-          </SettingRow>
-
-          <SettingRow
-            label={t('운동 목표', 'Workout target')}
-            helper={t('홈 화면 주간 목표에 반영돼요.', 'Used for the challenge target on the home screen.')}
-            compact
-          >
-            <div className="goal-chip-row settings-goal-row compact">
-              {GOAL_OPTIONS.map((goal) => (
-                <button
-                  key={goal}
-                  type="button"
-                  className={`goal-chip compact ${draftGoal === goal ? 'active' : ''}`}
-                  onClick={() => setDraftGoal(goal)}
-                  disabled={loading}
-                >
-                  {isEnglish ? `${goal}/week` : `주 ${goal}회`}
-                </button>
-              ))}
-            </div>
-          </SettingRow>
-
-          <SettingRow
-            label={t('운동 리마인더', 'Workout reminder')}
-            helper={t('선택한 시간에 홈 카드와 브라우저 알림으로 다시 알려줘요.', 'Shows a home reminder card and optional browser alert at the time you choose.')}
-            compact
-          >
-            <div className="settings-reminder-stack">
-              <button
-                type="button"
-                className={`toggle-chip ${draftReminderEnabled ? 'active' : ''}`}
-                onClick={() => setDraftReminderEnabled((prev) => !prev)}
-                disabled={loading}
-              >
-                {draftReminderEnabled ? t('리마인더 켜짐', 'Reminder on') : t('리마인더 꺼짐', 'Reminder off')}
-              </button>
-
-              {draftReminderEnabled && (
-                <>
-                  <input
-                    className="workout-input settings-input compact"
-                    type="time"
-                    value={draftReminderTime}
-                    onChange={(event) => setDraftReminderTime(event.target.value)}
-                    disabled={loading}
-                  />
-                  <div className="settings-reminder-meta">
-                    <span>{reminderPermissionLabel}</span>
-                    {reminderPermission !== 'granted' && reminderPermission !== 'unsupported' && (
-                      <button
-                        type="button"
-                        className="ghost-btn"
-                        onClick={onRequestReminderPermission}
-                        disabled={loading}
-                      >
-                        {t('브라우저 알림 허용', 'Allow browser alert')}
-                      </button>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          </SettingRow>
-
-          <p className="subtext compact settings-inline-note">
-            {t('체중 기록과 변화 추이는 기록 탭에서 바로 관리할 수 있어요.', 'Weight logging and trends now live in the Records tab.')}
-          </p>
-        </section>
-
-        <section className="card settings-card compact">
-          <div className="settings-card-header compact">
-            <span className="app-section-kicker">{t('앱', 'App')}</span>
-            <h2 className="app-section-title small">{t('언어와 계정', 'Language and account')}</h2>
-          </div>
-
-          <SettingRow
-            label={t('언어', 'Language')}
-            helper={t('앱 전체에 사용할 언어를 선택해주세요.', 'Choose the language for the app.')}
-            compact
-          >
-            <div className="language-switcher settings-language-switcher segmented-language-switcher">
-              <button
-                type="button"
-                className={`lang-btn ${language === 'ko' ? 'active' : ''}`}
-                onClick={() => onSetLanguage('ko')}
-              >
-                한국어
-              </button>
-              <button
-                type="button"
-                className={`lang-btn ${language === 'en' ? 'active' : ''}`}
-                onClick={() => onSetLanguage('en')}
-              >
-                English
-              </button>
-            </div>
-          </SettingRow>
-
-          <SettingRow
-            label={t('계정', 'Account')}
-            helper={
-              isGuest
-                ? t('지금은 게스트 체험 모드예요.', 'You are currently using the app in guest mode.')
-                : t('연결된 계정으로 로그인된 상태예요.', 'Your connected account is active.')
-            }
-            compact
-          >
-            <div className="profile-auth-actions compact">
-              {isGuest ? (
-                <button
-                  type="button"
-                  className="secondary-btn settings-signout-btn compact"
-                  onClick={onRequestAuth}
-                  disabled={authLoading}
-                >
-                  {authLoading ? t('열고 있어요', 'Opening...') : t('로그인 / 회원가입', 'Log in / Sign up')}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="secondary-btn settings-signout-btn compact"
-                  onClick={onSignOut}
-                  disabled={authLoading}
-                >
-                  {authLoading ? t('처리 중...', 'Working...') : t('로그아웃', 'Sign out')}
-                </button>
-              )}
-            </div>
-          </SettingRow>
-        </section>
+            </SettingRow>
+          </section>
+        )}
 
         <button type="submit" className="primary-btn settings-save-btn compact" disabled={loading || nicknameMissing}>
-          {loading ? t('저장 중...', 'Saving...') : t('설정 저장', 'Save settings')}
+          {loading ? t('저장 중...', 'Saving...') : t('변경 사항 저장', 'Save changes')}
         </button>
       </form>
     </section>

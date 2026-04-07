@@ -749,8 +749,7 @@ export async function deleteWorkoutTemplate(userId, templateId) {
   }
 }
 
-export async function getWorkoutStats(userId) {
-  const history = await fetchWorkoutHistory(userId)
+export function buildWorkoutStatsFromHistory(history = []) {
   const dates = history.map((item) => item.date)
   const calories = history.map((item) => Number(item.estimated_calories) || 0)
   const dateSet = new Set(dates)
@@ -806,6 +805,11 @@ export async function getWorkoutStats(userId) {
     lastWorkoutNote: history[0]?.note ?? null,
     typeCounts,
   }
+}
+
+export async function getWorkoutStats(userId) {
+  const history = await fetchWorkoutHistory(userId)
+  return buildWorkoutStatsFromHistory(history)
 }
 
 export async function hasWorkoutCompleted(userId, date) {
