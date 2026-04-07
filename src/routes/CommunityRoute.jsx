@@ -63,35 +63,18 @@ export default function CommunityRoute({
   }
 
   return (
-    <div className="view-stage">
-      <section className="card community-overview-card community-overview-card-simple">
-        <div>
-          <h2>{isEnglish ? 'Community' : '커뮤니티'}</h2>
-          <p className="subtext">{isEnglish ? 'Follow the feed first, then discover people when you want more.' : '먼저 피드를 보고, 더 찾고 싶을 때 사람을 둘러보세요.'}</p>
+    <div className="view-stage community-stage-clean">
+      <section className="card community-tab-shell community-screen-shell">
+        <div className="community-screen-head">
+          <div>
+            <span className="app-section-kicker">{isEnglish ? 'Community' : '커뮤니티'}</span>
+            <h2>{isEnglish ? 'Feed first, people second.' : '먼저 피드를 보고, 필요할 때 사람을 찾아보세요.'}</h2>
+          </div>
+          <span className="community-mini-pill">
+            {isEnglish ? `${visibleFeedPosts.length} posts` : `게시글 ${visibleFeedPosts.length}`}
+          </span>
         </div>
-        <div className="community-overview-stats">
-          <span className="community-mini-pill">{isEnglish ? `${visibleFeedPosts.length} posts` : `게시글 ${visibleFeedPosts.length}`}</span>
-          <span className="community-mini-pill">{isEnglish ? `${visibleLeaderboard.length} ranked` : `랭킹 ${visibleLeaderboard.length}`}</span>
-        </div>
-      </section>
-      {(selectedCommunityUser || loadingSelectedCommunityProfile) && (
-        <PublicProfileCard
-          profile={activeCommunityProfile}
-          loading={loadingSelectedCommunityProfile}
-          isFollowing={followingIds.includes(activeCommunityProfile?.user_id)}
-          isMe={activeCommunityProfile?.user_id === currentUserId}
-          isBlocked={blockedIds.includes(activeCommunityProfile?.user_id)}
-          actionLoading={loadingAction}
-          onToggleFollow={() => onToggleFollow(activeCommunityProfile?.user_id, followingIds.includes(activeCommunityProfile?.user_id))}
-          onReport={() => onOpenReportComposer({
-            kind: 'user',
-            targetUserId: activeCommunityProfile?.user_id ?? null,
-          })}
-          onToggleBlock={() => onToggleBlock(activeCommunityProfile?.user_id, blockedIds.includes(activeCommunityProfile?.user_id))}
-          onClear={onClearCommunityUser}
-        />
-      )}
-      <section className="card community-tab-shell">
+
         <div className="community-tab-row" role="tablist" aria-label={isEnglish ? 'Community sections' : '커뮤니티 섹션'}>
           <button
             type="button"
@@ -122,11 +105,13 @@ export default function CommunityRoute({
           posts={visibleFeedPosts}
           onToggleLike={onToggleLike}
           onSubmitComment={onSubmitComment}
-          onReportPost={(post) => onOpenReportComposer({
-            kind: 'post',
-            targetUserId: post.user_id,
-            postId: post.id,
-          })}
+          onReportPost={(post) =>
+            onOpenReportComposer({
+              kind: 'post',
+              targetUserId: post.user_id,
+              postId: post.id,
+            })
+          }
           onBlockUser={(targetUserId) => onToggleBlock(targetUserId, blockedIds.includes(targetUserId))}
           loading={loadingFeed}
           currentLevel={currentLevel}
@@ -187,6 +172,39 @@ export default function CommunityRoute({
           onToggleFollow={onToggleFollow}
           actionLoading={loadingAction}
         />
+      )}
+
+      {(selectedCommunityUser || loadingSelectedCommunityProfile) && (
+        <div
+          className="community-profile-overlay"
+          role="dialog"
+          aria-modal="true"
+          onClick={onClearCommunityUser}
+        >
+          <div className="community-profile-sheet" onClick={(event) => event.stopPropagation()}>
+            <PublicProfileCard
+              profile={activeCommunityProfile}
+              loading={loadingSelectedCommunityProfile}
+              isFollowing={followingIds.includes(activeCommunityProfile?.user_id)}
+              isMe={activeCommunityProfile?.user_id === currentUserId}
+              isBlocked={blockedIds.includes(activeCommunityProfile?.user_id)}
+              actionLoading={loadingAction}
+              onToggleFollow={() =>
+                onToggleFollow(activeCommunityProfile?.user_id, followingIds.includes(activeCommunityProfile?.user_id))
+              }
+              onReport={() =>
+                onOpenReportComposer({
+                  kind: 'user',
+                  targetUserId: activeCommunityProfile?.user_id ?? null,
+                })
+              }
+              onToggleBlock={() =>
+                onToggleBlock(activeCommunityProfile?.user_id, blockedIds.includes(activeCommunityProfile?.user_id))
+              }
+              onClear={onClearCommunityUser}
+            />
+          </div>
+        </div>
       )}
     </div>
   )

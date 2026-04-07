@@ -4,7 +4,6 @@ import ProgressPanel from '../components/ProgressPanel'
 import ResultView from '../components/ResultView'
 import TestForm from '../components/TestForm'
 import WorkoutHistory from '../components/WorkoutHistory'
-import { PREMIUM_CONTEXT } from '../utils/premium'
 
 export default function ProgressRoute({
   isEnglish,
@@ -21,8 +20,6 @@ export default function ProgressRoute({
   activitySummary,
   achievementBadges,
   recentActivityEvents,
-  isPro,
-  onOpenPaywall,
   onSaveWeight,
   workoutStats,
   workoutHistory,
@@ -40,27 +37,25 @@ export default function ProgressRoute({
 
   return (
     <div className="view-stage">
-      <section className="card record-hub-card">
-        <h2>{isEnglish ? 'Record Center' : '기록 센터'}</h2>
-        <p className="subtext">{isEnglish ? 'See records and tests in one place.' : '기록과 테스트를 한 곳에서 봅니다.'}</p>
+      <section className="card record-hub-card record-hub-card-simple">
+        <div>
+          <span className="app-section-kicker">{isEnglish ? 'Records' : '기록'}</span>
+          <h2>{isEnglish ? 'See your progress in one place.' : '내 변화를 한 곳에서 확인하세요.'}</h2>
+          <p className="subtext">
+            {isEnglish
+              ? 'Body changes, calories, XP, and workout history all live here.'
+              : '체중 변화, 칼로리, XP, 운동 기록을 이 탭에서 함께 확인할 수 있어요.'}
+          </p>
+        </div>
         <div className="record-hub-actions">
           <button type="button" className="ghost-btn" onClick={onToggleTestForm}>
             {showTestForm
-              ? (isEnglish ? 'Close Test' : '테스트 입력 닫기')
-              : (isEnglish ? 'Retake Level Test' : '체력 테스트 다시하기')}
+              ? (isEnglish ? 'Close Test' : '테스트 닫기')
+              : (isEnglish ? 'Retake Level Test' : '레벨 테스트 다시하기')}
           </button>
           <button type="button" className="secondary-btn" onClick={onGoHome}>
-            {isEnglish ? 'Log Today\'s Workout' : '오늘 운동 기록하러 가기'}
+            {isEnglish ? "Log Today's Workout" : '오늘 운동 기록하러 가기'}
           </button>
-          {!isPro && (
-            <button
-              type="button"
-              className="secondary-btn"
-              onClick={() => onOpenPaywall?.(PREMIUM_CONTEXT.REPORTS)}
-            >
-              {isEnglish ? 'Unlock Pro Reports' : 'Pro 리포트 열기'}
-            </button>
-          )}
         </div>
       </section>
 
@@ -92,16 +87,11 @@ export default function ProgressRoute({
             </button>
           </div>
         </form>
-
-        <p className="subtext compact settings-inline-note">
-          {isEnglish
-            ? 'Weight logging moved here so profile stays focused on your identity and settings.'
-            : '프로필은 가볍게 유지하고, 몸무게 기록은 기록 탭에서 바로 관리할 수 있게 옮겼어요.'}
-        </p>
       </section>
 
       {showTestForm && <TestForm onSubmit={onSubmitTest} loading={loadingAction} />}
       {testResult && <ResultView score={testResult.score} level={testResult.level} onStartWorkout={onGoHome} />}
+
       <ProgressPanel
         stats={workoutStats}
         latestResult={latestResult}

@@ -6692,6 +6692,99 @@ button:active {
   }
 }
 
+.record-hub-card-simple,
+.community-screen-shell {
+  display: grid;
+  gap: 14px;
+}
+
+.community-screen-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.community-screen-head h2,
+.record-hub-card-simple h2 {
+  margin: 4px 0 0;
+}
+
+.home-focus-inline-banner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.home-focus-inline-banner.due {
+  border-color: rgba(255, 184, 77, 0.28);
+  box-shadow: 0 18px 32px rgba(255, 184, 77, 0.08);
+}
+
+.home-focus-inline-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.home-focus-inline-copy strong {
+  color: #ffffff;
+  font-size: 0.92rem;
+}
+
+.home-focus-inline-copy span {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.home-summary-panel {
+  margin-top: 0;
+}
+
+.home-feed-preview-grid-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.profile-summary-grid-simple {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.community-profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 48;
+  overflow-y: auto;
+  padding: 20px 12px 108px;
+  background: rgba(15, 23, 42, 0.56);
+  backdrop-filter: blur(6px);
+}
+
+.community-profile-sheet {
+  width: min(520px, 100%);
+  margin: 0 auto;
+}
+
+@media (max-width: 720px) {
+  .record-hub-card-simple,
+  .community-screen-head,
+  .home-focus-inline-banner {
+    display: grid;
+  }
+
+  .profile-summary-grid-simple {
+    grid-template-columns: 1fr;
+  }
+
+  .community-profile-overlay {
+    padding: 12px 12px 108px;
+  }
+}
+
 :root[data-theme='dark'] {
   color-scheme: dark;
   --bg-app:
@@ -6971,4 +7064,89 @@ button:active {
 :root[data-theme='dark'] .auth-modal-backdrop,
 :root[data-theme='dark'] .notification-center-backdrop {
   background: rgba(2, 8, 18, 0.72);
+}
+
+:root[data-theme='dark'] .workout-capture-card,
+:root[data-theme='dark'] .capture-helper-card,
+:root[data-theme='dark'] .public-profile-stat,
+:root[data-theme='dark'] .feed-story-stat,
+:root[data-theme='dark'] .feed-comment-item,
+:root[data-theme='dark'] .comment-list li {
+  background:
+    linear-gradient(180deg, rgba(18, 31, 51, 0.98) 0%, rgba(12, 22, 36, 0.98) 100%);
+  border-color: var(--line-soft);
+  box-shadow: none;
+}
+
+:root[data-theme='dark'] .settings-goal-summary {
+  background:
+    linear-gradient(180deg, rgba(30, 64, 175, 0.42) 0%, rgba(18, 31, 51, 0.98) 100%);
+  border: 1px solid rgba(96, 165, 250, 0.22);
+}
+
+:root[data-theme='dark'] .reuse-workout-btn,
+:root[data-theme='dark'] .sheet-close-btn,
+:root[data-theme='dark'] .quick-choice-chip,
+:root[data-theme='dark'] .routine-template-card,
+:root[data-theme='dark'] .routine-count-pill,
+:root[data-theme='dark'] .capture-status,
+:root[data-theme='dark'] .feed-type-chip,
+:root[data-theme='dark'] .home-feed-preview-tab {
+  background: rgba(23, 37, 61, 0.94);
+  color: var(--text-main);
+  border-color: var(--line-soft);
+}
+
+:root[data-theme='dark'] .quick-choice-chip.active,
+:root[data-theme='dark'] .home-feed-preview-tab.active {
+  background:
+    linear-gradient(180deg, rgba(30, 64, 175, 0.44) 0%, rgba(23, 37, 61, 0.98) 100%);
+  color: #eff6ff;
+  border-color: rgba(96, 165, 250, 0.28);
+}
+
+:root[data-theme='dark'] .capture-status.done {
+  background: rgba(6, 95, 70, 0.34);
+  color: #d1fae5;
+  border: 1px solid rgba(52, 211, 153, 0.26);
+}
+
+:root[data-theme='dark'] .reuse-inline-mark,
+:root[data-theme='dark'] .quick-chip-mark {
+  background: rgba(30, 64, 175, 0.28);
+  color: #dbeafe;
+  border: 1px solid rgba(96, 165, 250, 0.18);
+}
+
+:root[data-theme='dark'] .field-label,
+:root[data-theme='dark'] .field-label-text,
+:root[data-theme='dark'] .routine-template-copy strong,
+:root[data-theme='dark'] .capture-helper-value,
+:root[data-theme='dark'] .reuse-workout-btn,
+:root[data-theme='dark'] .settings-goal-summary strong,
+:root[data-theme='dark'] .public-profile-stat strong,
+:root[data-theme='dark'] .feed-story-stat strong,
+:root[data-theme='dark'] .photo-proof-meta span,
+:root[data-theme='dark'] .sheet-close-btn,
+:root[data-theme='dark'] .comment-list li,
+:root[data-theme='dark'] .feed-comment-item {
+  color: var(--text-main);
+}
+
+:root[data-theme='dark'] .routine-template-copy span,
+:root[data-theme='dark'] .routine-template-note,
+:root[data-theme='dark'] .capture-helper-label,
+:root[data-theme='dark'] .reuse-workout-btn span,
+:root[data-theme='dark'] .settings-goal-summary span,
+:root[data-theme='dark'] .photo-proof-helper,
+:root[data-theme='dark'] .photo-proof-count,
+:root[data-theme='dark'] .public-profile-stat span,
+:root[data-theme='dark'] .feed-story-stat small,
+:root[data-theme='dark'] .feed-comment-item span,
+:root[data-theme='dark'] .home-feed-preview-tab:not(.active) {
+  color: var(--text-sub);
+}
+
+:root[data-theme='dark'] .public-profile-footnote {
+  color: rgba(228, 236, 245, 0.76);
 }
