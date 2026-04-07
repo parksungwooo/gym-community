@@ -342,6 +342,36 @@ export default function App() {
     () => feedPosts.filter((item) => !blockedIds.includes(item.user_id)),
     [blockedIds, feedPosts],
   )
+  const homeFeedPreview = useMemo(() => {
+    const followingSet = new Set(followingIds)
+    const allPreview = visibleFeedPosts.slice(0, 4)
+    const followingPreview = visibleFeedPosts
+      .filter((item) => followingSet.has(item.user_id))
+      .slice(0, 4)
+    const recommendedPool = visibleFeedPosts.filter(
+      (item) => !followingSet.has(item.user_id) && item.user_id !== user?.id,
+    )
+    const recommendedPreview = (recommendedPool.length ? recommendedPool : visibleFeedPosts).slice(0, 4)
+    const popularPreview = [...visibleFeedPosts]
+      .sort((left, right) => {
+        const leftScore = (Number(left.likeCount) || 0) * 3 + ((left.comments?.length ?? 0) * 5)
+        const rightScore = (Number(right.likeCount) || 0) * 3 + ((right.comments?.length ?? 0) * 5)
+
+        if (rightScore !== leftScore) {
+          return rightScore - leftScore
+        }
+
+        return new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
+      })
+      .slice(0, 4)
+
+    return {
+      all: allPreview,
+      following: followingPreview,
+      recommended: recommendedPreview,
+      popular: popularPreview.length ? popularPreview : allPreview,
+    }
+  }, [followingIds, user?.id, visibleFeedPosts])
 
   const activeCommunityProfile = selectedCommunityProfile ?? selectedCommunityUser
   const isAdmin = effectiveProfile?.is_admin === true
@@ -1711,6 +1741,7 @@ export default function App() {
                 isPro={isPro}
                 reminder={reminderStatus}
                 reminderPermission={reminderPermission}
+                feedPreview={homeFeedPreview}
                 routineTemplates={workoutTemplates}
                 workoutLoading={loadingAction}
                 onOpenWorkoutComposer={() => {
@@ -1724,6 +1755,10 @@ export default function App() {
                 }}
                 onOpenPaywall={openPaywall}
                 onSeeCommunity={() => handleChangeView(VIEW.COMMUNITY)}
+                onSelectFeedPreviewUser={(item) => {
+                  handleSelectCommunityUser(item)
+                  handleChangeView(VIEW.COMMUNITY)
+                }}
                 onRequestReminderPermission={handleRequestReminderPermission}
                 showWorkoutPanel={showWorkoutPanel}
                 workoutPreset={workoutPreset}

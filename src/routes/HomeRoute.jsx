@@ -15,6 +15,7 @@ export default function HomeRoute({
   isPro,
   reminder,
   reminderPermission,
+  feedPreview,
   routineTemplates,
   workoutLoading,
   onOpenWorkoutComposer,
@@ -22,6 +23,7 @@ export default function HomeRoute({
   onOpenTest,
   onOpenPaywall,
   onSeeCommunity,
+  onSelectFeedPreviewUser,
   onRequestReminderPermission,
   showWorkoutPanel,
   workoutPreset,
@@ -64,12 +66,15 @@ export default function HomeRoute({
         isPro={isPro}
         reminder={reminder}
         reminderPermission={reminderPermission}
+        feedPreview={feedPreview}
         routineTemplates={routineTemplates}
         workoutLoading={workoutLoading}
         onOpenWorkoutComposer={onOpenWorkoutComposer}
         onStartRoutine={onStartRoutine}
         onOpenTest={onOpenTest}
         onOpenPaywall={onOpenPaywall}
+        onSeeCommunity={onSeeCommunity}
+        onSelectFeedPreviewUser={onSelectFeedPreviewUser}
         onRequestReminderPermission={onRequestReminderPermission}
       />
       {showWorkoutPanel && (
