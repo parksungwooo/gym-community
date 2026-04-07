@@ -1,23 +1,12 @@
-import { useState } from 'react'
 import { formatDateTimeByLanguage, getWorkoutTypeLabel, useI18n } from '../i18n.js'
 import OptimizedImage from './OptimizedImage'
 import UserAvatar from './UserAvatar'
 import { localizeLevelText } from '../utils/level'
 
-function MetricPill({ eyebrow, value, detail, tone = 'default' }) {
+function MetricPill({ eyebrow, value, detail }) {
   return (
-    <article className={`home-metric-pill ${tone}`}>
+    <article className="home-metric-pill">
       <span>{eyebrow}</span>
-      <strong>{value}</strong>
-      {detail ? <small>{detail}</small> : null}
-    </article>
-  )
-}
-
-function InsightStat({ label, value, detail }) {
-  return (
-    <article className="home-insight-stat">
-      <span>{label}</span>
       <strong>{value}</strong>
       {detail ? <small>{detail}</small> : null}
     </article>
@@ -30,18 +19,17 @@ function formatCalories(value, isEnglish) {
 }
 
 function getHomeFeedPhotoUrl(post) {
-  if (Array.isArray(post?.metadata?.photoUrls) && post.metadata.photoUrls.length) {
+  if (Array.isArray(post?.metadata?.photoUrls) && post.metadata.photoUrls.length > 0) {
     return post.metadata.photoUrls[0]
   }
 
-  if (post?.metadata?.photoUrl) return post.metadata.photoUrl
-  return null
+  return post?.metadata?.photoUrl ?? null
 }
 
 function getHomeFeedMeta(post, language, isEnglish) {
   if (post?.type !== 'workout_complete') {
     if (post?.type === 'challenge_complete') return isEnglish ? 'Challenge complete' : '챌린지 완료'
-    if (post?.type === 'level_up') return isEnglish ? 'Level up' : '레벨 업'
+    if (post?.type === 'level_up') return isEnglish ? 'Level up' : '레벨업'
     return isEnglish ? 'Community update' : '커뮤니티 업데이트'
   }
 
@@ -75,7 +63,7 @@ function getHomeFeedCopy(post, language, isEnglish) {
   return isEnglish ? 'Shared a fresh progress update.' : '새로운 진행 상황을 공유했어요.'
 }
 
-function HomeFeedPreviewCard({ post, onSelectUser, onSeeCommunity }) {
+function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }) {
   const { language, isEnglish } = useI18n()
   const t = (ko, en) => (isEnglish ? en : ko)
   const authorName = post.authorDisplayName || (isEnglish ? 'Guest' : '게스트')
@@ -87,7 +75,7 @@ function HomeFeedPreviewCard({ post, onSelectUser, onSeeCommunity }) {
   const content = getHomeFeedCopy(post, language, isEnglish)
 
   return (
-    <article className="home-feed-preview-card">
+    <article className="home-feed-preview-card featured">
       <div className="home-feed-preview-top">
         <button
           type="button"
@@ -104,8 +92,7 @@ function HomeFeedPreviewCard({ post, onSelectUser, onSeeCommunity }) {
               activity_level_label: post.activity_level_label ?? null,
               total_xp: post.total_xp ?? 0,
               weekly_points: post.weekly_points ?? 0,
-            })
-          }
+            })}
         >
           <UserAvatar
             className="home-feed-preview-avatar"
@@ -119,14 +106,17 @@ function HomeFeedPreviewCard({ post, onSelectUser, onSeeCommunity }) {
           </div>
         </button>
 
-        <span className="home-feed-preview-time">
-          {formatDateTimeByLanguage(post.created_at, language, {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </span>
+        <div className="home-feed-preview-top-meta">
+          <span className="home-feed-preview-source">{sourceLabel}</span>
+          <span className="home-feed-preview-time">
+            {formatDateTimeByLanguage(post.created_at, language, {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </span>
+        </div>
       </div>
 
       {photoUrl ? (
@@ -138,7 +128,7 @@ function HomeFeedPreviewCard({ post, onSelectUser, onSeeCommunity }) {
             loading="lazy"
             decoding="async"
             fetchPriority="low"
-            sizes="(max-width: 720px) 92vw, 380px"
+            sizes="(max-width: 720px) 92vw, 420px"
           />
         </div>
       ) : null}
@@ -153,7 +143,6 @@ function HomeFeedPreviewCard({ post, onSelectUser, onSeeCommunity }) {
           <span>{t(`좋아요 ${post.likeCount ?? 0}`, `${post.likeCount ?? 0} likes`)}</span>
           <span>{t(`댓글 ${post.comments?.length ?? 0}`, `${post.comments?.length ?? 0} comments`)}</span>
         </div>
-
         <button type="button" className="ghost-btn home-feed-preview-open" onClick={onSeeCommunity}>
           {t('더 보기', 'Open')}
         </button>
@@ -183,32 +172,31 @@ export default function HomeDashboard({
 }) {
   const { isEnglish, language } = useI18n()
   const t = (ko, en) => (isEnglish ? en : ko)
-  const [selectedFeedTab, setSelectedFeedTab] = useState(
-    feedPreview.following?.length ? 'following' : feedPreview.recommended?.length ? 'recommended' : 'popular',
-  )
 
   const nickname = profile?.display_name?.trim()
   const topRoutine = routineTemplates[0] ?? null
   const activityLevelValue = activitySummary?.levelValue ?? 1
+  const goalCurrent = challenge?.current ?? 0
+  const goalTarget = challenge?.goal ?? 0
   const goalProgress = Math.max(0, Math.min(challenge?.progress ?? 0, 100))
 
   const heroTitle = todayDone
-    ? t('오늘 기록은 이미 있어요', 'Today already has a saved workout.')
-    : t('오늘은 한 번만 기록해도 충분해요', 'Today only needs one workout log.')
+    ? t('오늘 운동은 이미 기록했어요', 'Today already has a saved workout.')
+    : t('오늘 운동 한 번만 기록하면 충분해요', 'One workout log is enough for today.')
 
   const heroDescription = nickname
     ? todayDone
       ? t(
-          `${nickname}님은 오늘 기록을 이미 남겼어요. 이제 이번 주 페이스만 유지하면 충분해요.`,
-          `${nickname}, today is already in the green. Keeping the weekly rhythm is enough now.`,
+          `${nickname}님, 오늘은 이미 초록불이에요. 이제 이번 주 흐름만 이어가면 충분해요.`,
+          `${nickname}, today is already in the green. Just keep the weekly rhythm going now.`,
         )
       : t(
-          `${nickname}님, 길게 하지 않아도 괜찮아요. 운동 종류와 시간만 남겨도 오늘 기록은 충분해요.`,
-          `${nickname}, today does not need to be long. Type and time are enough to keep your rhythm going.`,
+          `${nickname}님, 길게 하지 않아도 괜찮아요. 운동 종류와 시간만 남겨도 오늘 흐름을 이어갈 수 있어요.`,
+          `${nickname}, it does not have to be long. Type and time are enough to keep your rhythm going.`,
         )
     : t(
-        '운동 종류와 시간만 적어도 오늘 기록은 시작할 수 있어요.',
-        'Workout type and time are enough to start today’s rhythm.',
+        '운동 종류와 시간만 적어도 오늘 기록은 충분해요.',
+        'Workout type and time are enough to keep today moving.',
       )
 
   const recentWorkoutTitle = stats.lastWorkoutType
@@ -219,14 +207,12 @@ export default function HomeDashboard({
     ? [
         stats.lastWorkoutDuration ? t(`${stats.lastWorkoutDuration}분`, `${stats.lastWorkoutDuration} min`) : null,
         stats.lastWorkoutCalories ? formatCalories(stats.lastWorkoutCalories, isEnglish) : null,
-      ]
-        .filter(Boolean)
-        .join(' · ')
-    : t('첫 운동을 남기면 가장 최근 운동이 여기에 보여요.', 'Your latest workout will appear here after the first save.')
+      ].filter(Boolean).join(' · ')
+    : t('첫 운동을 기록하면 최근 운동이 여기에 보여요.', 'Your latest workout will appear here after the first save.')
 
   const showReminderInline = reminder?.enabled && !todayDone
   const reminderTitle = reminder?.due
-    ? t('지금이 오늘 운동 리마인더 시간이에요', 'It is time for today’s workout reminder.')
+    ? t('지금이 오늘 운동 리마인더 시간이에요.', 'It is time for today’s workout reminder.')
     : t(
         `오늘 리마인더는 ${reminder?.reminderTimeLabel}에 울리도록 설정돼 있어요.`,
         `Today’s reminder is set for ${reminder?.reminderTimeLabel}.`,
@@ -235,48 +221,27 @@ export default function HomeDashboard({
   const reminderBody = reminder?.due
     ? t(
         '지금 한 번만 기록해도 연속 기록과 주간 목표를 같이 지킬 수 있어요.',
-        'One workout now is enough to keep both your streak and weekly rhythm alive.',
+        'One quick workout now keeps both your streak and weekly goal alive.',
       )
     : t(
-        '복잡하게 생각하지 않도록 다시 돌아올 시간을 미리 잡아두었어요.',
-        'A light nudge is queued up so you can come back without overthinking it.',
+        '복잡하게 생각하지 않도록, 다시 돌아올 시간을 미리 잡아뒀어요.',
+        'A gentle nudge is queued up so you can come back without overthinking it.',
       )
 
-  const feedTabs = [
-    {
-      key: 'following',
-      label: t('팔로잉', 'Following'),
-      items: feedPreview.following ?? [],
-    },
-    {
-      key: 'recommended',
-      label: t('추천', 'Recommended'),
-      items: feedPreview.recommended ?? [],
-    },
-    {
-      key: 'popular',
-      label: t('인기', 'Popular'),
-      items: feedPreview.popular ?? [],
-    },
-  ]
+  const featuredFeedSection =
+    (feedPreview.following?.length ? { label: t('팔로잉', 'Following'), items: feedPreview.following } : null)
+    ?? (feedPreview.recommended?.length ? { label: t('추천', 'Recommended'), items: feedPreview.recommended } : null)
+    ?? (feedPreview.popular?.length ? { label: t('인기', 'Popular'), items: feedPreview.popular } : null)
+    ?? { label: t('피드', 'Feed'), items: [] }
 
-  const activeFeedSection = feedTabs.find((tab) => tab.key === selectedFeedTab && tab.items.length)
-    ?? feedTabs.find((tab) => tab.items.length)
-    ?? feedTabs[1]
-  const activeFeedTab = activeFeedSection?.key ?? 'recommended'
-  const activeFeedItems = activeFeedSection?.items ?? []
-  const feedStoryTitle = activeFeedSection?.key === 'following'
-    ? t('팔로잉 피드 미리보기', 'Following feed preview')
-    : activeFeedSection?.key === 'popular'
-      ? t('지금 반응이 오는 운동 이야기', 'Stories trending now')
-      : t('오늘 둘러볼 새 운동 이야기', 'Fresh workout stories for today')
+  const featuredPost = featuredFeedSection.items[0] ?? null
 
   return (
     <section className="home-dashboard-app streamlined-home home-dashboard-redesign home-dashboard-clean">
-      <section className="card home-focus-card home-growth-hero">
+      <section className="card home-focus-card home-growth-hero home-growth-hero-strong">
         <div className="home-growth-hero-main">
           <div className="home-focus-copy">
-            <span className="app-section-kicker">{t('오늘 액션', 'Today')}</span>
+            <span className="app-section-kicker">{t('오늘의 액션', 'Today')}</span>
             <h2>{heroTitle}</h2>
             <p>{heroDescription}</p>
           </div>
@@ -284,12 +249,13 @@ export default function HomeDashboard({
           <div className="home-focus-actions">
             <button
               type="button"
-              className="primary-btn home-focus-btn"
+              className="primary-btn home-focus-btn home-focus-btn-strong"
               onClick={onOpenWorkoutComposer}
               disabled={workoutLoading}
+              data-testid="home-log-workout"
             >
               {workoutLoading
-                ? t('열고 있어요', 'Opening...')
+                ? t('여는 중...', 'Opening...')
                 : todayDone
                   ? t('운동 하나 더 기록', 'Log one more workout')
                   : t('오늘 운동 기록하기', 'Log today’s workout')}
@@ -310,6 +276,29 @@ export default function HomeDashboard({
             ) : null}
           </div>
 
+          <div className="home-focus-summary-strip">
+            <MetricPill
+              eyebrow={t('주간 목표', 'Weekly goal')}
+              value={`${goalCurrent}/${goalTarget}`}
+              detail={`${goalProgress}%`}
+            />
+            <MetricPill
+              eyebrow={t('연속 기록', 'Streak')}
+              value={t(`${stats.streak}일`, `${stats.streak} days`)}
+              detail={t('흐름 유지 중', 'Keep it going')}
+            />
+            <MetricPill
+              eyebrow={t('오늘 XP', 'Today XP')}
+              value={`${activitySummary?.todayXp ?? 0} XP`}
+              detail={t(`활동 Lv ${activityLevelValue}`, `Activity Lv ${activityLevelValue}`)}
+            />
+            <MetricPill
+              eyebrow={t('최근 운동', 'Latest')}
+              value={recentWorkoutTitle}
+              detail={recentWorkoutMeta}
+            />
+          </div>
+
           {showReminderInline && (
             <div className={`home-focus-inline-banner ${reminder?.due ? 'due' : ''}`}>
               <div className="home-focus-inline-copy">
@@ -324,122 +313,34 @@ export default function HomeDashboard({
             </div>
           )}
         </div>
-
-        <aside className="home-growth-side">
-          <div className="home-growth-side-head">
-            <span>{t('오늘 보드', 'Daily board')}</span>
-            <strong>{todayDone ? t('완료', 'Logged') : t('진행 중', 'In progress')}</strong>
-          </div>
-          <div className="home-growth-side-grid">
-            <MetricPill
-              eyebrow={t('주간 목표', 'Weekly goal')}
-              value={`${challenge.current}/${challenge.goal}`}
-              detail={`${goalProgress}%`}
-              tone="cool"
-            />
-            <MetricPill
-              eyebrow={t('연속 기록', 'Streak')}
-              value={t(`${stats.streak}일`, `${stats.streak} days`)}
-              detail={t('꾸준함 유지 중', 'Rhythm in motion')}
-            />
-            <MetricPill
-              eyebrow={t('오늘 XP', 'Today XP')}
-              value={`${activitySummary?.todayXp ?? 0} XP`}
-              detail={t(`활동 Lv ${activityLevelValue}`, `Activity Lv ${activityLevelValue}`)}
-              tone="cool"
-            />
-          </div>
-        </aside>
       </section>
 
-      <section className="card record-module-card compact activity-card home-summary-panel">
-        <div className="app-section-heading compact">
-          <div>
-            <span className="app-section-kicker">{t('이번 주 체크', 'Weekly check')}</span>
-            <h2 className="app-section-title small">{t('지금 중요한 것만 보기', 'Only the essentials right now')}</h2>
-          </div>
-          <span className="community-mini-pill">{`${challenge.current}/${challenge.goal}`}</span>
-        </div>
-
-        <div className="home-level-track">
-          <div>
-            <strong>{challenge.title}</strong>
-            <p>
-              {todayDone
-                ? t('오늘 기록은 끝났어요. 이제 이번 주 페이스만 유지하면 돼요.', 'Today is logged. Now keep the weekly rhythm going.')
-                : t('오늘 한 번만 기록해도 이번 주 페이스를 다시 찾을 수 있어요.', 'One saved workout is enough to keep this week moving.')}
-            </p>
-          </div>
-          <span>{`${goalProgress}%`}</span>
-        </div>
-
-        <div className="goal-progress-bar">
-          <div className="goal-progress-fill" style={{ width: `${goalProgress}%` }} />
-        </div>
-
-        <div className="home-insight-grid">
-          <InsightStat
-            label={t('오늘 XP', 'Today XP')}
-            value={`${activitySummary?.todayXp ?? 0} XP`}
-            detail={todayDone ? t('오늘 운동 저장 완료', 'Workout saved today') : t('오늘 한 번이면 충분해요', 'One workout is enough')}
-          />
-          <InsightStat
-            label={t('연속 기록', 'Streak')}
-            value={t(`${stats.streak}일`, `${stats.streak} days`)}
-            detail={t('꾸준히 이어가는 게 가장 중요해요', 'Keep the rhythm unbroken')}
-          />
-          <InsightStat
-            label={t('최근 운동', 'Latest workout')}
-            value={recentWorkoutTitle}
-            detail={recentWorkoutMeta}
-          />
-        </div>
-      </section>
-
-      <section className="card home-feed-preview-shell compact-home-feed">
+      <section className="card home-feed-preview-shell compact-home-feed minimal-home-feed">
         <div className="home-module-heading home-feed-preview-heading">
           <div>
-            <span className="app-section-kicker">{t('지금 피드', 'Now in feed')}</span>
-            <h3>{feedStoryTitle}</h3>
+            <span className="app-section-kicker">{t('피드 한 장', 'One story')}</span>
+            <h3>{t('지금 커뮤니티에서 가장 먼저 볼 이야기', 'The first community story to see now')}</h3>
           </div>
           <button type="button" className="ghost-btn" onClick={onSeeCommunity}>
             {t('커뮤니티 보기', 'See community')}
           </button>
         </div>
 
-        <div className="home-feed-preview-tabs" role="tablist" aria-label={t('홈 피드 필터', 'Home feed filter')}>
-          {feedTabs.map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              className={`home-feed-preview-tab ${activeFeedTab === tab.key ? 'active' : ''}`}
-              onClick={() => setSelectedFeedTab(tab.key)}
-              disabled={!tab.items.length}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {activeFeedItems.length ? (
-          <div className="home-feed-preview-grid home-feed-preview-grid-single">
-            {activeFeedItems.slice(0, 1).map((post) => (
-              <HomeFeedPreviewCard
-                key={post.id}
-                post={post}
-                onSelectUser={onSelectFeedPreviewUser}
-                onSeeCommunity={onSeeCommunity}
-              />
-            ))}
-          </div>
+        {featuredPost ? (
+          <HomeFeedPreviewCard
+            post={featuredPost}
+            sourceLabel={featuredFeedSection.label}
+            onSelectUser={onSelectFeedPreviewUser}
+            onSeeCommunity={onSeeCommunity}
+          />
         ) : (
           <div className="empty-state-card cool home-feed-empty">
             <span className="empty-state-badge">{t('피드', 'Feed')}</span>
-            <strong>{t('새 기록이 쌓이면 홈 피드가 바로 살아나요.', 'Home feed wakes up as soon as new updates land.')}</strong>
+            <strong>{t('새 운동 기록이 쌓이면 여기가 바로 채워져요.', 'This area fills as soon as new workout stories land.')}</strong>
             <p>
               {t(
-                '아직 보여줄 카드가 적어요. 운동을 기록하거나 몇 명을 팔로우하면 이 영역이 가장 먼저 채워져요.',
-                'There are not enough stories yet. Log a workout or follow a few people and this section fills first.',
+                '아직 보여줄 피드가 없어요. 오늘 운동을 기록하거나 몇 명을 팔로우하면 이 공간이 먼저 살아나요.',
+                'There is nothing to show yet. Log a workout or follow a few people and this section wakes up first.',
               )}
             </p>
             <div className="home-feed-empty-actions">

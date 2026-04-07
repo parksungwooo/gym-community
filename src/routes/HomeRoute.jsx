@@ -106,11 +106,13 @@ export default function HomeRoute({
           className="auth-modal-backdrop home-workout-sheet-overlay"
           role="presentation"
           onClick={onCloseWorkoutComposer}
+          data-testid="workout-sheet-backdrop"
         >
           <div
             className="home-workout-sheet-panel"
             role="dialog"
             aria-modal="true"
+            data-testid="workout-sheet"
             aria-label={isEnglish ? 'Workout logging sheet' : '운동 기록 바텀시트'}
             onClick={(event) => event.stopPropagation()}
           >

@@ -40,21 +40,16 @@ export default function ProgressRoute({
       <section className="card record-hub-card record-hub-card-simple">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Records' : '기록'}</span>
-          <h2>{isEnglish ? 'See your progress in one place.' : '내 변화를 한 곳에서 확인하세요.'}</h2>
-          <p className="subtext">
-            {isEnglish
-              ? 'Body changes, calories, XP, and workout history all live here.'
-              : '체중 변화, 칼로리, XP, 운동 기록을 이 탭에서 함께 확인할 수 있어요.'}
-          </p>
+          <h2>{isEnglish ? 'See your records at a glance.' : '내 기록을 한눈에 보기'}</h2>
         </div>
         <div className="record-hub-actions">
           <button type="button" className="ghost-btn" onClick={onToggleTestForm}>
             {showTestForm
-              ? (isEnglish ? 'Close Test' : '테스트 닫기')
-              : (isEnglish ? 'Retake Level Test' : '레벨 테스트 다시하기')}
+              ? (isEnglish ? 'Close test' : '테스트 닫기')
+              : (isEnglish ? 'Level test' : '레벨 테스트')}
           </button>
           <button type="button" className="secondary-btn" onClick={onGoHome}>
-            {isEnglish ? "Log Today's Workout" : '오늘 운동 기록하기'}
+            {isEnglish ? 'Log workout' : '운동 기록'}
           </button>
         </div>
       </section>

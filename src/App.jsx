@@ -1,58 +1,53 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
+import AppTopActions from './components/AppTopActions'
 import AuthRequiredModal from './components/AuthRequiredModal'
-import PaywallModal from './components/PaywallModal'
-import { Suspense, lazy } from 'react'
+import BottomTabNav from './components/BottomTabNav'
 import NotificationCenter from './components/NotificationCenter'
+import PaywallModal from './components/PaywallModal'
 import ReportModal from './components/ReportModal'
 import {
   consumePendingAction,
   createAuthPromptState,
   persistPendingAction,
 } from './features/auth/authFlow'
-import { buildCommunityAccessResult, buildSuggestedUsers } from './features/community/communityFlow'
+import {
+  getActionableErrorMessage,
+  getCurrentWeekKey,
+  getTodayDateString,
+  isTransientInitDelayMessage,
+  withTimeout,
+} from './features/app/appFlowUtils'
+import { buildCommunityAccessResult } from './features/community/communityFlow'
 import { buildNotificationNavigation } from './features/notifications/notificationFlow'
 import {
-  buildBadges,
-  buildChallenge,
-  createGuestProfile,
-  getReminderStatus,
   INITIAL_STATS,
   LAST_REMINDER_STORAGE_KEY,
+  getReminderStatus,
   validateDisplayName,
 } from './features/profile/profileFlow'
+import { useAppBootstrap } from './hooks/useAppBootstrap'
+import { useAppDerivedState } from './hooks/useAppDerivedState'
 import { useI18n } from './i18n.js'
 import { supabase } from './lib/supabaseClient'
 import RouteSuspenseFallback from './routes/RouteSuspenseFallback'
-import { getCurrentUser, signInWithOAuth, signOutUser } from './services/auth'
+import { signInWithOAuth, signOutUser } from './services/auth'
 import {
   addComment,
   blockUser,
   completeWorkout,
   createFeedPost,
   createMatePost,
-  buildWorkoutStatsFromHistory,
-  fetchAchievementBadges,
   fetchBlockedIds,
-  fetchMatePosts,
   deleteWorkoutTemplate,
   deleteWorkoutLog,
   fetchFollowStats,
-  fetchLeaderboard,
-  fetchModerationReports,
-  fetchNotifications,
-  fetchRecentActivityEvents,
-  fetchFeedWithRelations,
   fetchFollowingIds,
   fetchPublicProfile,
+  fetchWorkoutTemplates,
+  hasWorkoutCompleted,
   resolveModerationReport,
   searchPublicUsers,
-  fetchWeightLogs,
-  fetchWorkoutHistory,
-  fetchWorkoutTemplates,
   followUser,
-  getLatestTestResult,
-  getUserProfile,
-  hasWorkoutCompleted,
   submitReport,
   saveWorkoutTemplate,
   saveTestResult,
@@ -64,7 +59,6 @@ import {
   updateMatePostStatus,
   updateUserProfile,
   updateWorkoutLog,
-  upsertUser,
   markAllNotificationsRead,
   markNotificationRead,
 } from './services/communityService'
@@ -74,10 +68,8 @@ import {
   parseViewFromHash,
   shouldPushHomeBackGuard,
 } from './utils/appRouting'
-import { getActivityLevelProgress } from './utils/activityLevel'
-import { buildBodyMetrics } from './utils/bodyMetrics'
-import { isProMember, PREMIUM_CONTEXT } from './utils/premium'
 import { getLevelByScore } from './utils/level'
+import { PREMIUM_CONTEXT } from './utils/premium'
 import { getNextThemeMode, resolveThemeMode, THEME_STORAGE_KEY } from './utils/theme'
 
 const HomeRoute = lazy(() => import('./routes/HomeRoute'))
@@ -92,171 +84,10 @@ const VIEW = {
   PROFILE: 'profile',
 }
 
-function TabIcon({ type }) {
-  switch (type) {
-    case VIEW.HOME:
-      return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 10.5 12 4l8 6.5" />
-          <path d="M6.5 9.5V20h11V9.5" />
-        </svg>
-      )
-    case VIEW.COMMUNITY:
-      return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-          <path d="M16.5 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
-          <path d="M4.5 19a4.5 4.5 0 0 1 9 0" />
-          <path d="M14 18.5a3.5 3.5 0 0 1 6 0" />
-        </svg>
-      )
-    case VIEW.PROGRESS:
-      return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6 19V10" />
-          <path d="M12 19V5" />
-          <path d="M18 19v-7" />
-          <path d="M4 19.5h16" />
-        </svg>
-      )
-    case VIEW.PROFILE:
-      return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-          <path d="M5 19a7 7 0 0 1 14 0" />
-        </svg>
-      )
-    default:
-      return null
-  }
-}
-
-function BellIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M6.5 16.5h11" />
-      <path d="M8 16.5V11a4 4 0 1 1 8 0v5.5" />
-      <path d="M5 18h14" />
-      <path d="M10 19.5a2 2 0 0 0 4 0" />
-    </svg>
-  )
-}
-
-function ThemeIcon({ themeMode }) {
-  if (themeMode === 'dark') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />
-      </svg>
-    )
-  }
-
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="4.2" />
-      <path d="M12 2.5v2.6" />
-      <path d="M12 18.9v2.6" />
-      <path d="M4.6 4.6 6.4 6.4" />
-      <path d="m17.6 17.6 1.8 1.8" />
-      <path d="M2.5 12h2.6" />
-      <path d="M18.9 12h2.6" />
-      <path d="m4.6 19.4 1.8-1.8" />
-      <path d="m17.6 6.4 1.8-1.8" />
-    </svg>
-  )
-}
-
-function getTodayDateString() {
-  return new Date().toLocaleDateString('sv-SE')
-}
-
-function getCurrentWeekKey() {
-  const now = new Date()
-  const day = now.getDay()
-  const diff = day === 0 ? -6 : 1 - day
-  const monday = new Date(now)
-  monday.setDate(now.getDate() + diff)
-  return monday.toLocaleDateString('sv-SE')
-}
-
-function withTimeout(promise, ms, message) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => {
-      setTimeout(() => reject(new Error(message)), ms)
-    }),
-  ])
-}
-
-function isTransientInitDelayMessage(message) {
-  if (!message) return false
-
-  return [
-    '__user_setup_delay__',
-    '__login_init_delay__',
-    '사용자 정보를 준비하는 데 시간이 걸리고 있어요.',
-    '로그인 초기화가 지연되고 있어요. 네트워크를 확인해주세요.',
-    'User setup is taking too long.',
-    'Login initialization is taking too long. Please check your network.',
-  ].includes(message)
-}
-
-function getActionableErrorMessage(error, fallbackMessage, isEnglish) {
-  const rawMessage = error?.message ?? ''
-  const normalized = rawMessage.toLowerCase()
-
-  const schemaHints = [
-    'schema cache',
-    'does not exist',
-    'could not find the table',
-    'could not find the function',
-    'relation',
-    'column ',
-    'function ',
-  ]
-
-  if (schemaHints.some((hint) => normalized.includes(hint))) {
-    return isEnglish
-      ? 'Supabase setup is incomplete. Run supabase/schema.sql, then supabase/verify.sql, and refresh the app.'
-      : 'Supabase 설정이 아직 덜 반영됐어요. supabase/schema.sql을 실행한 뒤 supabase/verify.sql로 확인하고 앱을 새로고침해주세요.'
-  }
-
-  if (
-    normalized.includes('row-level security')
-    || normalized.includes('permission denied')
-    || normalized.includes('violates row-level security policy')
-  ) {
-    return isEnglish
-      ? 'Supabase permissions are blocking this action. Check the RLS policies in supabase/schema.sql.'
-      : 'Supabase 권한 설정 때문에 이 작업이 막혔어요. supabase/schema.sql의 RLS 정책을 확인해주세요.'
-  }
-
-  if (
-    normalized.includes('failed to fetch')
-    || normalized.includes('networkerror')
-    || normalized.includes('load failed')
-    || normalized.includes('network request failed')
-  ) {
-    return isEnglish
-      ? 'Network connection to Supabase failed. Check your internet connection and project URL.'
-      : 'Supabase 연결에 실패했어요. 인터넷 연결과 프로젝트 URL 설정을 확인해주세요.'
-  }
-
-  return rawMessage || fallbackMessage
-}
-
-function delay(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
-}
-
-
 export default function App() {
   const { language, setLanguage, isEnglish } = useI18n()
   const initInProgressRef = useRef(false)
   const notificationRefreshTimeoutRef = useRef(null)
-  const blockedIdsRef = useRef([])
   const pendingReplayHandlersRef = useRef({})
   const [user, setUser] = useState(null)
   const [authPrompt, setAuthPrompt] = useState(null)
@@ -304,6 +135,7 @@ export default function App() {
   const [loadingAction, setLoadingAction] = useState(false)
   const [loadingFeed, setLoadingFeed] = useState(false)
   const [loadingMatePosts, setLoadingMatePosts] = useState(false)
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(false)
   const [loadingAuth, setLoadingAuth] = useState(false)
   const [todayDone, setTodayDone] = useState(false)
   const [successState, setSuccessState] = useState(null)
@@ -351,341 +183,91 @@ export default function App() {
     setPaywallContext(null)
   }, [])
 
-  const badges = useMemo(() => buildBadges(workoutStats, latestResult), [latestResult, workoutStats])
-  const challenge = useMemo(() => buildChallenge(workoutStats, profile, isEnglish), [isEnglish, profile, workoutStats])
-  const suggestedUsers = useMemo(
-    () => buildSuggestedUsers({
-      leaderboard,
-      blockedIds,
-      currentUserId: user?.id,
-      currentLevel: latestResult?.level ?? testResult?.level ?? null,
-    }),
-    [blockedIds, leaderboard, latestResult?.level, testResult?.level, user?.id],
-  )
-  const effectiveProfile = useMemo(() => profile ?? createGuestProfile(), [profile])
-  const bodyMetrics = useMemo(() => buildBodyMetrics(effectiveProfile, weightLogs), [effectiveProfile, weightLogs])
-  const activityProgress = useMemo(
-    () => getActivityLevelProgress(effectiveProfile.total_xp ?? 0),
-    [effectiveProfile.total_xp],
-  )
-  const activitySummary = useMemo(() => {
-    const todayKey = new Date().toLocaleDateString('sv-SE')
-    const todayXp = recentActivityEvents
-      .filter((item) => item.created_at?.slice(0, 10) === todayKey)
-      .reduce((total, item) => total + (Number(item.xp_amount) || 0), 0)
+  const {
+    badges,
+    challenge,
+    suggestedUsers,
+    effectiveProfile,
+    bodyMetrics,
+    activitySummary,
+    hasCommunityNickname,
+    reminderStatus,
+    visibleLeaderboard,
+    visibleFeedPosts,
+    visibleMatePosts,
+    homeFeedPreview,
+    activeCommunityProfile,
+    isAdmin,
+    isPro,
+  } = useAppDerivedState({
+    leaderboard,
+    blockedIds,
+    user,
+    latestResult,
+    testResult,
+    profile,
+    weightLogs,
+    recentActivityEvents,
+    workoutStats,
+    isEnglish,
+    language,
+    todayDone,
+    followingIds,
+    feedPosts,
+    matePosts,
+    selectedCommunityProfile,
+    selectedCommunityUser,
+  })
 
-    return {
-      totalXp: Number(effectiveProfile.total_xp) || 0,
-      weeklyPoints: Number(effectiveProfile.weekly_points) || 0,
-      currentStreak: Number(effectiveProfile.streak_days) || workoutStats.streak || 0,
-      levelValue: Number(effectiveProfile.activity_level) || activityProgress.levelValue,
-      levelLabel: effectiveProfile.activity_level_label || activityProgress.levelLabel.en,
-      progressPercent: activityProgress.progressPercent,
-      remainingXp: activityProgress.remainingXp,
-      nextLevelValue: activityProgress.nextLevelValue,
-      nextLevelLabel: activityProgress.nextLevelLabel,
-      currentMinXp: activityProgress.currentMinXp,
-      nextMinXp: activityProgress.nextMinXp,
-      todayXp,
-      lastActivityDate: effectiveProfile.last_activity_date ?? null,
-    }
-  }, [activityProgress, effectiveProfile, recentActivityEvents, workoutStats.streak])
-  const hasCommunityNickname = Boolean(effectiveProfile.display_name?.trim())
-  const reminderStatus = useMemo(
-    () => getReminderStatus(effectiveProfile, todayDone, language),
-    [effectiveProfile, language, todayDone],
-  )
-  const visibleLeaderboard = useMemo(
-    () => leaderboard.filter((item) => !blockedIds.includes(item.user_id)),
-    [blockedIds, leaderboard],
-  )
-  const visibleFeedPosts = useMemo(
-    () => feedPosts.filter((item) => !blockedIds.includes(item.user_id)),
-    [blockedIds, feedPosts],
-  )
-  const visibleMatePosts = useMemo(
-    () => matePosts.filter((item) => !blockedIds.includes(item.user_id)),
-    [blockedIds, matePosts],
-  )
-  const homeFeedPreview = useMemo(() => {
-    const followingSet = new Set(followingIds)
-    const allPreview = visibleFeedPosts.slice(0, 4)
-    const followingPreview = visibleFeedPosts
-      .filter((item) => followingSet.has(item.user_id))
-      .slice(0, 4)
-    const recommendedPool = visibleFeedPosts.filter(
-      (item) => !followingSet.has(item.user_id) && item.user_id !== user?.id,
-    )
-    const recommendedPreview = (recommendedPool.length ? recommendedPool : visibleFeedPosts).slice(0, 4)
-    const popularPreview = [...visibleFeedPosts]
-      .sort((left, right) => {
-        const leftScore = (Number(left.likeCount) || 0) * 3 + ((left.comments?.length ?? 0) * 5)
-        const rightScore = (Number(right.likeCount) || 0) * 3 + ((right.comments?.length ?? 0) * 5)
-
-        if (rightScore !== leftScore) {
-          return rightScore - leftScore
-        }
-
-        return new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
-      })
-      .slice(0, 4)
-
-    return {
-      all: allPreview,
-      following: followingPreview,
-      recommended: recommendedPreview,
-      popular: popularPreview.length ? popularPreview : allPreview,
-    }
-  }, [followingIds, user?.id, visibleFeedPosts])
-
-  const activeCommunityProfile = selectedCommunityProfile ?? selectedCommunityUser
-  const isAdmin = effectiveProfile?.is_admin === true
-  const isPro = isProMember(effectiveProfile)
-
-  useEffect(() => {
-    blockedIdsRef.current = blockedIds
-  }, [blockedIds])
-
-  const refreshFeed = useCallback(async (userId, blockedIdSnapshot) => {
-    const effectiveBlockedIds = Array.isArray(blockedIdSnapshot)
-      ? blockedIdSnapshot
-      : blockedIdsRef.current
-
-    setLoadingFeed(true)
-    try {
-      const posts = await withTimeout(
-        fetchFeedWithRelations(userId, effectiveBlockedIds),
-        12000,
-        isEnglish ? 'Feed is taking longer to load. Please try again soon.' : '피드를 불러오는 시간이 길어지고 있어요. 잠시 후 다시 시도해주세요.',
-      )
-      setFeedPosts(posts)
-    } finally {
-      setLoadingFeed(false)
-    }
-  }, [isEnglish])
-
-  const refreshMatePosts = useCallback(async (userId) => {
-    setLoadingMatePosts(true)
-    try {
-      const rows = await withTimeout(
-        fetchMatePosts(userId, 24),
-        10000,
-        isEnglish ? 'Mate board is taking longer to load. Please try again soon.' : '메이트 게시판을 불러오는 시간이 길어지고 있어요. 잠시 후 다시 시도해주세요.',
-      )
-      setMatePosts(rows)
-      return rows
-    } finally {
-      setLoadingMatePosts(false)
-    }
-  }, [isEnglish])
-
-  const refreshNotifications = useCallback(async (userId) => {
-    if (!userId) {
-      setNotifications([])
-      setUnreadNotificationCount(0)
-      return {
-        notifications: [],
-        unreadCount: 0,
-      }
-    }
-
-    setLoadingNotifications(true)
-    try {
-      const { notifications: nextNotifications, unreadCount: nextUnreadCount } = await withTimeout(
-        fetchNotifications(userId),
-        10000,
-        isEnglish ? 'Could not load notifications.' : '알림을 불러오지 못했어요.',
-      )
-
-      setNotifications(nextNotifications)
-      setUnreadNotificationCount(nextUnreadCount)
-
-      return {
-        notifications: nextNotifications,
-        unreadCount: nextUnreadCount,
-      }
-    } finally {
-      setLoadingNotifications(false)
-    }
-  }, [isEnglish])
-
-  const refreshLeaderboard = useCallback(async () => {
-    const rows = await withTimeout(fetchLeaderboard(10), 12000, isEnglish ? 'Ranking is taking longer to load. Please try again soon.' : '랭킹을 불러오는 시간이 길어지고 있어요. 잠시 후 다시 시도해주세요.')
-    setLeaderboard(rows)
-  }, [isEnglish])
-
-  const refreshModeration = useCallback(async (status = moderationStatus) => {
-    if (!user?.id || !isAdmin) {
-      setModerationReports([])
-      return []
-    }
-
-    setLoadingModeration(true)
-    try {
-      const rows = await withTimeout(
-        fetchModerationReports(status, 30),
-        10000,
-        isEnglish ? 'Could not load moderation reports.' : '신고 목록을 불러오지 못했어요.',
-      )
-      setModerationReports(rows)
-      return rows
-    } finally {
-      setLoadingModeration(false)
-    }
-  }, [isAdmin, isEnglish, moderationStatus, user?.id])
-
-  const resetPrivateState = useCallback(() => {
-    setLatestResult(null)
-    setMatePosts([])
-    setWorkoutHistory([])
-    setWorkoutTemplates([])
-    setWorkoutStats(INITIAL_STATS)
-    setProfile(null)
-    setWeightLogs([])
-    setRecentActivityEvents([])
-    setAchievementBadges([])
-    setFollowingIds([])
-    setBlockedIds([])
-    setFollowStats({ followerCount: 0, followingCount: 0 })
-    setNotifications([])
-    setUnreadNotificationCount(0)
-    setShowNotificationCenter(false)
-    setCommunitySearchQuery('')
-    setCommunitySearchResults([])
-    setModerationReports([])
-    setModerationStatus('open')
-    setTodayDone(false)
-  }, [])
-
-  const refreshUserSummary = useCallback(async (userId) => {
-    const [
-      result,
-      history,
-      templates,
-      nextProfile,
-      nextWeightLogs,
-      nextRecentActivityEvents,
-      nextAchievementBadges,
-      nextFollowingIds,
-      nextBlockedIds,
-      nextFollowStats,
-    ] = await Promise.all([
-      withTimeout(getLatestTestResult(userId), 10000, isEnglish ? 'Could not load your latest test.' : '최근 테스트를 불러오지 못했어요.'),
-      withTimeout(fetchWorkoutHistory(userId), 10000, isEnglish ? 'Could not load workout history.' : '운동 기록 리스트를 불러오지 못했어요.'),
-      withTimeout(fetchWorkoutTemplates(userId), 10000, isEnglish ? 'Could not load saved routines.' : '저장된 루틴을 불러오지 못했어요.'),
-      withTimeout(getUserProfile(userId), 10000, isEnglish ? 'Could not load profile.' : '프로필 정보를 불러오지 못했어요.'),
-      withTimeout(fetchWeightLogs(userId), 10000, isEnglish ? 'Could not load weight logs.' : '몸무게 기록을 불러오지 못했어요.'),
-      withTimeout(fetchRecentActivityEvents(userId, 16), 10000, isEnglish ? 'Could not load activity events.' : '최근 활동 기록을 불러오지 못했어요.'),
-      withTimeout(fetchAchievementBadges(userId), 10000, isEnglish ? 'Could not load badges.' : '배지 목록을 불러오지 못했어요.'),
-      withTimeout(fetchFollowingIds(userId), 10000, isEnglish ? 'Could not load follows.' : '팔로잉 목록을 불러오지 못했어요.'),
-      withTimeout(fetchBlockedIds(userId), 10000, isEnglish ? 'Could not load blocked users.' : '차단 목록을 불러오지 못했어요.'),
-      withTimeout(fetchFollowStats(userId), 10000, isEnglish ? 'Could not load follow stats.' : '팔로우 통계를 불러오지 못했어요.'),
-    ])
-    const stats = buildWorkoutStatsFromHistory(history)
-
-    setLatestResult(result)
-    setWorkoutStats(stats)
-    setWorkoutHistory(history)
-    setWorkoutTemplates(templates)
-    setProfile(nextProfile)
-    setWeightLogs(nextWeightLogs)
-    setRecentActivityEvents(nextRecentActivityEvents)
-    setAchievementBadges(nextAchievementBadges)
-    setFollowingIds(nextFollowingIds)
-    setBlockedIds(nextBlockedIds)
-    setFollowStats(nextFollowStats)
-
-    return {
-      result,
-      stats,
-      history,
-      templates,
-      profile: nextProfile,
-      weightLogs: nextWeightLogs,
-      recentActivityEvents: nextRecentActivityEvents,
-      achievementBadges: nextAchievementBadges,
-      followingIds: nextFollowingIds,
-      blockedIds: nextBlockedIds,
-      followStats: nextFollowStats,
-    }
-  }, [isEnglish])
-
-  const ensureUserProfileReady = useCallback(async (userId) => {
-    try {
-      await withTimeout(upsertUser(userId), 10000, '__user_setup_delay__')
-    } catch (error) {
-      if (!isTransientInitDelayMessage(error?.message)) {
-        throw error
-      }
-    }
-
-    for (const waitMs of [0, 250, 600]) {
-      try {
-        const nextProfile = await withTimeout(
-          getUserProfile(userId),
-          4000,
-          '__user_setup_delay__',
-        )
-
-        if (nextProfile?.id) {
-          return nextProfile
-        }
-      } catch (error) {
-        if (!isTransientInitDelayMessage(error?.message)) {
-          throw error
-        }
-      }
-
-      if (waitMs > 0) {
-        await delay(waitMs)
-      }
-    }
-
-    return null
-  }, [])
-
-  const loadPublicData = useCallback(async () => {
-    setUser(null)
-    resetPrivateState()
-    setInitStatus(isEnglish ? 'Loading public dashboard...' : '공개 대시보드를 불러오는 중입니다...')
-    await Promise.all([refreshFeed(null, []), refreshLeaderboard()])
-  }, [isEnglish, refreshFeed, refreshLeaderboard, resetPrivateState])
-
-  const loadUserData = useCallback(async (nextUser) => {
-    if (!nextUser?.id) return
-
-    setInitStatus(isEnglish ? 'Loading user...' : '사용자 정보를 불러오는 중입니다...')
-    setUser(nextUser)
-    await ensureUserProfileReady(nextUser.id)
-
-    setInitStatus(isEnglish ? 'Checking today\'s log...' : '오늘 운동 기록을 확인하는 중입니다...')
-    const doneToday = await withTimeout(hasWorkoutCompleted(nextUser.id, getTodayDateString()), 10000, isEnglish ? 'Workout lookup is taking too long.' : '운동 기록 조회가 지연되고 있어요.')
-    setTodayDone(doneToday)
-
-    setInitStatus(isEnglish ? 'Loading dashboard...' : '홈 데이터를 불러오는 중입니다...')
-    await Promise.all([refreshFeed(nextUser.id), refreshUserSummary(nextUser.id), refreshLeaderboard(), refreshNotifications(nextUser.id)])
-  }, [ensureUserProfileReady, isEnglish, refreshFeed, refreshLeaderboard, refreshNotifications, refreshUserSummary])
-
-  const initializeApp = useCallback(async () => {
-    initInProgressRef.current = true
-    setLoadingInit(true)
-    setInitStatus(isEnglish ? 'Checking session...' : '세션을 확인하는 중입니다...')
-    setErrorMessage('')
-
-    try {
-      const sessionUser = await withTimeout(getCurrentUser(), 10000, isEnglish ? 'Login initialization is taking too long. Please check your network.' : '로그인 초기화가 지연되고 있어요. 네트워크를 확인해주세요.')
-      if (sessionUser?.id) {
-        await loadUserData(sessionUser)
-      } else {
-        await loadPublicData()
-      }
-    } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Something went wrong during initialization.' : '초기화 중 문제가 발생했습니다.', isEnglish))
-    } finally {
-      initInProgressRef.current = false
-      setLoadingInit(false)
-    }
-  }, [isEnglish, loadPublicData, loadUserData])
+  const {
+    refreshFeed,
+    refreshMatePosts,
+    refreshNotifications,
+    refreshLeaderboard,
+    refreshModeration,
+    loadPublicData,
+    loadUserData,
+    initializeApp,
+    refreshUserSummary,
+  } = useAppBootstrap({
+    isEnglish,
+    initInProgressRef,
+    blockedIds,
+    moderationStatus,
+    isAdmin,
+    currentUserId: user?.id,
+    setUser,
+    setFeedPosts,
+    setMatePosts,
+    setLeaderboard,
+    setWorkoutHistory,
+    setWorkoutTemplates,
+    setWorkoutStats,
+    setProfile,
+    setWeightLogs,
+    setRecentActivityEvents,
+    setAchievementBadges,
+    setFollowingIds,
+    setBlockedIds,
+    setFollowStats,
+    setNotifications,
+    setUnreadNotificationCount,
+    setShowNotificationCenter,
+    setCommunitySearchQuery,
+    setCommunitySearchResults,
+    setModerationReports,
+    setModerationStatus,
+    setLatestResult,
+    setTodayDone,
+    setLoadingFeed,
+    setLoadingMatePosts,
+    setLoadingNotifications,
+    setLoadingLeaderboard,
+    setLoadingModeration,
+    setLoadingInit,
+    setInitStatus,
+    setErrorMessage,
+  })
 
   const showSuccess = useCallback((message, accent = 'default') => {
     setSuccessState({ message, accent })
@@ -1955,54 +1537,21 @@ export default function App() {
         </section>
       ) : (
         <>
-          <div className="app-floating-actions" aria-label={isEnglish ? 'Global actions' : '빠른 메뉴'}>
-            <div className="app-action-dock">
-              <button
-                type="button"
-                className="theme-toggle-btn icon-only"
-                onClick={handleToggleTheme}
-                title={themeMode === 'dark'
-                  ? (isEnglish ? 'Switch to light mode' : '라이트 모드로 전환')
-                  : (isEnglish ? 'Switch to dark navy mode' : '네이비 다크로 전환')}
-                aria-label={isEnglish
-                  ? `Switch to ${themeMode === 'dark' ? 'light' : 'dark'} theme`
-                  : `${themeMode === 'dark' ? '라이트' : '다크'} 테마로 전환`}
-              >
-                <span className="theme-toggle-icon"><ThemeIcon themeMode={themeMode} /></span>
-                <span className="sr-only">
-                  {themeMode === 'dark'
-                    ? (isEnglish ? 'Dark navy' : '네이비 다크')
-                    : (isEnglish ? 'Light mode' : '라이트 모드')}
-                </span>
-              </button>
-              {isAuthenticated && (
-                <button
-                  type="button"
-                  className={`notification-trigger icon-only ${showNotificationCenter ? 'active' : ''}`}
-                  onClick={openNotificationCenter}
-                  title={isEnglish ? 'Open notifications' : '알림 열기'}
-                  aria-label={isEnglish ? 'Open notifications' : '알림 열기'}
-                >
-                  <span className="notification-trigger-icon"><BellIcon /></span>
-                  <span className="sr-only">{isEnglish ? 'Notifications' : '알림'}</span>
-                  {unreadNotificationCount > 0 && (
-                    <span className="notification-trigger-badge">
-                      {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
-                    </span>
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
+          <AppTopActions
+            isEnglish={isEnglish}
+            themeMode={themeMode}
+            isAuthenticated={isAuthenticated}
+            showNotificationCenter={showNotificationCenter}
+            unreadNotificationCount={unreadNotificationCount}
+            onToggleTheme={handleToggleTheme}
+            onOpenNotifications={openNotificationCenter}
+          />
 
-          <nav className="tab-nav">
-            {tabs.map((tab) => (
-              <button key={tab.key} type="button" className={`tab-btn ${view === tab.key ? 'active' : ''}`} onClick={() => handleChangeView(tab.key)}>
-                <span className="tab-icon"><TabIcon type={tab.key} /></span>
-                <span className="tab-text">{tab.label}</span>
-              </button>
-            ))}
-          </nav>
+          <BottomTabNav
+            tabs={tabs}
+            currentView={view}
+            onChangeView={handleChangeView}
+          />
 
           <Suspense fallback={<RouteSuspenseFallback label={isEnglish ? 'Loading route...' : '화면을 불러오는 중입니다...'} />}>
             {view === VIEW.HOME && (
@@ -2097,9 +1646,11 @@ export default function App() {
                 currentLevel={latestResult?.level ?? testResult?.level ?? null}
                 loadingFeed={loadingFeed}
                 loadingMatePosts={loadingMatePosts}
+                loadingLeaderboard={loadingLeaderboard}
                 visibleLeaderboard={visibleLeaderboard}
                 visibleFeedPosts={visibleFeedPosts}
                 visibleMatePosts={visibleMatePosts}
+                onEnsureLeaderboard={refreshLeaderboard}
                 onToggleLike={handleToggleLike}
                 onSubmitComment={handleSubmitComment}
                 onCreateMatePost={handleCreateMatePost}

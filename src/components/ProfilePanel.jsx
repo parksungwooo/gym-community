@@ -28,12 +28,13 @@ function SummaryStat({ label, value }) {
   )
 }
 
-function MenuButton({ label, meta, active, onClick }) {
+function MenuButton({ menuKey, label, meta, active, onClick }) {
   return (
     <button
       type="button"
       className={`profile-menu-button ${active ? 'active' : ''}`}
       onClick={onClick}
+      data-testid={`profile-menu-${menuKey}`}
     >
       <div className="profile-menu-button-copy">
         <strong>{label}</strong>
@@ -265,6 +266,7 @@ export default function ProfilePanel({
           {menuItems.map((item) => (
             <MenuButton
               key={item.key}
+              menuKey={item.key}
               label={item.label}
               meta={item.meta}
               active={activeSection === item.key}

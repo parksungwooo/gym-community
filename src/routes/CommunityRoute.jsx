@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import FeedList from '../components/FeedList'
 import MateBoard from '../components/MateBoard'
 import ModerationPanel from '../components/ModerationPanel'
@@ -31,9 +31,11 @@ export default function CommunityRoute({
   currentLevel,
   loadingFeed,
   loadingMatePosts,
+  loadingLeaderboard,
   visibleLeaderboard,
   visibleFeedPosts,
   visibleMatePosts,
+  onEnsureLeaderboard,
   onToggleLike,
   onSubmitComment,
   onCreateMatePost,
@@ -50,6 +52,13 @@ export default function CommunityRoute({
 }) {
   const t = (ko, en) => (isEnglish ? en : ko)
   const [activeTab, setActiveTab] = useState('feed')
+  const [activeUtility, setActiveUtility] = useState(null)
+
+  useEffect(() => {
+    if (activeUtility !== 'ranking') return
+    if (visibleLeaderboard.length > 0 || loadingLeaderboard) return
+    onEnsureLeaderboard?.().catch(() => {})
+  }, [activeUtility, loadingLeaderboard, onEnsureLeaderboard, visibleLeaderboard.length])
 
   if (!canUseCommunity) {
     return (
@@ -72,11 +81,11 @@ export default function CommunityRoute({
 
   return (
     <div className="view-stage community-stage-clean">
-      <section className="card community-tab-shell community-screen-shell">
-        <div className="community-screen-head">
+      <section className="card community-tab-shell community-screen-shell compact-community-shell">
+        <div className="community-screen-head compact">
           <div>
             <span className="app-section-kicker">{t('커뮤니티', 'Community')}</span>
-            <h2>{t('피드를 보고, 같이 운동할 사람도 찾아보세요.', 'See the feed, find a workout mate, and meet your people.')}</h2>
+            <h2>{t('피드와 메이트에 집중하고, 필요할 때만 더 열어보세요.', 'Focus on feed and mates, then open more only when you need it.')}</h2>
           </div>
           <span className="community-mini-pill">
             {activeTab === 'mate'
@@ -85,11 +94,17 @@ export default function CommunityRoute({
           </span>
         </div>
 
-        <div className="community-tab-row" role="tablist" aria-label={t('커뮤니티 섹션', 'Community sections')}>
+        <div
+          className="community-tab-row compact"
+          role="tablist"
+          aria-label={t('커뮤니티 섹션', 'Community sections')}
+          data-testid="community-tablist"
+        >
           <button
             type="button"
             className={`community-tab-btn ${activeTab === 'feed' ? 'active' : ''}`}
             onClick={() => setActiveTab('feed')}
+            data-testid="community-tab-feed"
           >
             {t('피드', 'Feed')}
           </button>
@@ -97,65 +112,34 @@ export default function CommunityRoute({
             type="button"
             className={`community-tab-btn ${activeTab === 'mate' ? 'active' : ''}`}
             onClick={() => setActiveTab('mate')}
+            data-testid="community-tab-mate"
           >
             {t('메이트', 'Mates')}
           </button>
+        </div>
+
+        <div className="community-utility-row">
           <button
             type="button"
-            className={`community-tab-btn ${activeTab === 'discover' ? 'active' : ''}`}
-            onClick={() => setActiveTab('discover')}
+            className={`ghost-chip community-utility-btn ${activeUtility === 'discover' ? 'active' : ''}`}
+            onClick={() => setActiveUtility((current) => (current === 'discover' ? null : 'discover'))}
+            data-testid="community-utility-discover"
           >
-            {t('찾기', 'Discover')}
+            {t('사람 찾기', 'Discover people')}
           </button>
           <button
             type="button"
-            className={`community-tab-btn ${activeTab === 'ranking' ? 'active' : ''}`}
-            onClick={() => setActiveTab('ranking')}
+            className={`ghost-chip community-utility-btn ${activeUtility === 'ranking' ? 'active' : ''}`}
+            onClick={() => setActiveUtility((current) => (current === 'ranking' ? null : 'ranking'))}
+            data-testid="community-utility-ranking"
           >
-            {t('랭킹', 'Ranking')}
+            {t('주간 랭킹', 'Weekly ranking')}
           </button>
         </div>
       </section>
 
-      {activeTab === 'feed' && (
-        <FeedList
-          posts={visibleFeedPosts}
-          onToggleLike={onToggleLike}
-          onSubmitComment={onSubmitComment}
-          onReportPost={(post) =>
-            onOpenReportComposer({
-              kind: 'post',
-              targetUserId: post.user_id,
-              postId: post.id,
-            })
-          }
-          onBlockUser={(targetUserId) => onToggleBlock(targetUserId, blockedIds.includes(targetUserId))}
-          loading={loadingFeed}
-          currentLevel={currentLevel}
-          selectedUser={selectedCommunityUser}
-          onClearSelectedUser={onClearCommunityUser}
-          onSelectUser={onSelectCommunityUser}
-          followingIds={followingIds}
-          currentUserId={currentUserId}
-        />
-      )}
-
-      {activeTab === 'mate' && (
-        <MateBoard
-          isEnglish={isEnglish}
-          posts={visibleMatePosts}
-          loading={loadingMatePosts}
-          actionLoading={loadingAction}
-          currentUserId={currentUserId}
-          onCreatePost={onCreateMatePost}
-          onToggleInterest={onToggleMateInterest}
-          onToggleStatus={onUpdateMatePostStatus}
-          onSelectUser={onSelectCommunityUser}
-        />
-      )}
-
-      {activeTab === 'discover' && (
-        <>
+      {activeUtility === 'discover' && (
+        <section className="community-utility-panel">
           <UserSearchPanel
             query={communitySearchQuery}
             onQueryChange={onCommunitySearchQueryChange}
@@ -189,19 +173,57 @@ export default function CommunityRoute({
               onResolve={onResolveReport}
             />
           )}
-        </>
+        </section>
       )}
 
-      {activeTab === 'ranking' && (
-        <RankingBoard
-          rows={visibleLeaderboard}
+      {activeUtility === 'ranking' && (
+        <section className="community-utility-panel">
+          <RankingBoard
+            rows={visibleLeaderboard}
+            loading={loadingLeaderboard}
+            selectedUserId={selectedCommunityUser?.user_id ?? null}
+            onSelectUser={onSelectCommunityUser}
+            currentUserId={currentUserId}
+            followingIds={followingIds}
+            onToggleFollow={onToggleFollow}
+            actionLoading={loadingAction}
+          />
+        </section>
+      )}
+
+      {activeTab === 'feed' && (
+        <FeedList
+          posts={visibleFeedPosts}
+          onToggleLike={onToggleLike}
+          onSubmitComment={onSubmitComment}
+          onReportPost={(post) =>
+            onOpenReportComposer({
+              kind: 'post',
+              targetUserId: post.user_id,
+              postId: post.id,
+            })}
+          onBlockUser={(targetUserId) => onToggleBlock(targetUserId, blockedIds.includes(targetUserId))}
           loading={loadingFeed}
-          selectedUserId={selectedCommunityUser?.user_id ?? null}
+          currentLevel={currentLevel}
+          selectedUser={selectedCommunityUser}
+          onClearSelectedUser={onClearCommunityUser}
           onSelectUser={onSelectCommunityUser}
-          currentUserId={currentUserId}
           followingIds={followingIds}
-          onToggleFollow={onToggleFollow}
+          currentUserId={currentUserId}
+        />
+      )}
+
+      {activeTab === 'mate' && (
+        <MateBoard
+          isEnglish={isEnglish}
+          posts={visibleMatePosts}
+          loading={loadingMatePosts}
           actionLoading={loadingAction}
+          currentUserId={currentUserId}
+          onCreatePost={onCreateMatePost}
+          onToggleInterest={onToggleMateInterest}
+          onToggleStatus={onUpdateMatePostStatus}
+          onSelectUser={onSelectCommunityUser}
         />
       )}
 
@@ -221,17 +243,14 @@ export default function CommunityRoute({
               isBlocked={blockedIds.includes(activeCommunityProfile?.user_id)}
               actionLoading={loadingAction}
               onToggleFollow={() =>
-                onToggleFollow(activeCommunityProfile?.user_id, followingIds.includes(activeCommunityProfile?.user_id))
-              }
+                onToggleFollow(activeCommunityProfile?.user_id, followingIds.includes(activeCommunityProfile?.user_id))}
               onReport={() =>
                 onOpenReportComposer({
                   kind: 'user',
                   targetUserId: activeCommunityProfile?.user_id ?? null,
-                })
-              }
+                })}
               onToggleBlock={() =>
-                onToggleBlock(activeCommunityProfile?.user_id, blockedIds.includes(activeCommunityProfile?.user_id))
-              }
+                onToggleBlock(activeCommunityProfile?.user_id, blockedIds.includes(activeCommunityProfile?.user_id))}
               onClear={onClearCommunityUser}
             />
           </div>
