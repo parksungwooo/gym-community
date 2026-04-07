@@ -915,10 +915,6 @@ export default function App() {
 
     setWorkoutPreset(nextPreset)
     setShowWorkoutPanel(true)
-
-    window.setTimeout(() => {
-      document.querySelector('.home-workout-panel-shell')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 40)
   }, [profile?.default_share_to_feed, workoutStats.lastWorkoutDuration, workoutStats.lastWorkoutType])
 
   const closeWorkoutComposer = useCallback(() => {

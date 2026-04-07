@@ -4020,9 +4020,39 @@ button:active {
   margin-top: 12px;
 }
 
+.home-workout-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 24px 16px 0;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(8px);
+  animation: fade-in-sheet 180ms ease;
+}
+
+.home-workout-sheet-panel {
+  width: min(720px, 100%);
+  max-height: min(88vh, 920px);
+  border-radius: 28px 28px 0 0;
+  overflow: hidden;
+  animation: slide-up-sheet 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 .home-workout-panel-shell {
   display: grid;
   gap: 10px;
+  max-height: min(88vh, 920px);
+  overflow-y: auto;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.home-workout-panel-shell .workout-capture-card {
+  margin: 0;
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 24px 56px rgba(15, 23, 42, 0.24);
 }
 
 .app-surface {
@@ -4037,6 +4067,26 @@ button:active {
     linear-gradient(135deg, #0f172a 0%, #17325a 62%, #244a76 100%);
   color: #f8fafc;
   box-shadow: 0 22px 42px rgba(15, 23, 42, 0.18);
+}
+
+@keyframes fade-in-sheet {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up-sheet {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .home-status-surface.compact {
@@ -6078,6 +6128,20 @@ button:active {
 }
 
 @media (max-width: 720px) {
+  .home-workout-sheet-overlay {
+    padding: 12px 0 0;
+  }
+
+  .home-workout-sheet-panel,
+  .home-workout-panel-shell {
+    max-height: 92vh;
+  }
+
+  .home-workout-sheet-panel,
+  .home-workout-panel-shell .workout-capture-card {
+    border-radius: 24px 24px 0 0;
+  }
+
   .home-growth-side-grid,
   .home-insight-grid,
   .home-story-grid,

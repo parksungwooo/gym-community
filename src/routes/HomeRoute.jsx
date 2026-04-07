@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import HomeDashboard from '../components/HomeDashboard'
 import WorkoutPanel from '../components/WorkoutPanel'
 
@@ -32,6 +33,29 @@ export default function HomeRoute({
   onDeleteRoutine,
   onCloseWorkoutComposer,
 }) {
+  useEffect(() => {
+    if (!showWorkoutPanel || typeof document === 'undefined') return undefined
+
+    const previousOverflow = document.body.style.overflow
+    const previousOverscroll = document.body.style.overscrollBehavior
+    document.body.style.overflow = 'hidden'
+    document.body.style.overscrollBehavior = 'none'
+
+    const handleKeydown = (event) => {
+      if (event.key === 'Escape') {
+        onCloseWorkoutComposer?.()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeydown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.body.style.overscrollBehavior = previousOverscroll
+      window.removeEventListener('keydown', handleKeydown)
+    }
+  }, [onCloseWorkoutComposer, showWorkoutPanel])
+
   return (
     <div className="view-stage">
       {celebration && (
@@ -78,29 +102,43 @@ export default function HomeRoute({
         onRequestReminderPermission={onRequestReminderPermission}
       />
       {showWorkoutPanel && (
-        <div className="home-workout-panel-shell">
-          <WorkoutPanel
-            key={[
-              workoutPreset?.name || '',
-              workoutPreset?.workoutType || '',
-              workoutPreset?.durationMinutes || '',
-              workoutPreset?.note || '',
-            ].join('|')}
-            onComplete={onCompleteWorkout}
-            onSaveRoutine={onSaveRoutine}
-            onDeleteRoutine={onDeleteRoutine}
-            onClose={onCloseWorkoutComposer}
-            loading={workoutLoading}
-            todayDone={todayDone}
-            todayCount={stats.todayCount}
-            recentWorkout={{
-              workoutType: stats.lastWorkoutType,
-              durationMinutes: stats.lastWorkoutDuration,
-              note: stats.lastWorkoutNote,
-            }}
-            routineTemplates={routineTemplates}
-            initialSelection={workoutPreset}
-          />
+        <div
+          className="home-workout-sheet-overlay"
+          role="presentation"
+          onClick={onCloseWorkoutComposer}
+        >
+          <div
+            className="home-workout-sheet-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={isEnglish ? 'Workout logging sheet' : '운동 기록 바텀시트'}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="home-workout-panel-shell">
+              <WorkoutPanel
+                key={[
+                  workoutPreset?.name || '',
+                  workoutPreset?.workoutType || '',
+                  workoutPreset?.durationMinutes || '',
+                  workoutPreset?.note || '',
+                ].join('|')}
+                onComplete={onCompleteWorkout}
+                onSaveRoutine={onSaveRoutine}
+                onDeleteRoutine={onDeleteRoutine}
+                onClose={onCloseWorkoutComposer}
+                loading={workoutLoading}
+                todayDone={todayDone}
+                todayCount={stats.todayCount}
+                recentWorkout={{
+                  workoutType: stats.lastWorkoutType,
+                  durationMinutes: stats.lastWorkoutDuration,
+                  note: stats.lastWorkoutNote,
+                }}
+                routineTemplates={routineTemplates}
+                initialSelection={workoutPreset}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
