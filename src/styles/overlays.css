@@ -1391,12 +1391,13 @@
 
 @media (max-width: 720px) {
   .auth-modal-backdrop.home-workout-sheet-overlay {
-    padding: 12px 0 0;
+    padding: 0;
   }
 
   .auth-modal-backdrop.home-workout-sheet-overlay .home-workout-sheet-panel,
   .home-workout-panel-shell {
-    max-height: 92vh;
+    height: 96dvh;
+    max-height: 96dvh;
   }
 
   .auth-modal-backdrop.home-workout-sheet-overlay .home-workout-sheet-panel,

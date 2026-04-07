@@ -1537,21 +1537,25 @@ export default function App() {
         </section>
       ) : (
         <>
-          <AppTopActions
-            isEnglish={isEnglish}
-            themeMode={themeMode}
-            isAuthenticated={isAuthenticated}
-            showNotificationCenter={showNotificationCenter}
-            unreadNotificationCount={unreadNotificationCount}
-            onToggleTheme={handleToggleTheme}
-            onOpenNotifications={openNotificationCenter}
-          />
+          {!showWorkoutPanel && (
+            <AppTopActions
+              isEnglish={isEnglish}
+              themeMode={themeMode}
+              isAuthenticated={isAuthenticated}
+              showNotificationCenter={showNotificationCenter}
+              unreadNotificationCount={unreadNotificationCount}
+              onToggleTheme={handleToggleTheme}
+              onOpenNotifications={openNotificationCenter}
+            />
+          )}
 
-          <BottomTabNav
-            tabs={tabs}
-            currentView={view}
-            onChangeView={handleChangeView}
-          />
+          {!showWorkoutPanel && (
+            <BottomTabNav
+              tabs={tabs}
+              currentView={view}
+              onChangeView={handleChangeView}
+            />
+          )}
 
           <Suspense fallback={<RouteSuspenseFallback label={isEnglish ? 'Loading route...' : '화면을 불러오는 중입니다...'} />}>
             {view === VIEW.HOME && (
