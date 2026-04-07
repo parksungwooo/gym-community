@@ -31,6 +31,18 @@ select 'table.notifications', exists (
   where table_schema = 'public' and table_name = 'notifications'
 )
 union all
+select 'table.mate_posts', exists (
+  select 1
+  from information_schema.tables
+  where table_schema = 'public' and table_name = 'mate_posts'
+)
+union all
+select 'table.mate_post_interests', exists (
+  select 1
+  from information_schema.tables
+  where table_schema = 'public' and table_name = 'mate_post_interests'
+)
+union all
 select 'table.xp_events', exists (
   select 1
   from information_schema.tables
@@ -267,6 +279,22 @@ select 'column.notifications.read_at', exists (
     and column_name = 'read_at'
 )
 union all
+select 'column.mate_posts.title', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'mate_posts'
+    and column_name = 'title'
+)
+union all
+select 'column.mate_posts.status', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'mate_posts'
+    and column_name = 'status'
+)
+union all
 select 'function.get_week_start', to_regprocedure('public.get_week_start(date)') is not null
 union all
 select 'function.get_activity_level_value', to_regprocedure('public.get_activity_level_value(integer)') is not null
@@ -274,6 +302,8 @@ union all
 select 'function.get_activity_level_label', to_regprocedure('public.get_activity_level_label(integer)') is not null
 union all
 select 'function.rebuild_activity_progress', to_regprocedure('public.rebuild_activity_progress(uuid)') is not null
+union all
+select 'function.get_public_mate_posts', to_regprocedure('public.get_public_mate_posts(uuid,integer)') is not null
 union all
 select 'function.get_public_leaderboard', to_regprocedure('public.get_public_leaderboard(integer)') is not null
 union all
@@ -313,6 +343,13 @@ select 'index.user_badges_user_awarded_at', exists (
   from pg_indexes
   where schemaname = 'public'
     and indexname = 'idx_user_badges_user_awarded_at'
+)
+union all
+select 'index.mate_posts_status_created_at', exists (
+  select 1
+  from pg_indexes
+  where schemaname = 'public'
+    and indexname = 'idx_mate_posts_status_created_at'
 )
 union all
 select 'trigger.follow_notifications', exists (
@@ -369,6 +406,14 @@ select 'trigger.rebuild_activity_from_test_results', exists (
   where event_object_schema = 'public'
     and event_object_table = 'test_results'
     and trigger_name = 'trg_rebuild_activity_from_test_results'
+)
+union all
+select 'trigger.set_mate_posts_updated_at', exists (
+  select 1
+  from information_schema.triggers
+  where event_object_schema = 'public'
+    and event_object_table = 'mate_posts'
+    and trigger_name = 'set_mate_posts_updated_at'
 )
 union all
 select 'policy.users can insert own profile', exists (
@@ -441,6 +486,22 @@ select 'policy.users can insert own reports', exists (
   where schemaname = 'public'
     and tablename = 'reports'
     and policyname = 'users can insert own reports'
+)
+union all
+select 'policy.users can insert own mate posts', exists (
+  select 1
+  from pg_policies
+  where schemaname = 'public'
+    and tablename = 'mate_posts'
+    and policyname = 'users can insert own mate posts'
+)
+union all
+select 'policy.users can insert own mate interests', exists (
+  select 1
+  from pg_policies
+  where schemaname = 'public'
+    and tablename = 'mate_post_interests'
+    and policyname = 'users can insert own mate interests'
 )
 union all
 select 'publication.notifications.realtime', exists (

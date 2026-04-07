@@ -90,7 +90,7 @@ export default function ProgressPanel({
         </div>
 
         <div className="record-health-headline compact">
-          <strong>{isEnglish ? 'Your week at a glance.' : '이번 주 흐름을 한눈에 볼 수 있어요.'}</strong>
+          <strong>{isEnglish ? 'Your week at a glance.' : '이번 주 기록을 한눈에 볼 수 있어요.'}</strong>
           <p className="subtext compact">
             {isEnglish
               ? 'Workouts, calories, and body metrics are shown together.'
@@ -394,7 +394,7 @@ export default function ProgressPanel({
                 <p>
                   {isEnglish
                     ? 'As you log more workouts, your favorite types and rhythm will become easier to spot.'
-                    : '운동 기록이 쌓일수록 자주 하는 운동과 리듬이 더 분명해집니다.'}
+                    : '운동 기록이 쌓일수록 자주 하는 운동과 패턴이 더 분명해집니다.'}
                 </p>
               </div>
             )}

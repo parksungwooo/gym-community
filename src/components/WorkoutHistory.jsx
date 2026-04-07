@@ -472,7 +472,7 @@ export default function WorkoutHistory({ history, onUpdate, onDelete, loading })
       <p className="subtext compact">
         {isEnglish
           ? 'See your recent logs and the last 7 days in one place.'
-          : '최근 기록과 지난 7일 흐름을 한 번에 확인해보세요.'}
+          : '최근 기록과 지난 7일 기록을 한 번에 확인해보세요.'}
       </p>
 
       <div className="week-strip compact">

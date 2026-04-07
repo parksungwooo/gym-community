@@ -30,7 +30,7 @@ export const PREMIUM_BENEFITS = [
   {
     title: { ko: '주간/월간 리포트', en: 'Weekly and monthly reports' },
     body: {
-      ko: '운동, 체중, 칼로리, XP 흐름을 한눈에 정리해줘요.',
+      ko: '운동, 체중, 칼로리, XP 기록을 한눈에 정리해줘요.',
       en: 'Summarizes workouts, weight, calories, and XP in one place.',
     },
   },
@@ -102,7 +102,7 @@ export function getPaywallCopy(context, language = 'ko') {
         en: 'Turn a logging app into a staying-consistent app',
       },
       body: {
-        ko: '주간 리포트, 고급 리마인더, 비공개 챌린지까지 열고 운동 흐름을 더 오래 이어가세요.',
+        ko: '주간 리포트, 고급 리마인더, 비공개 챌린지까지 열고 운동 습관을 더 오래 이어가세요.',
         en: 'Unlock reports, advanced reminders, and private challenges to keep your workout rhythm going longer.',
       },
     },
@@ -113,18 +113,18 @@ export function getPaywallCopy(context, language = 'ko') {
         en: 'Do more than collect numbers. Read the change.',
       },
       body: {
-        ko: '주간/월간 리포트와 패턴 해석으로 운동, 체중, XP 흐름을 더 깊게 볼 수 있어요.',
+        ko: '주간/월간 리포트와 패턴 분석으로 운동, 체중, XP 변화를 더 깊게 볼 수 있어요.',
         en: 'Go deeper on workouts, weight, and XP with weekly and monthly reports plus pattern insights.',
       },
     },
     [PREMIUM_CONTEXT.REMINDERS]: {
       kicker: { ko: 'Pro 리마인더', en: 'Pro Reminders' },
       title: {
-        ko: '내 생활 리듬에 맞는 리마인더로 바꾸세요',
+        ko: '내 생활 패턴에 맞는 리마인더로 바꿔보세요',
         en: 'Shape reminders around your real routine',
       },
       body: {
-        ko: '요일별 시간, 다시 알림, 목표 미달성 알림으로 놓치던 운동 흐름을 붙잡아보세요.',
+        ko: '요일별 시간, 다시 알림, 목표 미달성 알림으로 놓치기 쉬운 운동도 챙겨보세요.',
         en: 'Use weekday timing, retry nudges, and missed-goal alerts to catch the workouts that usually slip away.',
       },
     },

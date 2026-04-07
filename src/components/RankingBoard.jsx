@@ -45,7 +45,7 @@ export default function RankingBoard({
           <span className="app-section-kicker">{t('보드', 'Board')}</span>
           <h2>{t('주간 활동 랭킹', 'Weekly activity ranking')}</h2>
         </div>
-        <span className="community-mini-pill accent">{t('상위 활동 유저', 'Top movers')}</span>
+        <span className="community-mini-pill accent">{t('이번 주 상위 활동 회원', 'Top movers')}</span>
       </div>
 
       <p className="subtext compact">
@@ -104,7 +104,7 @@ export default function RankingBoard({
                     className="ranking-avatar"
                     imageUrl={item.avatar_url}
                     fallback={item.avatar_emoji || 'RUN'}
-                    alt={item.display_name || (isEnglish ? 'Ranked user' : '랭킹 유저')}
+                    alt={item.display_name || (isEnglish ? 'Ranked user' : '랭킹 사용자')}
                   />
                   <div>
                     <strong className="ranking-name">{item.display_name}</strong>

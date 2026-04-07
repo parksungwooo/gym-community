@@ -35,7 +35,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
           {isEnglish ? 'Share Result' : '결과 공유하기'}
         </button>
         <button type="button" className="primary-btn" onClick={onStartWorkout}>
-          {isEnglish ? 'Log Today\'s Workout' : '오늘 운동 기록하러 가기'}
+          {isEnglish ? 'Log Today\'s Workout' : '오늘 운동 기록하기'}
         </button>
       </div>
     </section>

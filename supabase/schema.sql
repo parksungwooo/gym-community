@@ -219,6 +219,29 @@ create table if not exists public.notifications (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.mate_posts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users(id) on delete cascade,
+  title text not null check (char_length(title) <= 60),
+  workout_type text not null,
+  location_label text not null check (char_length(location_label) <= 40),
+  time_slot text not null,
+  difficulty text not null default 'beginner',
+  capacity int not null default 2 check (capacity >= 1 and capacity <= 20),
+  body text check (char_length(body) <= 180),
+  status text not null default 'open' check (status in ('open', 'closed')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.mate_post_interests (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references public.mate_posts(id) on delete cascade,
+  user_id uuid not null references public.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (post_id, user_id)
+);
+
 create extension if not exists pg_trgm with schema extensions;
 
 create index if not exists idx_test_results_user_created_at on public.test_results (user_id, created_at desc);
@@ -243,6 +266,10 @@ create index if not exists idx_reports_post_id on public.reports (post_id, creat
 create index if not exists idx_reports_status_created_at on public.reports (status, created_at desc);
 create index if not exists idx_notifications_user_created_at on public.notifications (user_id, created_at desc);
 create index if not exists idx_notifications_user_read_at on public.notifications (user_id, read_at, created_at desc);
+create index if not exists idx_mate_posts_status_created_at on public.mate_posts (status, created_at desc);
+create index if not exists idx_mate_posts_user_created_at on public.mate_posts (user_id, created_at desc);
+create index if not exists idx_mate_post_interests_post_id on public.mate_post_interests (post_id);
+create index if not exists idx_mate_post_interests_user_id on public.mate_post_interests (user_id);
 create index if not exists idx_users_display_name_trgm on public.users using gin (display_name gin_trgm_ops);
 
 insert into storage.buckets (id, name, public)
@@ -271,6 +298,8 @@ alter table public.follows enable row level security;
 alter table public.blocks enable row level security;
 alter table public.reports enable row level security;
 alter table public.notifications enable row level security;
+alter table public.mate_posts enable row level security;
+alter table public.mate_post_interests enable row level security;
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -315,6 +344,113 @@ begin
     before update on public.workout_templates
     for each row
     execute function public.set_updated_at();
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_trigger
+    where tgname = 'set_mate_posts_updated_at'
+      and tgrelid = 'public.mate_posts'::regclass
+  ) then
+    create trigger set_mate_posts_updated_at
+    before update on public.mate_posts
+    for each row
+    execute function public.set_updated_at();
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public' and tablename = 'mate_posts' and policyname = 'users can insert own mate posts'
+  ) then
+    create policy "users can insert own mate posts"
+    on public.mate_posts
+    for insert
+    with check (auth.uid() = user_id);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public' and tablename = 'mate_posts' and policyname = 'users can update own mate posts'
+  ) then
+    create policy "users can update own mate posts"
+    on public.mate_posts
+    for update
+    using (auth.uid() = user_id)
+    with check (auth.uid() = user_id);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public' and tablename = 'mate_posts' and policyname = 'users can delete own mate posts'
+  ) then
+    create policy "users can delete own mate posts"
+    on public.mate_posts
+    for delete
+    using (auth.uid() = user_id);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public' and tablename = 'mate_post_interests' and policyname = 'users can read own mate interests'
+  ) then
+    create policy "users can read own mate interests"
+    on public.mate_post_interests
+    for select
+    using (auth.uid() = user_id);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public' and tablename = 'mate_post_interests' and policyname = 'users can insert own mate interests'
+  ) then
+    create policy "users can insert own mate interests"
+    on public.mate_post_interests
+    for insert
+    with check (auth.uid() = user_id);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public' and tablename = 'mate_post_interests' and policyname = 'users can delete own mate interests'
+  ) then
+    create policy "users can delete own mate interests"
+    on public.mate_post_interests
+    for delete
+    using (auth.uid() = user_id);
   end if;
 end
 $$;
@@ -1510,11 +1646,86 @@ end
 $$;
 
 drop function if exists public.get_public_leaderboard(integer);
+drop function if exists public.get_public_mate_posts(uuid, integer);
 drop function if exists public.get_public_profile(uuid);
 drop function if exists public.get_notification_inbox(integer);
 drop function if exists public.get_moderation_reports(text, integer);
 drop function if exists public.resolve_report(uuid, text, text);
 drop function if exists public.search_public_users(text, integer);
+
+create or replace function public.get_public_mate_posts(viewer_user_id uuid default null, limit_count int default 24)
+returns table (
+  id uuid,
+  user_id uuid,
+  title text,
+  workout_type text,
+  location_label text,
+  time_slot text,
+  difficulty text,
+  capacity int,
+  body text,
+  status text,
+  created_at timestamptz,
+  updated_at timestamptz,
+  display_name text,
+  avatar_emoji text,
+  avatar_url text,
+  activity_level int,
+  activity_level_label text,
+  interest_count bigint,
+  interested_by_me boolean
+)
+language sql
+security definer
+set search_path = public
+as $$
+  with viewer_context as (
+    select coalesce(viewer_user_id, auth.uid()) as viewer_id
+  ),
+  interest_counts as (
+    select
+      mpi.post_id,
+      count(*)::bigint as interest_count
+    from public.mate_post_interests mpi
+    group by mpi.post_id
+  )
+  select
+    mp.id,
+    mp.user_id,
+    mp.title,
+    mp.workout_type,
+    mp.location_label,
+    mp.time_slot,
+    mp.difficulty,
+    mp.capacity,
+    mp.body,
+    mp.status,
+    mp.created_at,
+    mp.updated_at,
+    coalesce(u.display_name, '게스트') as display_name,
+    coalesce(u.avatar_emoji, 'RUN') as avatar_emoji,
+    u.avatar_url,
+    coalesce(u.activity_level, 1) as activity_level,
+    coalesce(u.activity_level_label, 'Starter') as activity_level_label,
+    coalesce(ic.interest_count, 0) as interest_count,
+    exists (
+      select 1
+      from public.mate_post_interests mine
+      cross join viewer_context vc
+      where vc.viewer_id is not null
+        and mine.post_id = mp.id
+        and mine.user_id = vc.viewer_id
+    ) as interested_by_me
+  from public.mate_posts mp
+  join public.users u on u.id = mp.user_id
+  left join interest_counts ic on ic.post_id = mp.id
+  order by
+    case when mp.status = 'open' then 0 else 1 end,
+    mp.created_at desc
+  limit greatest(least(limit_count, 50), 1);
+$$;
+
+grant execute on function public.get_public_mate_posts(uuid, integer) to authenticated;
 
 create or replace function public.get_public_leaderboard(limit_count int default 10)
 returns table (

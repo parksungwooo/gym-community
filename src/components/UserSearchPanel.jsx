@@ -34,7 +34,7 @@ export default function UserSearchPanel({
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Search' : '검색'}</span>
-          <h2 className="app-section-title small">{isEnglish ? 'Find People' : '유저 찾기'}</h2>
+          <h2 className="app-section-title small">{isEnglish ? 'Find People' : '사람 찾기'}</h2>
         </div>
         <span className="community-mini-pill">{trimmedQuery ? (isEnglish ? `${rows.length} results` : `${rows.length}명`) : (isEnglish ? 'Search by nickname' : '닉네임 검색')}</span>
       </div>
@@ -86,7 +86,7 @@ export default function UserSearchPanel({
       {!loading && trimmedQuery.length >= 2 && !rows.length && (
         <div className="empty-state-card cool user-search-empty">
           <span className="empty-state-badge">{isEnglish ? 'No Match' : '검색 결과 없음'}</span>
-          <strong>{isEnglish ? 'No users matched that nickname.' : '해당 닉네임으로 찾은 유저가 없어요.'}</strong>
+          <strong>{isEnglish ? 'No users matched that nickname.' : '해당 닉네임과 일치하는 사람이 없어요.'}</strong>
           <p>{isEnglish ? 'Try a shorter keyword or a different spelling.' : '더 짧은 키워드나 다른 철자로 다시 검색해보세요.'}</p>
         </div>
       )}

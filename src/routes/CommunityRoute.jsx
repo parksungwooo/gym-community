@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import FeedList from '../components/FeedList'
+import MateBoard from '../components/MateBoard'
 import ModerationPanel from '../components/ModerationPanel'
 import PublicProfileCard from '../components/PublicProfileCard'
 import RankingBoard from '../components/RankingBoard'
@@ -29,10 +30,15 @@ export default function CommunityRoute({
   suggestedUsers,
   currentLevel,
   loadingFeed,
+  loadingMatePosts,
   visibleLeaderboard,
   visibleFeedPosts,
+  visibleMatePosts,
   onToggleLike,
   onSubmitComment,
+  onCreateMatePost,
+  onToggleMateInterest,
+  onUpdateMatePostStatus,
   isAdmin,
   moderationReports,
   moderationLoading,
@@ -42,20 +48,22 @@ export default function CommunityRoute({
   onRefreshModeration,
   onResolveReport,
 }) {
+  const t = (ko, en) => (isEnglish ? en : ko)
   const [activeTab, setActiveTab] = useState('feed')
 
   if (!canUseCommunity) {
     return (
       <div className="view-stage">
         <section className="card community-overview-card">
-          <h2>{isEnglish ? 'Community Locked' : '커뮤니티 잠금'}</h2>
+          <h2>{t('커뮤니티 잠금', 'Community locked')}</h2>
           <p className="subtext">
-            {isEnglish
-              ? 'Add a nickname in your profile first, then you can use the community.'
-              : '먼저 프로필에 닉네임을 저장하면 커뮤니티를 사용할 수 있어요.'}
+            {t(
+              '프로필에 닉네임을 먼저 저장하면 커뮤니티를 바로 사용할 수 있어요.',
+              'Save a nickname in your profile first, then the community will open normally.',
+            )}
           </p>
           <button type="button" className="primary-btn" onClick={onGoProfile}>
-            {isEnglish ? 'Go to Profile' : '프로필로 가기'}
+            {t('프로필로 가기', 'Go to profile')}
           </button>
         </section>
       </div>
@@ -67,35 +75,44 @@ export default function CommunityRoute({
       <section className="card community-tab-shell community-screen-shell">
         <div className="community-screen-head">
           <div>
-            <span className="app-section-kicker">{isEnglish ? 'Community' : '커뮤니티'}</span>
-            <h2>{isEnglish ? 'Feed first, people second.' : '먼저 피드를 보고, 필요할 때 사람을 찾아보세요.'}</h2>
+            <span className="app-section-kicker">{t('커뮤니티', 'Community')}</span>
+            <h2>{t('피드를 보고, 같이 운동할 사람도 찾아보세요.', 'See the feed, find a workout mate, and meet your people.')}</h2>
           </div>
           <span className="community-mini-pill">
-            {isEnglish ? `${visibleFeedPosts.length} posts` : `게시글 ${visibleFeedPosts.length}`}
+            {activeTab === 'mate'
+              ? t(`모집글 ${visibleMatePosts.length}`, `${visibleMatePosts.length} mate posts`)
+              : t(`게시글 ${visibleFeedPosts.length}`, `${visibleFeedPosts.length} posts`)}
           </span>
         </div>
 
-        <div className="community-tab-row" role="tablist" aria-label={isEnglish ? 'Community sections' : '커뮤니티 섹션'}>
+        <div className="community-tab-row" role="tablist" aria-label={t('커뮤니티 섹션', 'Community sections')}>
           <button
             type="button"
             className={`community-tab-btn ${activeTab === 'feed' ? 'active' : ''}`}
             onClick={() => setActiveTab('feed')}
           >
-            {isEnglish ? 'Feed' : '피드'}
+            {t('피드', 'Feed')}
+          </button>
+          <button
+            type="button"
+            className={`community-tab-btn ${activeTab === 'mate' ? 'active' : ''}`}
+            onClick={() => setActiveTab('mate')}
+          >
+            {t('메이트', 'Mates')}
           </button>
           <button
             type="button"
             className={`community-tab-btn ${activeTab === 'discover' ? 'active' : ''}`}
             onClick={() => setActiveTab('discover')}
           >
-            {isEnglish ? 'Discover' : '찾기'}
+            {t('찾기', 'Discover')}
           </button>
           <button
             type="button"
             className={`community-tab-btn ${activeTab === 'ranking' ? 'active' : ''}`}
             onClick={() => setActiveTab('ranking')}
           >
-            {isEnglish ? 'Ranking' : '랭킹'}
+            {t('랭킹', 'Ranking')}
           </button>
         </div>
       </section>
@@ -120,6 +137,20 @@ export default function CommunityRoute({
           onSelectUser={onSelectCommunityUser}
           followingIds={followingIds}
           currentUserId={currentUserId}
+        />
+      )}
+
+      {activeTab === 'mate' && (
+        <MateBoard
+          isEnglish={isEnglish}
+          posts={visibleMatePosts}
+          loading={loadingMatePosts}
+          actionLoading={loadingAction}
+          currentUserId={currentUserId}
+          onCreatePost={onCreateMatePost}
+          onToggleInterest={onToggleMateInterest}
+          onToggleStatus={onUpdateMatePostStatus}
+          onSelectUser={onSelectCommunityUser}
         />
       )}
 

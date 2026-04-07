@@ -73,6 +73,24 @@ const tests = [
     },
   },
   {
+    name: 'mate post flow keeps pending draft payload when auth is required',
+    run() {
+      const result = createAuthPromptState(false, 'mate_post', {
+        type: 'create_mate_post',
+        reason: 'mate_post',
+        view: 'community',
+        payload: {
+          title: '합정 저녁 러닝 메이트 구해요',
+          workoutType: '러닝',
+          locationLabel: '합정역 근처',
+        },
+      })
+
+      assert.equal(result.authPrompt?.pendingAction?.type, 'create_mate_post')
+      assert.equal(result.authPrompt?.pendingAction?.payload?.title, '합정 저녁 러닝 메이트 구해요')
+    },
+  },
+  {
     name: 'notification flow opens actor profile for follow notifications',
     run() {
       const result = buildNotificationNavigation({

@@ -54,7 +54,7 @@ export default function ProgressRoute({
               : (isEnglish ? 'Retake Level Test' : '레벨 테스트 다시하기')}
           </button>
           <button type="button" className="secondary-btn" onClick={onGoHome}>
-            {isEnglish ? "Log Today's Workout" : '오늘 운동 기록하러 가기'}
+            {isEnglish ? "Log Today's Workout" : '오늘 운동 기록하기'}
           </button>
         </div>
       </section>

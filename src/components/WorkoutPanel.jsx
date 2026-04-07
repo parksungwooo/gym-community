@@ -210,18 +210,18 @@ export default function WorkoutPanel({
 
       <div className="workout-capture-header compact">
         <div>
-          <span className="app-section-kicker">{isEnglish ? 'Workout Sheet' : '운동 입력 시트'}</span>
+          <span className="app-section-kicker">{isEnglish ? 'Workout Sheet' : '운동 기록'}</span>
           <h2>{isEnglish ? "Log Today's Workout" : '오늘 운동 기록하기'}</h2>
           <p className="subtext compact">
             {isEnglish
               ? 'Type, time, photos, and a sharing choice are enough to save today.'
-              : '운동 종류, 시간, 사진, 공개 여부만 정하면 오늘 기록이 완성돼요.'}
+              : '운동 종류와 시간만 정해도 오늘 기록은 충분해요. 필요하면 사진과 공개 여부도 함께 설정해보세요.'}
           </p>
         </div>
 
         <div className="capture-header-actions">
           <span className={`capture-status ${todayDone ? 'done' : ''}`}>
-            {todayDone ? (isEnglish ? 'More logs available today' : '오늘은 추가 기록 가능') : (isEnglish ? 'Ready to log' : '지금 기록 가능')}
+            {todayDone ? (isEnglish ? 'More logs available today' : '오늘은 더 기록할 수 있어요') : (isEnglish ? 'Ready to log' : '바로 기록할 수 있어요')}
           </span>
           {onClose ? (
             <button type="button" className="sheet-close-btn" onClick={onClose} disabled={loading}>
@@ -380,7 +380,7 @@ export default function WorkoutPanel({
               <div className="photo-proof-header">
                 <span className="field-label-text">{isEnglish ? 'Photo Proof' : '사진 인증'}</span>
                 <span className="photo-proof-helper">
-                  {isEnglish ? `Optional. Up to ${MAX_PHOTOS} photos. Drag-style order with up/down controls.` : `선택 사항. 최대 ${MAX_PHOTOS}장까지 가능하고 위/아래 버튼으로 순서를 바꿀 수 있어요.`}
+                  {isEnglish ? `Optional. Up to ${MAX_PHOTOS} photos. Drag-style order with up/down controls.` : `선택 사항이에요. 최대 ${MAX_PHOTOS}장까지 올릴 수 있고 위/아래 버튼으로 순서를 바꿀 수 있어요.`}
                 </span>
               </div>
 
@@ -405,7 +405,7 @@ export default function WorkoutPanel({
                 <div>
                   <span className="field-label-text">{isEnglish ? 'Share to Feed' : '피드 공개'}</span>
                   <p className="photo-proof-helper">
-                    {isEnglish ? 'Turn this off to save privately in your records only.' : '끄면 기록에는 저장되지만 커뮤니티 피드에는 올리지 않아요.'}
+                    {isEnglish ? 'Turn this off to save privately in your records only.' : '끄면 내 기록에만 저장되고 커뮤니티 피드에는 올라가지 않아요.'}
                   </p>
                 </div>
                 <button type="button" className={`toggle-chip ${shareToFeed ? 'active' : ''}`} onClick={() => setShareToFeed((prev) => !prev)} disabled={loading}>
@@ -419,7 +419,7 @@ export default function WorkoutPanel({
         <div className="sheet-submit-bar compact">
           <div className="sheet-submit-copy">
             <strong>{getWorkoutTypeLabel(workoutType, language)}</strong>
-            <span>{Number(durationMinutes) ? (isEnglish ? `${durationMinutes} min planned` : `${durationMinutes}분 기록 예정`) : (isEnglish ? 'Duration not set' : '시간 미설정')}</span>
+            <span>{Number(durationMinutes) ? (isEnglish ? `${durationMinutes} min planned` : `${durationMinutes}분 운동으로 저장돼요`) : (isEnglish ? 'Duration not set' : '운동 시간이 아직 없어요')}</span>
           </div>
           <button type="submit" className="primary-btn capture-submit-btn compact" disabled={loading}>
             {loading ? (isEnglish ? 'Saving workout...' : '운동 저장 중...') : todayDone ? (isEnglish ? 'Save Another Workout Today' : '오늘 운동 추가 저장') : (isEnglish ? "Save Today's Workout" : '오늘 운동 기록 저장')}

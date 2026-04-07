@@ -14,14 +14,14 @@ function buildReason(item, currentLevel, language) {
   }
 
   if ((item.weekly_count ?? 0) >= 4) {
-    return language === 'en' ? 'Keeping a weekly rhythm' : '주간 리듬을 잘 지키는 중'
+    return language === 'en' ? 'Keeping a weekly rhythm' : '이번 주 꾸준히 운동 중'
   }
 
   if ((item.total_workouts ?? 0) >= 10) {
-    return language === 'en' ? 'Already building a habit' : '꾸준한 루틴이 쌓인 유저'
+    return language === 'en' ? 'Already building a habit' : '꾸준히 운동하는 사람'
   }
 
-  return language === 'en' ? 'Recommended for your pace' : '지금 흐름에 잘 맞는 추천'
+  return language === 'en' ? 'Recommended for your pace' : '지금 페이스와 잘 맞는 추천'
 }
 
 function FollowButton({ isFollowing, disabled, onClick, isEnglish }) {
@@ -65,14 +65,14 @@ export default function SuggestedUsers({
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{t('사람', 'People')}</span>
-          <h2 className="app-section-title small">{t('함께 뛰기 좋은 유저', 'People to move with')}</h2>
+          <h2 className="app-section-title small">{t('함께 운동하기 좋은 사람', 'People to move with')}</h2>
         </div>
         <span className="community-mini-pill">{isEnglish ? `${rows.length} picks` : `${rows.length}명 추천`}</span>
       </div>
 
       <p className="subtext compact">
         {t(
-          '지금 내 레벨과 리듬에 가까운 사람부터 가볍게 연결해보세요.',
+          '지금 내 레벨과 운동 페이스가 비슷한 사람부터 가볍게 연결해보세요.',
           'Start with people who feel close to your current level and rhythm.',
         )}
       </p>
@@ -101,7 +101,7 @@ export default function SuggestedUsers({
       {!loading && !rows.length && (
         <div className="empty-state-card">
           <span className="empty-state-badge">{t('곧 채워져요', 'Coming soon')}</span>
-          <strong>{t('추천 유저가 여기에 나타날 거예요.', 'Suggested people will appear here.')}</strong>
+          <strong>{t('추천할 사람이 여기에 나타날 거예요.', 'Suggested people will appear here.')}</strong>
           <p>
             {t(
               '운동 기록이 조금만 더 쌓이면 비슷한 페이스의 사람을 골라서 보여드릴게요.',

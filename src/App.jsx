@@ -29,8 +29,10 @@ import {
   blockUser,
   completeWorkout,
   createFeedPost,
+  createMatePost,
   fetchAchievementBadges,
   fetchBlockedIds,
+  fetchMatePosts,
   deleteWorkoutTemplate,
   deleteWorkoutLog,
   fetchFollowStats,
@@ -55,9 +57,11 @@ import {
   saveWorkoutTemplate,
   saveTestResult,
   saveWeightLog,
+  toggleMatePostInterest,
   toggleLike,
   unblockUser,
   unfollowUser,
+  updateMatePostStatus,
   updateUserProfile,
   updateWorkoutLog,
   upsertUser,
@@ -184,6 +188,19 @@ function withTimeout(promise, ms, message) {
   ])
 }
 
+function isTransientInitDelayMessage(message) {
+  if (!message) return false
+
+  return [
+    '__user_setup_delay__',
+    '__login_init_delay__',
+    '사용자 정보를 준비하는 데 시간이 걸리고 있어요.',
+    '로그인 초기화가 지연되고 있어요. 네트워크를 확인해주세요.',
+    'User setup is taking too long.',
+    'Login initialization is taking too long. Please check your network.',
+  ].includes(message)
+}
+
 function getActionableErrorMessage(error, fallbackMessage, isEnglish) {
   const rawMessage = error?.message ?? ''
   const normalized = rawMessage.toLowerCase()
@@ -234,6 +251,7 @@ export default function App() {
   const initInProgressRef = useRef(false)
   const notificationRefreshTimeoutRef = useRef(null)
   const blockedIdsRef = useRef([])
+  const pendingReplayHandlersRef = useRef({})
   const [user, setUser] = useState(null)
   const [authPrompt, setAuthPrompt] = useState(null)
   const [view, setView] = useState(() => (
@@ -244,6 +262,7 @@ export default function App() {
   const [testResult, setTestResult] = useState(null)
   const [latestResult, setLatestResult] = useState(null)
   const [feedPosts, setFeedPosts] = useState([])
+  const [matePosts, setMatePosts] = useState([])
   const [leaderboard, setLeaderboard] = useState([])
   const [workoutHistory, setWorkoutHistory] = useState([])
   const [workoutTemplates, setWorkoutTemplates] = useState([])
@@ -278,6 +297,7 @@ export default function App() {
   const [loadingInit, setLoadingInit] = useState(true)
   const [loadingAction, setLoadingAction] = useState(false)
   const [loadingFeed, setLoadingFeed] = useState(false)
+  const [loadingMatePosts, setLoadingMatePosts] = useState(false)
   const [loadingAuth, setLoadingAuth] = useState(false)
   const [todayDone, setTodayDone] = useState(false)
   const [successState, setSuccessState] = useState(null)
@@ -377,6 +397,10 @@ export default function App() {
     () => feedPosts.filter((item) => !blockedIds.includes(item.user_id)),
     [blockedIds, feedPosts],
   )
+  const visibleMatePosts = useMemo(
+    () => matePosts.filter((item) => !blockedIds.includes(item.user_id)),
+    [blockedIds, matePosts],
+  )
   const homeFeedPreview = useMemo(() => {
     const followingSet = new Set(followingIds)
     const allPreview = visibleFeedPosts.slice(0, 4)
@@ -431,6 +455,21 @@ export default function App() {
       setFeedPosts(posts)
     } finally {
       setLoadingFeed(false)
+    }
+  }, [isEnglish])
+
+  const refreshMatePosts = useCallback(async (userId) => {
+    setLoadingMatePosts(true)
+    try {
+      const rows = await withTimeout(
+        fetchMatePosts(userId, 24),
+        10000,
+        isEnglish ? 'Mate board is taking longer to load. Please try again soon.' : '메이트 게시판을 불러오는 시간이 길어지고 있어요. 잠시 후 다시 시도해주세요.',
+      )
+      setMatePosts(rows)
+      return rows
+    } finally {
+      setLoadingMatePosts(false)
     }
   }, [isEnglish])
 
@@ -491,6 +530,7 @@ export default function App() {
 
   const resetPrivateState = useCallback(() => {
     setLatestResult(null)
+    setMatePosts([])
     setWorkoutHistory([])
     setWorkoutTemplates([])
     setWorkoutStats(INITIAL_STATS)
@@ -531,8 +571,8 @@ export default function App() {
       withTimeout(fetchWorkoutTemplates(userId), 10000, isEnglish ? 'Could not load saved routines.' : '저장된 루틴을 불러오지 못했어요.'),
       withTimeout(getUserProfile(userId), 10000, isEnglish ? 'Could not load profile.' : '프로필 정보를 불러오지 못했어요.'),
       withTimeout(fetchWeightLogs(userId), 10000, isEnglish ? 'Could not load weight logs.' : '몸무게 기록을 불러오지 못했어요.'),
-      withTimeout(fetchRecentActivityEvents(userId, 16), 10000, isEnglish ? 'Could not load activity events.' : '활동 XP 기록을 불러오지 못했어요.'),
-      withTimeout(fetchAchievementBadges(userId), 10000, isEnglish ? 'Could not load badges.' : '활동 배지를 불러오지 못했어요.'),
+      withTimeout(fetchRecentActivityEvents(userId, 16), 10000, isEnglish ? 'Could not load activity events.' : '최근 활동 기록을 불러오지 못했어요.'),
+      withTimeout(fetchAchievementBadges(userId), 10000, isEnglish ? 'Could not load badges.' : '배지 목록을 불러오지 못했어요.'),
       withTimeout(fetchFollowingIds(userId), 10000, isEnglish ? 'Could not load follows.' : '팔로잉 목록을 불러오지 못했어요.'),
       withTimeout(fetchBlockedIds(userId), 10000, isEnglish ? 'Could not load blocked users.' : '차단 목록을 불러오지 못했어요.'),
       withTimeout(fetchFollowStats(userId), 10000, isEnglish ? 'Could not load follow stats.' : '팔로우 통계를 불러오지 못했어요.'),
@@ -576,7 +616,13 @@ export default function App() {
     if (!nextUser?.id) return
 
     setInitStatus(isEnglish ? 'Loading user...' : '사용자 정보를 불러오는 중입니다...')
-    await withTimeout(upsertUser(nextUser.id), 10000, isEnglish ? 'User setup is taking too long.' : '유저 초기화가 지연되고 있어요.')
+    try {
+      await withTimeout(upsertUser(nextUser.id), 10000, '__user_setup_delay__')
+    } catch (error) {
+      if (!isTransientInitDelayMessage(error?.message)) {
+        throw error
+      }
+    }
     setUser(nextUser)
 
     setInitStatus(isEnglish ? 'Checking today\'s log...' : '오늘 운동 기록을 확인하는 중입니다...')
@@ -666,13 +712,19 @@ export default function App() {
       clearTimeout(failSafe)
       subscription.unsubscribe()
     }
-  }, [initializeApp, isEnglish, loadPublicData, loadUserData])
+  }, [initializeApp, isEnglish, loadPublicData, loadUserData, navigateToView])
 
   useEffect(() => {
     if (!successState) return undefined
     const timer = setTimeout(() => setSuccessState(null), 2600)
     return () => clearTimeout(timer)
   }, [successState])
+
+  useEffect(() => {
+    if (!errorMessage || !isTransientInitDelayMessage(errorMessage)) return undefined
+    const timer = setTimeout(() => setErrorMessage(''), 1400)
+    return () => clearTimeout(timer)
+  }, [errorMessage])
 
   useEffect(() => {
     if (!celebration) return undefined
@@ -776,7 +828,7 @@ export default function App() {
         {
           body: isEnglish
             ? 'Your reminder time has arrived. Log one workout to keep the flow going.'
-            : '리마인더 시간이 됐어요. 흐름을 이어가려면 운동 한 번만 기록해보세요.',
+            : '운동할 시간이에요. 오늘 기록 한 번만 남겨보세요.',
         },
       )
 
@@ -799,6 +851,7 @@ export default function App() {
     isAuthenticated,
     isEnglish,
     language,
+    navigateToView,
     reminderPermission,
     reminderStatus.enabled,
     todayDone,
@@ -854,6 +907,34 @@ export default function App() {
     setAuthPrompt(authState.authPrompt)
     return true
   }, [isAuthenticated])
+
+  const runActionTask = useCallback(async (
+    task,
+    fallbackMessage,
+    options = {},
+  ) => {
+    const {
+      useLoadingState = true,
+      defaultValue = null,
+    } = options
+
+    if (useLoadingState) {
+      setLoadingAction(true)
+    }
+
+    setErrorMessage('')
+
+    try {
+      return await task()
+    } catch (error) {
+      setErrorMessage(getActionableErrorMessage(error, fallbackMessage, isEnglish))
+      return defaultValue
+    } finally {
+      if (useLoadingState) {
+        setLoadingAction(false)
+      }
+    }
+  }, [isEnglish])
 
   const handleGoogleSignIn = async () => {
     setLoadingAuth(true)
@@ -1041,54 +1122,37 @@ export default function App() {
   const handleDeleteWorkoutTemplate = async (templateId) => {
     if (!user?.id) return
 
-    setLoadingAction(true)
-    setErrorMessage('')
-
-    try {
+    await runActionTask(async () => {
       await deleteWorkoutTemplate(user.id, templateId)
       const templates = await fetchWorkoutTemplates(user.id)
       setWorkoutTemplates(templates)
       showSuccess(isEnglish ? 'Routine removed.' : '루틴을 삭제했어요.', 'danger-soft')
-    } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to delete routine.' : '루틴 삭제에 실패했습니다.', isEnglish))
-    } finally {
-      setLoadingAction(false)
-    }
+    }, isEnglish ? 'Failed to delete routine.' : '루틴 삭제에 실패했습니다.')
   }
 
   const handleUpdateWorkout = async (workoutLogId, details) => {
     if (!user?.id) return
-    setLoadingAction(true)
-    setErrorMessage('')
-    try {
+
+    await runActionTask(async () => {
       await updateWorkoutLog(user.id, workoutLogId, {
         ...details,
         weightKg: bodyMetrics.latestWeightKg,
       })
       await refreshUserSummary(user.id)
       showSuccess(isEnglish ? 'Workout updated.' : '운동 기록을 수정했어요.', 'info')
-    } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to update workout.' : '운동 기록 수정에 실패했습니다.', isEnglish))
-    } finally {
-      setLoadingAction(false)
-    }
+    }, isEnglish ? 'Failed to update workout.' : '운동 기록 수정에 실패했습니다.')
   }
 
   const handleDeleteWorkout = async (workoutLogId) => {
     if (!user?.id) return
-    setLoadingAction(true)
-    setErrorMessage('')
-    try {
+
+    await runActionTask(async () => {
       await deleteWorkoutLog(user.id, workoutLogId)
       await Promise.all([refreshUserSummary(user.id), refreshLeaderboard()])
       const doneToday = await hasWorkoutCompleted(user.id, getTodayDateString())
       setTodayDone(doneToday)
       showSuccess(isEnglish ? 'Workout deleted.' : '운동 기록을 삭제했어요.', 'danger-soft')
-    } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to delete workout.' : '운동 기록 삭제에 실패했습니다.', isEnglish))
-    } finally {
-      setLoadingAction(false)
-    }
+    }, isEnglish ? 'Failed to delete workout.' : '운동 기록 삭제에 실패했습니다.')
   }
 
   const handleToggleLike = async (postId, isLiked) => {
@@ -1098,12 +1162,11 @@ export default function App() {
       view: VIEW.COMMUNITY,
       payload: { postId, isLiked },
     })) return
-    try {
+
+    await runActionTask(async () => {
       await toggleLike(user.id, postId, isLiked)
       await refreshFeed(user.id)
-    } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to update like.' : '좋아요 처리에 실패했습니다.', isEnglish))
-    }
+    }, isEnglish ? 'Failed to update like.' : '좋아요 처리에 실패했습니다.', { useLoadingState: false })
   }
 
   const handleSubmitComment = async (postId, content) => {
@@ -1113,12 +1176,11 @@ export default function App() {
       view: VIEW.COMMUNITY,
       payload: { postId, content },
     })) return
-    try {
+
+    await runActionTask(async () => {
       await addComment(user.id, postId, content)
       await refreshFeed(user.id)
-    } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to add comment.' : '댓글 등록에 실패했습니다.', isEnglish))
-    }
+    }, isEnglish ? 'Failed to add comment.' : '댓글 등록에 실패했습니다.', { useLoadingState: false })
   }
 
   const openReportComposer = useCallback((target) => {
@@ -1359,6 +1421,62 @@ export default function App() {
     }
   }
 
+  const handleCreateMatePost = async (draft) => {
+    if (guardAuthAction('mate_post', {
+      type: 'create_mate_post',
+      reason: 'mate_post',
+      view: VIEW.COMMUNITY,
+      payload: draft,
+    })) return false
+
+    return runActionTask(async () => {
+      await createMatePost(user.id, draft)
+      await refreshMatePosts(user.id)
+      showSuccess(
+        isEnglish ? 'Mate post is live.' : '메이트 모집글을 등록했어요.',
+        'success',
+      )
+      return true
+    }, isEnglish ? 'Failed to create mate post.' : '메이트 모집글 작성에 실패했습니다.', { defaultValue: false })
+  }
+
+  const handleToggleMateInterest = async (postId, isInterested) => {
+    if (!postId) return
+
+    if (guardAuthAction('mate_interest', {
+      type: 'toggle_mate_interest',
+      reason: 'mate_interest',
+      view: VIEW.COMMUNITY,
+      payload: { postId, isInterested },
+    })) return
+
+    await runActionTask(async () => {
+      await toggleMatePostInterest(user.id, postId, isInterested)
+      await refreshMatePosts(user.id)
+      showSuccess(
+        isInterested
+          ? (isEnglish ? 'Interest removed.' : '관심 보내기를 취소했어요.')
+          : (isEnglish ? 'Interest sent.' : '관심을 보냈어요.'),
+        'info',
+      )
+    }, isEnglish ? 'Failed to update mate interest.' : '관심 상태를 바꾸지 못했어요.')
+  }
+
+  const handleUpdateMatePostStatus = async (postId, status = 'closed') => {
+    if (!postId || !user?.id) return
+
+    await runActionTask(async () => {
+      await updateMatePostStatus(user.id, postId, status)
+      await refreshMatePosts(user.id)
+      showSuccess(
+        status === 'closed'
+          ? (isEnglish ? 'Mate post closed.' : '메이트 모집을 마감했어요.')
+          : (isEnglish ? 'Mate post reopened.' : '메이트 모집을 다시 열었어요.'),
+        'info',
+      )
+    }, isEnglish ? 'Failed to update mate post.' : '메이트 모집 상태 변경에 실패했습니다.')
+  }
+
   const handleToggleFollow = async (targetUserId, isFollowing) => {
     if (!targetUserId || user?.id === targetUserId) return
 
@@ -1369,10 +1487,7 @@ export default function App() {
       payload: { targetUserId, isFollowing },
     })) return
 
-    setLoadingAction(true)
-    setErrorMessage('')
-
-    try {
+    await runActionTask(async () => {
       if (isFollowing) {
         await unfollowUser(user.id, targetUserId)
       } else {
@@ -1395,11 +1510,7 @@ export default function App() {
           : (isEnglish ? 'Now following user.' : '팔로우했어요.'),
         'info',
       )
-    } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to update follow.' : '팔로우 상태 변경에 실패했습니다.', isEnglish))
-    } finally {
-      setLoadingAction(false)
-    }
+    }, isEnglish ? 'Failed to update follow.' : '팔로우 상태 변경에 실패했습니다.')
   }
 
   useEffect(() => {
@@ -1460,7 +1571,7 @@ export default function App() {
         const rows = await withTimeout(
           searchPublicUsers(trimmedQuery, 12),
           10000,
-          isEnglish ? 'Search is taking too long.' : '유저 검색이 지연되고 있어요.',
+          isEnglish ? 'Search is taking too long.' : '사람 검색이 지연되고 있어요.',
         )
 
         if (!cancelled) {
@@ -1471,7 +1582,7 @@ export default function App() {
       } catch (error) {
         if (!cancelled) {
           setCommunitySearchResults([])
-          setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to search users.' : '유저 검색에 실패했습니다.', isEnglish))
+          setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to search users.' : '사람 검색에 실패했습니다.', isEnglish))
         }
       } finally {
         if (!cancelled) {
@@ -1498,6 +1609,16 @@ export default function App() {
 
     return undefined
   }, [isAdmin, isAuthenticated, isEnglish, moderationStatus, refreshModeration])
+
+  useEffect(() => {
+    if (view !== VIEW.COMMUNITY || !hasCommunityNickname) return undefined
+
+    refreshMatePosts(user?.id).catch((error) => {
+      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to load mate board.' : '메이트 게시판을 불러오지 못했습니다.', isEnglish))
+    })
+
+    return undefined
+  }, [hasCommunityNickname, isEnglish, refreshMatePosts, user?.id, view])
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
@@ -1623,96 +1744,112 @@ export default function App() {
     user?.id,
   ])
 
+  pendingReplayHandlersRef.current = {
+    handleSubmitTest,
+    handleWorkoutComplete,
+    handleSaveWorkoutTemplate,
+    handleToggleLike,
+    handleSubmitComment,
+    handleSubmitReport,
+    handleUpdateProfile,
+    handleSaveWeight,
+    handleToggleFollow,
+    handleToggleBlock,
+    handleCreateMatePost,
+    handleToggleMateInterest,
+  }
+
+  const replayPendingAction = useCallback(async (pendingAction) => {
+    if (!pendingAction?.type) return
+
+    closeAuthPrompt()
+
+    if (pendingAction.view) {
+      navigateToView(pendingAction.view)
+    }
+
+    const handlers = pendingReplayHandlersRef.current
+
+    switch (pendingAction.type) {
+      case 'submit_test':
+        await handlers.handleSubmitTest?.(pendingAction.payload?.score)
+        break
+      case 'complete_workout':
+        await handlers.handleWorkoutComplete?.(pendingAction.payload ?? {})
+        break
+      case 'reopen_workout':
+        navigateToView(VIEW.HOME)
+        openWorkoutComposer(pendingAction.payload ?? null)
+        showSuccess(
+          isEnglish
+            ? 'Login complete. Re-attach any new photos, then save your workout.'
+            : '로그인됐어요. 새 사진만 다시 붙인 뒤 운동을 저장해주세요.',
+          'info',
+        )
+        break
+      case 'save_workout_template':
+        await handlers.handleSaveWorkoutTemplate?.(pendingAction.payload ?? {})
+        break
+      case 'toggle_like':
+        await handlers.handleToggleLike?.(pendingAction.payload?.postId, pendingAction.payload?.isLiked)
+        break
+      case 'submit_comment':
+        await handlers.handleSubmitComment?.(pendingAction.payload?.postId, pendingAction.payload?.content ?? '')
+        break
+      case 'submit_report': {
+        const reportSubject = {
+          kind: pendingAction.payload?.kind ?? (pendingAction.payload?.postId ? 'post' : 'user'),
+          targetUserId: pendingAction.payload?.targetUserId ?? null,
+          postId: pendingAction.payload?.postId ?? null,
+        }
+        setReportTarget(reportSubject)
+        await handlers.handleSubmitReport?.({
+          reason: pendingAction.payload?.reason ?? 'other',
+          details: pendingAction.payload?.details ?? '',
+          subjectOverride: reportSubject,
+        })
+        break
+      }
+      case 'update_profile':
+        await handlers.handleUpdateProfile?.(pendingAction.payload ?? {})
+        break
+      case 'save_weight':
+        await handlers.handleSaveWeight?.(pendingAction.payload?.weightKg)
+        break
+      case 'toggle_follow':
+        await handlers.handleToggleFollow?.(pendingAction.payload?.targetUserId, pendingAction.payload?.isFollowing)
+        break
+      case 'create_mate_post':
+        await handlers.handleCreateMatePost?.(pendingAction.payload ?? {})
+        break
+      case 'toggle_mate_interest':
+        await handlers.handleToggleMateInterest?.(pendingAction.payload?.postId, pendingAction.payload?.isInterested)
+        break
+      case 'toggle_block':
+        await handlers.handleToggleBlock?.(pendingAction.payload?.targetUserId, pendingAction.payload?.isBlocked)
+        break
+      default:
+        break
+    }
+  }, [
+    closeAuthPrompt,
+    isEnglish,
+    navigateToView,
+    openWorkoutComposer,
+    showSuccess,
+  ])
+
   useEffect(() => {
     if (!isAuthenticated || loadingInit) return undefined
 
     const pendingAction = consumePendingAction()
     if (!pendingAction?.type) return undefined
-
-    const replay = async () => {
-      closeAuthPrompt()
-
-      if (pendingAction.view) {
-        navigateToView(pendingAction.view)
-      }
-
-      switch (pendingAction.type) {
-        case 'submit_test':
-          await handleSubmitTest(pendingAction.payload?.score)
-          break
-        case 'complete_workout':
-          await handleWorkoutComplete(pendingAction.payload ?? {})
-          break
-        case 'reopen_workout':
-          navigateToView(VIEW.HOME)
-          openWorkoutComposer(pendingAction.payload ?? null)
-          showSuccess(
-            isEnglish
-              ? 'Login complete. Re-attach any new photos, then save your workout.'
-              : '로그인됐어요. 새 사진만 다시 붙인 뒤 운동을 저장해주세요.',
-            'info',
-          )
-          break
-        case 'save_workout_template':
-          await handleSaveWorkoutTemplate(pendingAction.payload ?? {})
-          break
-        case 'toggle_like':
-          await handleToggleLike(pendingAction.payload?.postId, pendingAction.payload?.isLiked)
-          break
-        case 'submit_comment':
-          await handleSubmitComment(pendingAction.payload?.postId, pendingAction.payload?.content ?? '')
-          break
-        case 'submit_report':
-          {
-            const reportSubject = {
-              kind: pendingAction.payload?.kind ?? (pendingAction.payload?.postId ? 'post' : 'user'),
-              targetUserId: pendingAction.payload?.targetUserId ?? null,
-              postId: pendingAction.payload?.postId ?? null,
-            }
-            setReportTarget(reportSubject)
-          await handleSubmitReport({
-            reason: pendingAction.payload?.reason ?? 'other',
-            details: pendingAction.payload?.details ?? '',
-            subjectOverride: reportSubject,
-          })
-          break
-          }
-        case 'update_profile':
-          await handleUpdateProfile(pendingAction.payload ?? {})
-          break
-        case 'save_weight':
-          await handleSaveWeight(pendingAction.payload?.weightKg)
-          break
-        case 'toggle_follow':
-          await handleToggleFollow(pendingAction.payload?.targetUserId, pendingAction.payload?.isFollowing)
-          break
-        case 'toggle_block':
-          await handleToggleBlock(pendingAction.payload?.targetUserId, pendingAction.payload?.isBlocked)
-          break
-        default:
-          break
-      }
-    }
-
-    replay()
+    void replayPendingAction(pendingAction)
     return undefined
   }, [
-    closeAuthPrompt,
-    handleSaveWeight,
-    handleSaveWorkoutTemplate,
-    handleSubmitComment,
-    handleSubmitReport,
-    handleSubmitTest,
-    handleToggleBlock,
-    handleToggleFollow,
-    handleToggleLike,
-    handleUpdateProfile,
-    handleWorkoutComplete,
     isAuthenticated,
-    isEnglish,
     loadingInit,
-    openWorkoutComposer,
-    showSuccess,
+    replayPendingAction,
   ])
 
   const tabs = [
@@ -1721,10 +1858,11 @@ export default function App() {
     { key: VIEW.PROGRESS, label: isEnglish ? 'Records' : '기록' },
     { key: VIEW.PROFILE, label: isEnglish ? 'Profile' : '프로필' },
   ]
+  const visibleErrorMessage = isTransientInitDelayMessage(errorMessage) ? '' : errorMessage
 
   return (
     <main className="app-shell">
-      {errorMessage && <div className="error-box">{errorMessage}</div>}
+      {visibleErrorMessage && <div className="error-box">{visibleErrorMessage}</div>}
       {successState && (
         <div className={`app-toast ${successState.accent ?? 'default'}`}>
           <span className="app-toast-dot" />
@@ -1784,37 +1922,42 @@ export default function App() {
         </section>
       ) : (
         <>
-          <div className="app-utility-bar">
-            <div className="app-utility-group">
+          <div className="app-floating-actions" aria-label={isEnglish ? 'Global actions' : '빠른 메뉴'}>
+            <div className="app-action-dock">
               <button
                 type="button"
-                className="theme-toggle-btn"
+                className="theme-toggle-btn icon-only"
                 onClick={handleToggleTheme}
+                title={themeMode === 'dark'
+                  ? (isEnglish ? 'Switch to light mode' : '라이트 모드로 전환')
+                  : (isEnglish ? 'Switch to dark navy mode' : '네이비 다크로 전환')}
                 aria-label={isEnglish
                   ? `Switch to ${themeMode === 'dark' ? 'light' : 'dark'} theme`
                   : `${themeMode === 'dark' ? '라이트' : '다크'} 테마로 전환`}
               >
                 <span className="theme-toggle-icon"><ThemeIcon themeMode={themeMode} /></span>
-                <span className="theme-toggle-text">
+                <span className="sr-only">
                   {themeMode === 'dark'
                     ? (isEnglish ? 'Dark navy' : '네이비 다크')
                     : (isEnglish ? 'Light mode' : '라이트 모드')}
                 </span>
               </button>
               {isAuthenticated && (
-              <button
-                type="button"
-                className={`notification-trigger ${showNotificationCenter ? 'active' : ''}`}
-                onClick={openNotificationCenter}
-              >
-                <span className="notification-trigger-icon"><BellIcon /></span>
-                <span className="notification-trigger-text">{isEnglish ? 'Notifications' : '알림'}</span>
-                {unreadNotificationCount > 0 && (
-                  <span className="notification-trigger-badge">
-                    {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
-                  </span>
-                )}
-              </button>
+                <button
+                  type="button"
+                  className={`notification-trigger icon-only ${showNotificationCenter ? 'active' : ''}`}
+                  onClick={openNotificationCenter}
+                  title={isEnglish ? 'Open notifications' : '알림 열기'}
+                  aria-label={isEnglish ? 'Open notifications' : '알림 열기'}
+                >
+                  <span className="notification-trigger-icon"><BellIcon /></span>
+                  <span className="sr-only">{isEnglish ? 'Notifications' : '알림'}</span>
+                  {unreadNotificationCount > 0 && (
+                    <span className="notification-trigger-badge">
+                      {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                    </span>
+                  )}
+                </button>
               )}
             </div>
           </div>
@@ -1920,10 +2063,15 @@ export default function App() {
                 suggestedUsers={suggestedUsers}
                 currentLevel={latestResult?.level ?? testResult?.level ?? null}
                 loadingFeed={loadingFeed}
+                loadingMatePosts={loadingMatePosts}
                 visibleLeaderboard={visibleLeaderboard}
                 visibleFeedPosts={visibleFeedPosts}
+                visibleMatePosts={visibleMatePosts}
                 onToggleLike={handleToggleLike}
                 onSubmitComment={handleSubmitComment}
+                onCreateMatePost={handleCreateMatePost}
+                onToggleMateInterest={handleToggleMateInterest}
+                onUpdateMatePostStatus={handleUpdateMatePostStatus}
                 isAdmin={isAdmin}
                 moderationReports={moderationReports}
                 moderationLoading={loadingModeration}

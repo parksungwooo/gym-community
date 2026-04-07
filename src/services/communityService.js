@@ -265,6 +265,106 @@ export async function fetchBlockedIds(userId) {
   return (data ?? []).map((item) => item.blocked_id)
 }
 
+export async function fetchMatePosts(currentUserId, limit = 24) {
+  const safeLimit = Math.min(50, Math.max(1, Number(limit) || 24))
+
+  const { data, error } = await supabase.rpc('get_public_mate_posts', {
+    viewer_user_id: currentUserId ?? null,
+    limit_count: safeLimit,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return data ?? []
+}
+
+export async function createMatePost(userId, draft = {}) {
+  const title = draft.title?.trim()
+  const workoutType = draft.workoutType?.trim() || '러닝'
+  const locationLabel = draft.locationLabel?.trim()
+  const timeSlot = draft.timeSlot?.trim() || 'weekday_evening'
+  const difficulty = draft.difficulty?.trim() || 'beginner'
+  const capacity = Math.min(20, Math.max(1, Number(draft.capacity) || 2))
+  const body = draft.body?.trim() || null
+
+  if (!title) {
+    throw new Error('메이트 모집 제목을 입력해주세요.')
+  }
+
+  if (!locationLabel) {
+    throw new Error('만날 지역이나 장소를 입력해주세요.')
+  }
+
+  const { error } = await supabase
+    .from('mate_posts')
+    .insert({
+      user_id: userId,
+      title,
+      workout_type: workoutType,
+      location_label: locationLabel,
+      time_slot: timeSlot,
+      difficulty,
+      capacity,
+      body,
+      status: 'open',
+    })
+
+  if (error) {
+    throw error
+  }
+
+  return { ok: true }
+}
+
+export async function toggleMatePostInterest(userId, postId, isInterested) {
+  if (!userId || !postId) return null
+
+  if (isInterested) {
+    const { error } = await supabase
+      .from('mate_post_interests')
+      .delete()
+      .eq('post_id', postId)
+      .eq('user_id', userId)
+
+    if (error) {
+      throw error
+    }
+
+    return null
+  }
+
+  const { data, error } = await supabase
+    .from('mate_post_interests')
+    .insert({
+      post_id: postId,
+      user_id: userId,
+    })
+    .select('id,post_id,user_id,created_at')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export async function updateMatePostStatus(userId, postId, status = 'closed') {
+  const { error } = await supabase
+    .from('mate_posts')
+    .update({ status })
+    .eq('id', postId)
+    .eq('user_id', userId)
+
+  if (error) {
+    throw error
+  }
+
+  return { ok: true }
+}
+
 export async function blockUser(userId, targetUserId) {
   if (!targetUserId || userId === targetUserId) return null
 
@@ -409,7 +509,7 @@ export async function createFollowNotification(actorUserId, targetUserId) {
     actorUserId,
     type: 'follow',
     title: '새 팔로워',
-    body: '회원님을 팔로우하기 시작했어요.',
+    body: '회원님을 새로 팔로우했어요.',
     entityType: 'user',
     entityId: targetUserId,
   })
@@ -427,7 +527,7 @@ export async function createLikeNotification(actorUserId, postId) {
     actorUserId,
     type: 'like',
     title: '새 좋아요',
-    body: '회원님의 커뮤니티 기록을 좋아해요.',
+    body: '회원님의 게시글에 좋아요를 눌렀어요.',
     entityType: 'feed_post',
     entityId: post.id,
     metadata: {
@@ -449,7 +549,7 @@ export async function createCommentNotification(actorUserId, postId, commentCont
     actorUserId,
     type: 'comment',
     title: '새 댓글',
-    body: '회원님의 커뮤니티 기록에 댓글을 남겼어요.',
+    body: '회원님의 게시글에 댓글을 남겼어요.',
     entityType: 'feed_post',
     entityId: post.id,
     metadata: {

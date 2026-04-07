@@ -199,15 +199,15 @@ export default function HomeDashboard({
   const heroDescription = nickname
     ? todayDone
       ? t(
-          `${nickname}님은 오늘 흐름을 이미 이어가고 있어요. 이제 이번 주 페이스만 유지하면 충분해요.`,
+          `${nickname}님은 오늘 기록을 이미 남겼어요. 이제 이번 주 페이스만 유지하면 충분해요.`,
           `${nickname}, today is already in the green. Keeping the weekly rhythm is enough now.`,
         )
       : t(
-          `${nickname}님, 길게 하지 않아도 괜찮아요. 운동 종류와 시간만 남겨도 흐름이 이어져요.`,
+          `${nickname}님, 길게 하지 않아도 괜찮아요. 운동 종류와 시간만 남겨도 오늘 기록은 충분해요.`,
           `${nickname}, today does not need to be long. Type and time are enough to keep your rhythm going.`,
         )
     : t(
-        '운동 종류와 시간만 적어도 오늘의 리듬을 시작할 수 있어요.',
+        '운동 종류와 시간만 적어도 오늘 기록은 시작할 수 있어요.',
         'Workout type and time are enough to start today’s rhythm.',
       )
 
@@ -366,8 +366,8 @@ export default function HomeDashboard({
             <strong>{challenge.title}</strong>
             <p>
               {todayDone
-                ? t('오늘 기록은 끝났어요. 이제 이번 주 흐름만 유지하면 돼요.', 'Today is logged. Now keep the weekly rhythm going.')
-                : t('오늘 한 번의 기록이면 이번 주 흐름을 다시 이어갈 수 있어요.', 'One saved workout is enough to keep this week moving.')}
+                ? t('오늘 기록은 끝났어요. 이제 이번 주 페이스만 유지하면 돼요.', 'Today is logged. Now keep the weekly rhythm going.')
+                : t('오늘 한 번만 기록해도 이번 주 페이스를 다시 찾을 수 있어요.', 'One saved workout is enough to keep this week moving.')}
             </p>
           </div>
           <span>{`${goalProgress}%`}</span>
@@ -386,7 +386,7 @@ export default function HomeDashboard({
           <InsightStat
             label={t('연속 기록', 'Streak')}
             value={t(`${stats.streak}일`, `${stats.streak} days`)}
-            detail={t('리듬을 끊지 않는 게 가장 중요해요', 'Keep the rhythm unbroken')}
+            detail={t('꾸준히 이어가는 게 가장 중요해요', 'Keep the rhythm unbroken')}
           />
           <InsightStat
             label={t('최근 운동', 'Latest workout')}

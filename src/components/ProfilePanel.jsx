@@ -222,10 +222,10 @@ export default function ProfilePanel({
 
       {!isGuest && !canUseCommunity && (
         <div className="profile-guest-banner">
-          <strong>{t('커뮤니티를 열려면 닉네임이 필요해요.', 'Community access needs a nickname.')}</strong>
+          <strong>{t('커뮤니티를 이용하려면 닉네임이 필요해요.', 'Community access needs a nickname.')}</strong>
           <p>
             {t(
-              '닉네임을 저장하면 커뮤니티 탭을 바로 정상적으로 사용할 수 있어요.',
+              '닉네임을 저장하면 바로 커뮤니티 탭을 이용할 수 있어요.',
               'Save a nickname first and the community tab will open normally.',
             )}
           </p>
@@ -315,7 +315,7 @@ export default function ProfilePanel({
 
           <SettingRow
             label={t('한줄 소개', 'Bio')}
-            helper={t('지금 집중하는 운동 흐름을 짧게 적어보세요.', 'Describe your current workout focus in one short line.')}
+            helper={t('요즘 집중하는 운동 목표를 짧게 적어보세요.', 'Describe your current workout focus in one short line.')}
             compact
           >
             <textarea
