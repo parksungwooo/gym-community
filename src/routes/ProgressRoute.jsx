@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import MonthlyCalendar from '../components/MonthlyCalendar'
 import ProgressPanel from '../components/ProgressPanel'
 import ResultView from '../components/ResultView'
 import TestForm from '../components/TestForm'
 import WorkoutHistory from '../components/WorkoutHistory'
+import { buildProgressInsight } from '../features/app/surfaceInsights'
 
 export default function ProgressRoute({
   isEnglish,
@@ -28,6 +29,19 @@ export default function ProgressRoute({
 }) {
   const [weightDraft, setWeightDraft] = useState(null)
   const weightInputValue = weightDraft ?? String(bodyMetrics?.latestWeightKg ?? '')
+  const currentLevel = latestResult?.level ?? testResult?.level ?? null
+  const progressInsight = useMemo(
+    () => buildProgressInsight({
+      currentLevel,
+      workoutStats,
+      weeklyGoal,
+      bodyMetrics,
+      activitySummary,
+      workoutHistory,
+      isEnglish,
+    }),
+    [activitySummary, bodyMetrics, currentLevel, isEnglish, weeklyGoal, workoutHistory, workoutStats],
+  )
 
   const handleWeightSubmit = async (event) => {
     event.preventDefault()
@@ -41,6 +55,13 @@ export default function ProgressRoute({
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Records' : '기록'}</span>
           <h2>{isEnglish ? 'See your records at a glance.' : '내 기록을 한눈에 보기'}</h2>
+        </div>
+        <div className={`surface-insight-banner ${progressInsight.tone}`}>
+          <div className="surface-insight-copy">
+            <span>{progressInsight.label}</span>
+            <strong>{progressInsight.title}</strong>
+            <p>{progressInsight.body}</p>
+          </div>
         </div>
         <div className="record-hub-actions">
           <button type="button" className="ghost-btn" onClick={onToggleTestForm}>

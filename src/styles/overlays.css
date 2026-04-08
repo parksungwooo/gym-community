@@ -1798,6 +1798,55 @@
   line-height: 1.5;
 }
 
+.surface-insight-banner {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.96) 0%, rgba(241, 245, 249, 0.94) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.surface-insight-banner.warm {
+  background: linear-gradient(180deg, rgba(255, 247, 237, 0.96) 0%, rgba(255, 237, 213, 0.94) 100%);
+  border-color: rgba(251, 146, 60, 0.18);
+}
+
+.surface-insight-banner.cool {
+  background: linear-gradient(180deg, rgba(239, 246, 255, 0.96) 0%, rgba(219, 234, 254, 0.94) 100%);
+  border-color: rgba(59, 130, 246, 0.18);
+}
+
+.surface-insight-banner.growth {
+  background: linear-gradient(180deg, rgba(236, 253, 245, 0.98) 0%, rgba(209, 250, 229, 0.92) 100%);
+  border-color: rgba(16, 185, 129, 0.18);
+}
+
+.surface-insight-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.surface-insight-copy span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.surface-insight-copy strong {
+  color: #122033;
+  font-size: 0.98rem;
+  line-height: 1.28;
+  letter-spacing: -0.03em;
+}
+
+.surface-insight-copy p {
+  margin: 0;
+  color: #607086;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
 .home-summary-panel {
   margin-top: 0;
 }
@@ -2266,6 +2315,51 @@
   box-shadow: 0 0 0 3px rgba(90, 169, 255, 0.12);
 }
 
+:root[data-theme='dark'] .record-test-card {
+  background:
+    radial-gradient(circle at top right, rgba(96, 165, 250, 0.16), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(255, 204, 112, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(14, 25, 42, 0.98) 0%, rgba(10, 19, 32, 0.98) 100%);
+}
+
+:root[data-theme='dark'] .record-test-progress {
+  background: rgba(255, 255, 255, 0.1);
+  color: #dbeafe;
+}
+
+:root[data-theme='dark'] .question-card {
+  background: linear-gradient(180deg, rgba(18, 31, 51, 0.98) 0%, rgba(12, 22, 36, 0.98) 100%);
+  border-color: var(--line-soft);
+  box-shadow: none;
+}
+
+:root[data-theme='dark'] .question-label {
+  background: rgba(90, 169, 255, 0.12);
+  color: #bfdbfe;
+}
+
+:root[data-theme='dark'] .question-title {
+  color: var(--text-main);
+}
+
+:root[data-theme='dark'] .record-test-note {
+  color: var(--text-sub);
+}
+
+:root[data-theme='dark'] .question-card .option-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  box-shadow: none;
+}
+
+:root[data-theme='dark'] .question-card .option-btn.selected {
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+  border-color: rgba(96, 165, 250, 0.26);
+  color: #eff6ff;
+  box-shadow: 0 12px 22px rgba(37, 99, 235, 0.22);
+}
+
 :root[data-theme='dark'] .community-tab-btn {
   background: rgba(23, 37, 61, 0.94);
   color: var(--text-sub);
@@ -2325,6 +2419,41 @@
   color: #d1fae5;
 }
 
+:root[data-theme='dark'] .home-focus-insight {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme='dark'] .home-focus-insight.goal {
+  background: linear-gradient(180deg, rgba(146, 64, 14, 0.34) 0%, rgba(78, 36, 8, 0.28) 100%);
+}
+
+:root[data-theme='dark'] .home-focus-insight.community {
+  background: linear-gradient(180deg, rgba(30, 64, 175, 0.36) 0%, rgba(29, 78, 216, 0.2) 100%);
+}
+
+:root[data-theme='dark'] .home-focus-insight.streak,
+:root[data-theme='dark'] .home-focus-insight.win {
+  background: linear-gradient(180deg, rgba(6, 95, 70, 0.34) 0%, rgba(6, 78, 59, 0.26) 100%);
+}
+
+:root[data-theme='dark'] .home-focus-insight.setup {
+  background: linear-gradient(180deg, rgba(51, 65, 85, 0.42) 0%, rgba(30, 41, 59, 0.26) 100%);
+}
+
+:root[data-theme='dark'] .home-focus-insight.growth {
+  background: linear-gradient(180deg, rgba(133, 77, 14, 0.34) 0%, rgba(92, 52, 12, 0.24) 100%);
+}
+
+:root[data-theme='dark'] .home-focus-insight span,
+:root[data-theme='dark'] .home-focus-insight small {
+  color: rgba(228, 236, 245, 0.78);
+}
+
+:root[data-theme='dark'] .home-focus-insight strong {
+  color: #f8fbff;
+}
+
 :root[data-theme='dark'] .home-growth-side-head span,
 :root[data-theme='dark'] .home-metric-pill span,
 :root[data-theme='dark'] .home-metric-pill small,
@@ -2352,6 +2481,32 @@
 
 :root[data-theme='dark'] .home-focus-inline-copy span {
   color: rgba(255, 255, 255, 0.78);
+}
+
+:root[data-theme='dark'] .surface-insight-banner {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.94) 100%);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme='dark'] .surface-insight-banner.warm {
+  background: linear-gradient(180deg, rgba(146, 64, 14, 0.34) 0%, rgba(78, 36, 8, 0.24) 100%);
+}
+
+:root[data-theme='dark'] .surface-insight-banner.cool {
+  background: linear-gradient(180deg, rgba(30, 64, 175, 0.34) 0%, rgba(29, 78, 216, 0.18) 100%);
+}
+
+:root[data-theme='dark'] .surface-insight-banner.growth {
+  background: linear-gradient(180deg, rgba(6, 95, 70, 0.34) 0%, rgba(6, 78, 59, 0.22) 100%);
+}
+
+:root[data-theme='dark'] .surface-insight-copy span,
+:root[data-theme='dark'] .surface-insight-copy p {
+  color: rgba(228, 236, 245, 0.8);
+}
+
+:root[data-theme='dark'] .surface-insight-copy strong {
+  color: #f8fbff;
 }
 
 :root[data-theme='dark'] .home-feed-momentum-card,

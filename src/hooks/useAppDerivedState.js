@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { buildSuggestedUsers } from '../features/community/communityFlow'
+import { buildHomeInsight } from '../features/home/homeFlow'
 import { buildBadges, buildChallenge, createGuestProfile, getReminderStatus } from '../features/profile/profileFlow'
 import { getActivityLevelProgress } from '../utils/activityLevel'
 import { buildBodyMetrics } from '../utils/bodyMetrics'
@@ -110,6 +111,31 @@ export function useAppDerivedState({
       popular: popularPreview.length ? popularPreview : allPreview,
     }
   }, [followingIds, user?.id, visibleFeedPosts])
+  const homeInsight = useMemo(
+    () => buildHomeInsight({
+      challenge,
+      activitySummary,
+      currentLevel: latestResult?.level ?? testResult?.level ?? null,
+      currentUserId: user?.id ?? null,
+      followingIds,
+      visibleFeedPosts,
+      visibleMatePosts,
+      todayDone,
+      isEnglish,
+    }),
+    [
+      activitySummary,
+      challenge,
+      followingIds,
+      isEnglish,
+      latestResult?.level,
+      testResult?.level,
+      todayDone,
+      user?.id,
+      visibleFeedPosts,
+      visibleMatePosts,
+    ],
+  )
 
   return {
     badges,
@@ -125,6 +151,7 @@ export function useAppDerivedState({
     visibleFeedPosts,
     visibleMatePosts,
     homeFeedPreview,
+    homeInsight,
     activeCommunityProfile: selectedCommunityProfile ?? selectedCommunityUser,
     isAdmin: effectiveProfile?.is_admin === true,
     isPro: isProMember(effectiveProfile),

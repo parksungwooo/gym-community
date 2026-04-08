@@ -312,12 +312,32 @@ export function useAppBootstrap({
     return null
   }, [])
 
+  const prefetchCommunityData = useCallback((userId = null) => {
+    const tasks = [
+      refreshLeaderboard(),
+      refreshMatePosts(userId),
+    ]
+
+    if (userId && isAdmin) {
+      tasks.push(refreshModeration(moderationStatus))
+    }
+
+    void Promise.allSettled(tasks)
+  }, [
+    isAdmin,
+    moderationStatus,
+    refreshLeaderboard,
+    refreshMatePosts,
+    refreshModeration,
+  ])
+
   const loadPublicData = useCallback(async () => {
     setUser(null)
     resetPrivateState()
     setInitStatus(isEnglish ? 'Loading public dashboard...' : '공개 대시보드를 불러오는 중입니다...')
     await refreshFeed(null, [])
-  }, [isEnglish, refreshFeed, resetPrivateState, setInitStatus, setUser])
+    prefetchCommunityData(null)
+  }, [isEnglish, prefetchCommunityData, refreshFeed, resetPrivateState, setInitStatus, setUser])
 
   const loadUserData = useCallback(async (nextUser) => {
     if (!nextUser?.id) return
@@ -340,9 +360,11 @@ export function useAppBootstrap({
       refreshUserSummary(nextUser.id),
       refreshNotifications(nextUser.id),
     ])
+    prefetchCommunityData(nextUser.id)
   }, [
     ensureUserProfileReady,
     isEnglish,
+    prefetchCommunityData,
     refreshFeed,
     refreshNotifications,
     refreshUserSummary,

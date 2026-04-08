@@ -52,8 +52,8 @@ npm run dev
 1. Supabase 프로젝트 생성
 2. `Authentication > Providers`에서 `Anonymous` 활성화
 3. Supabase SQL Editor에서 아래 둘 중 하나 실행
-- 가장 쉬운 방법: `supabase/run_once.sql`
-- 분리 실행: `supabase/schema.sql` -> `supabase/verify.sql`
+- 권장: `supabase/schema.sql` -> `supabase/verify.sql`
+- `supabase/run_once.sql`은 초기 부트스트랩용 레거시 파일이라 최신 스키마 기준으로는 유지되지 않을 수 있음
 4. verify 결과의 `ok` 값이 모두 `true`인지 확인
 5. 프로젝트 URL/anon key 확인 후 `.env` 생성
 

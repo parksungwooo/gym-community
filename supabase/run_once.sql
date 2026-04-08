@@ -1,6 +1,6 @@
 -- Daily Fitness Loop
--- Run this single file in Supabase SQL Editor.
--- It applies the latest schema and immediately verifies the required resources.
+-- Legacy bootstrap helper for early local setup only.
+-- For the latest schema, use supabase/schema.sql and then supabase/verify.sql.
 
 create extension if not exists "pgcrypto";
 

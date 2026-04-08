@@ -11,6 +11,7 @@ export default function HomeRoute({
   stats,
   challenge,
   activitySummary,
+  homeInsight,
   achievementBadges,
   reminder,
   reminderPermission,
@@ -88,6 +89,7 @@ export default function HomeRoute({
         stats={stats}
         challenge={challenge}
         activitySummary={activitySummary}
+        homeInsight={homeInsight}
         achievementBadges={achievementBadges}
         reminder={reminder}
         reminderPermission={reminderPermission}

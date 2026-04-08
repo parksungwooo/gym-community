@@ -146,8 +146,33 @@ create table if not exists public.feed_posts (
   content text not null,
   type text not null default 'general',
   metadata jsonb not null default '{}'::jsonb,
+  visibility_status text not null default 'visible' check (visibility_status in ('visible', 'hidden_by_admin', 'hidden_by_author')),
+  hidden_at timestamptz,
+  hidden_by uuid references public.users(id) on delete set null,
+  hidden_reason text,
   created_at timestamptz not null default now()
 );
+
+alter table public.feed_posts add column if not exists visibility_status text not null default 'visible';
+alter table public.feed_posts add column if not exists hidden_at timestamptz;
+alter table public.feed_posts add column if not exists hidden_by uuid references public.users(id) on delete set null;
+alter table public.feed_posts add column if not exists hidden_reason text;
+update public.feed_posts set visibility_status = 'visible' where visibility_status is null;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'feed_posts_visibility_status_check'
+      and conrelid = 'public.feed_posts'::regclass
+  ) then
+    alter table public.feed_posts
+      add constraint feed_posts_visibility_status_check
+      check (visibility_status in ('visible', 'hidden_by_admin', 'hidden_by_author'));
+  end if;
+end
+$$;
 
 create table if not exists public.likes (
   id uuid primary key default gen_random_uuid(),
@@ -254,6 +279,7 @@ create index if not exists idx_xp_events_reference on public.xp_events (referenc
 create index if not exists idx_user_badges_user_awarded_at on public.user_badges (user_id, awarded_at desc);
 create index if not exists idx_feed_posts_created_at on public.feed_posts (created_at desc);
 create index if not exists idx_feed_posts_user_created_at on public.feed_posts (user_id, created_at desc);
+create index if not exists idx_feed_posts_visibility_created_at on public.feed_posts (visibility_status, created_at desc);
 create index if not exists idx_likes_post_id on public.likes (post_id);
 create index if not exists idx_comments_post_id on public.comments (post_id);
 create index if not exists idx_follows_follower_id on public.follows (follower_id);
@@ -896,19 +922,11 @@ begin
 end
 $$;
 
-do $$
-begin
-  if not exists (
-    select 1 from pg_policies
-    where schemaname = 'public' and tablename = 'feed_posts' and policyname = 'anyone can read feed posts'
-  ) then
-    create policy "anyone can read feed posts"
-    on public.feed_posts
-    for select
-    using (true);
-  end if;
-end
-$$;
+drop policy if exists "anyone can read feed posts" on public.feed_posts;
+create policy "anyone can read feed posts"
+on public.feed_posts
+for select
+using (visibility_status = 'visible');
 
 do $$
 begin
@@ -1725,7 +1743,7 @@ as $$
   limit greatest(least(limit_count, 50), 1);
 $$;
 
-grant execute on function public.get_public_mate_posts(uuid, integer) to authenticated;
+grant execute on function public.get_public_mate_posts(uuid, integer) to anon, authenticated;
 
 create or replace function public.get_public_leaderboard(limit_count int default 10)
 returns table (
@@ -2134,6 +2152,9 @@ returns table (
   resolution_note text,
   reviewed_at timestamptz,
   reviewed_by uuid,
+  post_visibility_status text,
+  post_hidden_at timestamptz,
+  post_hidden_reason text,
   post_preview text,
   created_at timestamptz
 )
@@ -2168,6 +2189,9 @@ as $$
     r.resolution_note,
     r.reviewed_at,
     r.reviewed_by,
+    post.visibility_status as post_visibility_status,
+    post.hidden_at as post_hidden_at,
+    post.hidden_reason as post_hidden_reason,
     public.trim_notification_text(post.content, 120) as post_preview,
     r.created_at
   from public.reports r
@@ -2182,6 +2206,56 @@ as $$
 $$;
 
 grant execute on function public.get_moderation_reports(text, int) to authenticated;
+
+create or replace function public.set_feed_post_visibility(
+  target_post_id uuid,
+  next_visibility text default 'hidden_by_admin',
+  moderation_note text default null
+)
+returns public.feed_posts
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  admin_id uuid;
+  sanitized_visibility text;
+  updated_post public.feed_posts;
+begin
+  select u.id
+  into admin_id
+  from public.users u
+  where u.id = auth.uid()
+    and u.is_admin = true;
+
+  if admin_id is null then
+    raise exception 'Only admins can moderate feed posts.';
+  end if;
+
+  sanitized_visibility := case
+    when next_visibility = 'visible' then 'visible'
+    when next_visibility in ('hidden_by_admin', 'hidden_by_author') then next_visibility
+    else 'hidden_by_admin'
+  end;
+
+  update public.feed_posts fp
+  set
+    visibility_status = sanitized_visibility,
+    hidden_at = case when sanitized_visibility = 'visible' then null else now() end,
+    hidden_by = case when sanitized_visibility = 'visible' then null else admin_id end,
+    hidden_reason = case when sanitized_visibility = 'visible' then null else nullif(trim(moderation_note), '') end
+  where fp.id = target_post_id
+  returning fp.* into updated_post;
+
+  if updated_post.id is null then
+    raise exception 'Feed post not found.';
+  end if;
+
+  return updated_post;
+end;
+$$;
+
+grant execute on function public.set_feed_post_visibility(uuid, text, text) to authenticated;
 
 create or replace function public.resolve_report(report_id uuid, next_status text default 'reviewed', review_note text default null)
 returns public.reports

@@ -47,6 +47,7 @@ import {
   hasWorkoutCompleted,
   resolveModerationReport,
   searchPublicUsers,
+  setFeedPostVisibility,
   followUser,
   submitReport,
   saveWorkoutTemplate,
@@ -196,6 +197,7 @@ export default function App() {
     visibleFeedPosts,
     visibleMatePosts,
     homeFeedPreview,
+    homeInsight,
     activeCommunityProfile,
     isAdmin,
     isPro,
@@ -857,6 +859,37 @@ export default function App() {
       )
     } catch (error) {
       setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to update moderation report.' : '신고 처리에 실패했습니다.', isEnglish))
+    } finally {
+      setModerationActionLoading(false)
+    }
+  }
+
+  const handleToggleReportedPostVisibility = async (report, nextVisibility, resolutionNote = '') => {
+    if (!user?.id || !isAdmin || !report?.post_id) return
+
+    setModerationActionLoading(true)
+    setErrorMessage('')
+
+    try {
+      await setFeedPostVisibility(report.post_id, nextVisibility, resolutionNote)
+      await Promise.all([
+        refreshModeration(moderationStatus),
+        refreshFeed(user.id),
+      ])
+      showSuccess(
+        nextVisibility === 'visible'
+          ? (isEnglish ? 'Post restored.' : '게시글을 다시 노출했어요.')
+          : (isEnglish ? 'Post hidden from the feed.' : '게시글을 피드에서 숨겼어요.'),
+        nextVisibility === 'visible' ? 'info' : 'danger-soft',
+      )
+    } catch (error) {
+      setErrorMessage(
+        getActionableErrorMessage(
+          error,
+          isEnglish ? 'Failed to update post visibility.' : '게시글 노출 상태를 바꾸지 못했어요.',
+          isEnglish,
+        ),
+      )
     } finally {
       setModerationActionLoading(false)
     }
@@ -1568,6 +1601,7 @@ export default function App() {
                 stats={workoutStats}
                 challenge={challenge}
                 activitySummary={activitySummary}
+                homeInsight={homeInsight}
                 achievementBadges={achievementBadges}
                 reminder={reminderStatus}
                 reminderPermission={reminderPermission}
@@ -1668,6 +1702,7 @@ export default function App() {
                 onModerationStatusChange={setModerationStatus}
                 onRefreshModeration={() => refreshModeration(moderationStatus)}
                 onResolveReport={handleResolveReport}
+                onTogglePostVisibility={handleToggleReportedPostVisibility}
               />
             )}
 

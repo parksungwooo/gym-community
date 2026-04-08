@@ -166,6 +166,35 @@
   font-weight: 700;
 }
 
+.moderation-post-state-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.moderation-post-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  background: rgba(219, 234, 254, 0.9);
+  color: #1d4ed8;
+}
+
+.moderation-post-pill.hidden_by_admin,
+.moderation-post-pill.hidden_by_author {
+  background: rgba(254, 226, 226, 0.92);
+  color: #b91c1c;
+}
+
+.moderation-post-note {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
 .moderation-status-pill.open {
   background: rgba(253, 224, 71, 0.24);
   color: #854d0e;

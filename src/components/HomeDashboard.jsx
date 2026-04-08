@@ -158,6 +158,7 @@ export default function HomeDashboard({
   stats,
   challenge,
   activitySummary,
+  homeInsight,
   reminder,
   reminderPermission,
   feedPreview = {},
@@ -251,6 +252,13 @@ export default function HomeDashboard({
             <div className="home-focus-topline">
               <span className={`home-focus-badge ${todayDone ? 'done' : 'fresh'}`}>{heroBadgeLabel}</span>
             </div>
+            {homeInsight ? (
+              <div className={`home-focus-insight ${homeInsight.tone || 'default'}`}>
+                <span>{homeInsight.label}</span>
+                <strong>{homeInsight.title}</strong>
+                <small>{homeInsight.body}</small>
+              </div>
+            ) : null}
             <h2>{heroTitle}</h2>
             <p>{heroDescription}</p>
           </div>

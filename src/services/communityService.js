@@ -449,6 +449,20 @@ export async function resolveModerationReport(reportId, status, resolutionNote =
   return data
 }
 
+export async function setFeedPostVisibility(postId, nextVisibility = 'hidden_by_admin', moderationNote = '') {
+  const { data, error } = await supabase.rpc('set_feed_post_visibility', {
+    target_post_id: postId,
+    next_visibility: nextVisibility,
+    moderation_note: moderationNote?.trim() || null,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
 export async function fetchFollowStats(userId) {
   const [{ count: followerCount, error: followerError }, { count: followingCount, error: followingError }] = await Promise.all([
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', userId),
@@ -1132,7 +1146,8 @@ export async function addComment(userId, postId, content) {
 export async function fetchFeedWithRelations(currentUserId, blockedUserIds = []) {
   const { data: posts, error: postError } = await supabase
     .from('feed_posts')
-    .select('id,user_id,content,type,metadata,created_at')
+    .select('id,user_id,content,type,metadata,created_at,visibility_status')
+    .eq('visibility_status', 'visible')
     .order('created_at', { ascending: false })
     .limit(50)
 

@@ -38,18 +38,29 @@ export default function TestForm({ onSubmit, loading }) {
   }
 
   return (
-    <section className="card">
-      <h2>{isEnglish ? '3-Min Fitness Level Test' : '3분 체력 레벨 테스트'}</h2>
-      <p className="subtext">
-        {isEnglish
-          ? 'Check where you are now and set a starting point for your record.'
-          : '가볍게 지금 상태를 확인하고, 기록의 출발점을 만들어보세요.'}
-      </p>
+    <section className="card record-test-card">
+      <div className="record-test-head">
+        <div className="record-test-copy">
+          <span className="app-section-kicker">{isEnglish ? 'Quick check' : '빠른 체크'}</span>
+          <h2>{isEnglish ? '3-Min Fitness Level Test' : '3분 체력 레벨 테스트'}</h2>
+          <p className="subtext">
+            {isEnglish
+              ? 'Check where you are now and set a starting point for your record.'
+              : '가볍게 지금 상태를 확인하고, 기록의 출발점을 만들어보세요.'}
+          </p>
+        </div>
+        <span className="record-test-progress">
+          {answeredCount}/{questions.length}
+        </span>
+      </div>
 
       <form onSubmit={handleSubmit} className="question-form">
         {questions.map((item, index) => (
           <article key={item.id} className="question-card">
-            <p className="question-title">Q{index + 1}. {item.question}</p>
+            <div className="question-head">
+              <span className="question-label">Q{index + 1}</span>
+              <p className="question-title">{item.question}</p>
+            </div>
             <div className="option-grid">
               {item.options.map((option) => (
                 <OptionButton
@@ -64,7 +75,7 @@ export default function TestForm({ onSubmit, loading }) {
         ))}
 
         {!canSubmit && (
-          <p className="subtext">
+          <p className="subtext record-test-note">
             {isEnglish
               ? `${questions.length - answeredCount} more answers to unlock your result.`
               : `아직 ${questions.length - answeredCount}개만 더 답하면 결과를 볼 수 있어요.`}

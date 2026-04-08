@@ -271,6 +271,38 @@ select 'column.reports.reviewed_by', exists (
     and column_name = 'reviewed_by'
 )
 union all
+select 'column.feed_posts.visibility_status', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'feed_posts'
+    and column_name = 'visibility_status'
+)
+union all
+select 'column.feed_posts.hidden_at', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'feed_posts'
+    and column_name = 'hidden_at'
+)
+union all
+select 'column.feed_posts.hidden_by', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'feed_posts'
+    and column_name = 'hidden_by'
+)
+union all
+select 'column.feed_posts.hidden_reason', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'feed_posts'
+    and column_name = 'hidden_reason'
+)
+union all
 select 'column.notifications.read_at', exists (
   select 1
   from information_schema.columns
@@ -313,6 +345,8 @@ select 'function.get_notification_inbox', to_regprocedure('public.get_notificati
 union all
 select 'function.get_moderation_reports', to_regprocedure('public.get_moderation_reports(text,integer)') is not null
 union all
+select 'function.set_feed_post_visibility', to_regprocedure('public.set_feed_post_visibility(uuid,text,text)') is not null
+union all
 select 'function.resolve_report', to_regprocedure('public.resolve_report(uuid,text,text)') is not null
 union all
 select 'function.search_public_users', to_regprocedure('public.search_public_users(text,integer)') is not null
@@ -329,6 +363,13 @@ select 'index.reports_status_created_at', exists (
   from pg_indexes
   where schemaname = 'public'
     and indexname = 'idx_reports_status_created_at'
+)
+union all
+select 'index.feed_posts_visibility_created_at', exists (
+  select 1
+  from pg_indexes
+  where schemaname = 'public'
+    and indexname = 'idx_feed_posts_visibility_created_at'
 )
 union all
 select 'index.xp_events_user_created_at', exists (

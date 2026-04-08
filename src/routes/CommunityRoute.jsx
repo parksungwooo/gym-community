@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import FeedList from '../components/FeedList'
 import MateBoard from '../components/MateBoard'
 import ModerationPanel from '../components/ModerationPanel'
@@ -6,6 +6,7 @@ import PublicProfileCard from '../components/PublicProfileCard'
 import RankingBoard from '../components/RankingBoard'
 import SuggestedUsers from '../components/SuggestedUsers'
 import UserSearchPanel from '../components/UserSearchPanel'
+import { buildCommunityInsight } from '../features/app/surfaceInsights'
 
 export default function CommunityRoute({
   isEnglish,
@@ -49,10 +50,37 @@ export default function CommunityRoute({
   onModerationStatusChange,
   onRefreshModeration,
   onResolveReport,
+  onTogglePostVisibility,
 }) {
   const t = (ko, en) => (isEnglish ? en : ko)
   const [activeTab, setActiveTab] = useState('feed')
   const [activeUtility, setActiveUtility] = useState(null)
+  const communityInsight = useMemo(
+    () => buildCommunityInsight({
+      currentLevel,
+      currentUserId,
+      followingIds,
+      suggestedUsers,
+      visibleLeaderboard,
+      visibleFeedPosts,
+      visibleMatePosts,
+      activeTab,
+      activeUtility,
+      isEnglish,
+    }),
+    [
+      activeTab,
+      activeUtility,
+      currentLevel,
+      currentUserId,
+      followingIds,
+      isEnglish,
+      suggestedUsers,
+      visibleFeedPosts,
+      visibleLeaderboard,
+      visibleMatePosts,
+    ],
+  )
 
   useEffect(() => {
     if (activeUtility !== 'ranking') return
@@ -92,6 +120,14 @@ export default function CommunityRoute({
               ? t(`모집글 ${visibleMatePosts.length}`, `${visibleMatePosts.length} mate posts`)
               : t(`게시글 ${visibleFeedPosts.length}`, `${visibleFeedPosts.length} posts`)}
           </span>
+        </div>
+
+        <div className={`surface-insight-banner ${communityInsight.tone}`}>
+          <div className="surface-insight-copy">
+            <span>{communityInsight.label}</span>
+            <strong>{communityInsight.title}</strong>
+            <p>{communityInsight.body}</p>
+          </div>
         </div>
 
         <div
@@ -171,6 +207,7 @@ export default function CommunityRoute({
               onStatusChange={onModerationStatusChange}
               onRefresh={onRefreshModeration}
               onResolve={onResolveReport}
+              onTogglePostVisibility={onTogglePostVisibility}
             />
           )}
         </section>
