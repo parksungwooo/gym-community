@@ -69,17 +69,17 @@ button:active {
 }
 
 .app-shell {
-  width: min(520px, 100%);
+  width: min(640px, calc(100vw - 24px));
   margin: 0 auto;
-  padding: 68px 12px 88px;
+  padding: 74px 0 108px;
 }
 
 .app-floating-actions {
   position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
   left: 50%;
   z-index: 45;
-  width: min(520px, calc(100vw - 24px));
+  width: min(640px, calc(100vw - 24px));
   display: flex;
   justify-content: flex-end;
   transform: translateX(-50%);
@@ -92,10 +92,10 @@ button:active {
   gap: 8px;
   padding: 6px;
   border-radius: 22px;
-  border: 1px solid rgba(126, 142, 177, 0.18);
-  background: rgba(8, 17, 29, 0.82);
-  box-shadow: 0 18px 42px rgba(2, 8, 23, 0.26);
-  backdrop-filter: blur(16px);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(20px);
   pointer-events: auto;
 }
 
@@ -134,9 +134,9 @@ button:active {
   min-height: 48px;
   padding: 0;
   border-radius: 16px;
-  background: rgba(13, 23, 38, 0.88);
-  border-color: rgba(90, 169, 255, 0.16);
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(148, 163, 184, 0.16);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
 }
 
 .theme-toggle-icon {
@@ -147,6 +147,7 @@ button:active {
   height: 34px;
   border-radius: 12px;
   background: linear-gradient(135deg, #dbeafe 0%, #fff0db 100%);
+  color: #1d4ed8;
 }
 
 .theme-toggle-icon svg {
@@ -182,7 +183,7 @@ button:active {
 .notification-trigger-icon svg {
   width: 17px;
   height: 17px;
-  stroke: #dbeafe;
+  stroke: #1d4ed8;
   stroke-width: 1.9;
   fill: none;
   stroke-linecap: round;
@@ -405,30 +406,31 @@ button:active {
 .tab-nav {
   position: fixed;
   left: 50%;
-  bottom: 6px;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
   z-index: 30;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  width: min(500px, calc(100vw - 14px));
-  padding: 6px;
+  gap: 6px;
+  width: min(560px, calc(100vw - 24px));
+  padding: 8px;
   transform: translateX(-50%);
-  border-radius: 20px;
-  background: rgba(15, 23, 42, 0.92);
-  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.28);
-  backdrop-filter: blur(18px);
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(20px);
 }
 
 .tab-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   border: none;
-  border-radius: 14px;
+  border-radius: 16px;
   background: transparent;
-  color: rgba(241, 245, 249, 0.7);
-  padding: 9px 6px;
+  color: #64748b;
+  padding: 10px 8px;
   font-weight: 700;
 }
 
@@ -436,10 +438,10 @@ button:active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(37, 99, 235, 0.08);
 }
 
 .tab-icon svg {
@@ -457,9 +459,9 @@ button:active {
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, #1f4fd8 0%, #5aa9ff 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
   color: #eff6ff;
-  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.28);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.26);
 }
 
 .tab-btn.active .tab-icon {

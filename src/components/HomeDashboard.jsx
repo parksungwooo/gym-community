@@ -184,6 +184,12 @@ export default function HomeDashboard({
     ? t('오늘 운동은 이미 기록했어요', 'Today already has a saved workout.')
     : t('오늘 운동 한 번만 기록하면 충분해요', 'One workout log is enough for today.')
 
+  const heroBadgeLabel = todayDone
+    ? t('오늘 완료', 'Saved today')
+    : goalCurrent > 0
+      ? t(`이번 주 ${goalCurrent}/${goalTarget}`, `Week ${goalCurrent}/${goalTarget}`)
+      : t('첫 기록 만들기', 'Start the first log')
+
   const heroDescription = nickname
     ? todayDone
       ? t(
@@ -242,6 +248,9 @@ export default function HomeDashboard({
         <div className="home-growth-hero-main">
           <div className="home-focus-copy">
             <span className="app-section-kicker">{t('오늘의 액션', 'Today')}</span>
+            <div className="home-focus-topline">
+              <span className={`home-focus-badge ${todayDone ? 'done' : 'fresh'}`}>{heroBadgeLabel}</span>
+            </div>
             <h2>{heroTitle}</h2>
             <p>{heroDescription}</p>
           </div>

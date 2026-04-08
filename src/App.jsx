@@ -146,7 +146,7 @@ export default function App() {
   const [initStatus, setInitStatus] = useState(isEnglish ? 'Checking session...' : '세션을 확인하는 중입니다...')
   const [historyTick, setHistoryTick] = useState(0)
   const [themeMode, setThemeMode] = useState(() => {
-    if (typeof window === 'undefined') return 'dark'
+    if (typeof window === 'undefined') return 'light'
     return resolveThemeMode(window.localStorage.getItem(THEME_STORAGE_KEY))
   })
   const isAuthenticated = Boolean(user?.id)
