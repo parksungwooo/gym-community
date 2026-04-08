@@ -2399,6 +2399,15 @@
   background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 55%, #93c5fd 100%);
 }
 
+:root[data-theme='dark'] .record-test-flow-header {
+  background:
+    linear-gradient(180deg, rgba(10, 19, 32, 0.98) 0%, rgba(10, 19, 32, 0.9) 78%, rgba(10, 19, 32, 0) 100%);
+}
+
+:root[data-theme='dark'] .record-test-flow-title strong {
+  color: var(--text-main);
+}
+
 :root[data-theme='dark'] .question-card {
   background: linear-gradient(180deg, rgba(18, 31, 51, 0.98) 0%, rgba(12, 22, 36, 0.98) 100%);
   border-color: var(--line-soft);

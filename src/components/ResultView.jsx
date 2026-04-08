@@ -22,8 +22,9 @@ export default function ResultView({ score, level, onStartWorkout }) {
 
   return (
     <section className="card result-card">
-      <span className="app-section-kicker">{isEnglish ? 'Level test' : '레벨 테스트'}</span>
-      <h2>{isEnglish ? 'Result' : '결과'}</h2>
+      <p className="subtext result-caption">
+        {isEnglish ? 'Based on this check.' : '이번 체크 기준이에요.'}
+      </p>
       <p className="score">{isEnglish ? `${score} pts` : `${score}점`}</p>
       <p className="level-pill">{displayLevel}</p>
       <p className="result-message">{message}</p>

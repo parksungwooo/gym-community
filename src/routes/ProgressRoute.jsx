@@ -126,11 +126,18 @@ export default function ProgressRoute({
           >
             <div className="record-test-flow-shell">
               <div className="record-test-flow-header">
-                <span className="auth-modal-kicker">
-                  {showTestForm
-                    ? (isEnglish ? '3-Min Check' : '3분 체크')
-                    : (isEnglish ? 'Result' : '결과')}
-                </span>
+                <div className="record-test-flow-title">
+                  <span className="auth-modal-kicker">
+                    {showTestForm
+                      ? (isEnglish ? '3-Min Check' : '3분 체크')
+                      : (isEnglish ? 'Result' : '결과')}
+                  </span>
+                  <strong>
+                    {showTestForm
+                      ? (isEnglish ? 'Level test' : '레벨 테스트')
+                      : (isEnglish ? 'Your level' : '현재 레벨')}
+                  </strong>
+                </div>
                 <button
                   type="button"
                   className="sheet-close-btn"

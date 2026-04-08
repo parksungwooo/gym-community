@@ -54,14 +54,14 @@ export default function TestForm({ onSubmit, loading }) {
 
   return (
     <section className="card record-test-card">
-      <div className="record-test-head">
-        <div className="record-test-copy">
-          <span className="app-section-kicker">{isEnglish ? 'Quick check' : '빠른 체크'}</span>
-          <h2>{isEnglish ? '3-Min Level Test' : '3분 레벨 테스트'}</h2>
-          <p className="subtext">
-            {isEnglish ? 'One question at a time.' : '한 문제씩 답해요.'}
-          </p>
-        </div>
+      <div className="record-test-stepbar">
+        <p className="subtext record-test-note">
+          {currentAnswer == null
+            ? (isEnglish ? 'Pick one.' : '하나만 고르면 돼요.')
+            : isLastQuestion
+              ? (isEnglish ? 'Last one.' : '마지막 질문이에요.')
+              : (isEnglish ? `${answeredCount} done.` : `${answeredCount}개 답했어요.`)}
+        </p>
         <span className="record-test-progress">
           {currentIndex + 1}/{questions.length}
         </span>
@@ -74,7 +74,9 @@ export default function TestForm({ onSubmit, loading }) {
       <form onSubmit={handleSubmit} className="question-form">
         <article key={currentQuestion.id} className="question-card" data-testid={`test-question-${currentQuestion.id}`}>
           <div className="question-head">
-            <span className="question-label">Q{currentIndex + 1}</span>
+            <span className="question-label">
+              {isEnglish ? `Question ${currentIndex + 1}` : `질문 ${currentIndex + 1}`}
+            </span>
             <p className="question-title">{currentQuestion.question}</p>
           </div>
           <div className="option-grid">
@@ -89,16 +91,6 @@ export default function TestForm({ onSubmit, loading }) {
             ))}
           </div>
         </article>
-
-        <div className="record-test-step-copy">
-          <p className="subtext record-test-note">
-            {currentAnswer == null
-              ? (isEnglish ? 'Pick one.' : '하나 선택')
-              : isLastQuestion
-                ? (isEnglish ? 'Last one.' : '마지막 질문')
-                : (isEnglish ? `${answeredCount} done.` : `${answeredCount}개 완료`)}
-          </p>
-        </div>
 
         <div className={`record-test-actions ${currentIndex === 0 ? 'single' : ''}`}>
           {currentIndex > 0 && (
