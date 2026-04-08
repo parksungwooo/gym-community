@@ -61,21 +61,21 @@ export function buildHomeInsight({
   if (!currentLevel) {
     return {
       label: isEnglish ? 'Setup' : '시작 준비',
-      title: isEnglish ? 'The 3-minute level test unlocks better guidance.' : '3분 레벨 테스트를 하면 홈이 더 똑똑해져요.',
+      title: isEnglish ? 'The level test sharpens this home screen.' : '레벨 테스트로 홈이 더 정확해져요.',
       body: isEnglish
-        ? 'Once your level is set, workouts, feed, and suggestions can feel much more personal.'
-        : '레벨이 잡히면 운동 제안, 피드, 추천 사람이 지금보다 훨씬 개인적으로 바뀝니다.',
+        ? 'Workouts, feed, and suggestions fit better once your level is set.'
+        : '운동, 피드, 추천이 내 페이스에 더 잘 맞아집니다.',
       tone: 'setup',
     }
   }
 
   if (!todayDone && remainingGoal === 1) {
     return {
-      label: isEnglish ? 'Best next step' : '지금 제일 좋은 한 수',
-      title: isEnglish ? 'One workout today clears this week’s goal.' : '오늘 한 번만 기록하면 이번 주 목표가 끝나요.',
+      label: isEnglish ? 'Next step' : '지금 할 일',
+      title: isEnglish ? 'One more log clears this week’s goal.' : '오늘 한 번이면 주간 목표 완료예요.',
       body: isEnglish
-        ? `You are already at ${current}/${goal}. Keep the pace while it still feels light.`
-        : `지금 ${current}/${goal} 상태예요. 힘들게 몰아치기 전에 오늘 가볍게 끝내두는 편이 좋아요.`,
+        ? `${current}/${goal} so far. Finish it while it still feels light.`
+        : `지금 ${current}/${goal}. 오늘 가볍게 끝내면 돼요.`,
       tone: 'goal',
     }
   }
@@ -83,10 +83,10 @@ export function buildHomeInsight({
   if (todayDone && remainingGoal === 0) {
     return {
       label: isEnglish ? 'Weekly win' : '주간 클리어',
-      title: isEnglish ? 'This week’s goal is already done.' : '이번 주 목표는 이미 채웠어요.',
+      title: isEnglish ? 'This week’s goal is done.' : '이번 주 목표 완료.',
       body: isEnglish
-        ? `You can coast a little now, or keep building from Activity Lv ${levelValue}.`
-        : `이제는 조금 쉬어도 되고, 아니면 활동 레벨 ${levelValue} 흐름을 더 밀어도 좋아요.`,
+        ? `Rest a bit, or keep going from Activity Lv ${levelValue}.`
+        : `쉬어도 좋고, 활동 Lv ${levelValue}로 더 가도 좋아요.`,
       tone: 'win',
     }
   }
@@ -95,15 +95,15 @@ export function buildHomeInsight({
     return {
       label: isEnglish ? 'Community pulse' : '커뮤니티 온도',
       title: isEnglish
-        ? `${followingUpdateCount} fresh updates are waiting from people you follow.`
-        : `팔로우한 사람들의 새 기록 ${followingUpdateCount}개가 기다리고 있어요.`,
+        ? `${followingUpdateCount} new updates from people you follow.`
+        : `팔로우한 새 기록 ${followingUpdateCount}개가 있어요.`,
       body: isEnglish
         ? todayDone
-          ? 'Your own log is in. This is a good moment to stay in the loop.'
-          : 'Seeing one or two posts first can make starting today feel much easier.'
+          ? 'Good time to check in.'
+          : 'A few posts can make starting easier.'
         : todayDone
-          ? '내 기록은 남겼으니, 지금 잠깐 둘러보면 커뮤니티 리듬이 더 잘 이어져요.'
-          : '남의 기록을 먼저 한두 개 보면 오늘 운동 시작 장벽이 훨씬 낮아집니다.',
+          ? '지금 잠깐 둘러보기 좋아요.'
+          : '먼저 보면 시작이 쉬워져요.',
       tone: 'community',
     }
   }
@@ -111,10 +111,10 @@ export function buildHomeInsight({
   if (!todayDone && streak >= 3) {
     return {
       label: isEnglish ? 'Streak watch' : '연속 기록',
-      title: isEnglish ? `${streak} days are alive right now.` : `지금 ${streak}일 연속 흐름이 살아 있어요.`,
+      title: isEnglish ? `${streak} days in a row right now.` : `지금 ${streak}일 연속이에요.`,
       body: isEnglish
-        ? 'Even a short save is enough to keep the chain from breaking tonight.'
-        : '오늘은 짧은 기록 하나만 남겨도 이 흐름을 끊지 않을 수 있어요.',
+        ? 'A short log keeps it alive.'
+        : '짧게 남겨도 이어집니다.',
       tone: 'streak',
     }
   }
@@ -122,10 +122,10 @@ export function buildHomeInsight({
   if (todayXp > 0) {
     return {
       label: isEnglish ? 'Growth note' : '성장 메모',
-      title: isEnglish ? `You already stacked ${todayXp} XP today.` : `오늘은 벌써 ${todayXp} XP를 쌓았어요.`,
+      title: isEnglish ? `${todayXp} XP already earned today.` : `오늘 ${todayXp} XP 적립.`,
       body: isEnglish
-        ? 'This is a good day to keep the momentum tidy instead of starting from zero tomorrow.'
-        : '내일 다시 0에서 시작하지 않도록, 오늘 흐름을 깔끔하게 이어가기 좋은 날이에요.',
+        ? 'Keep the momentum tidy.'
+        : '오늘 흐름만 잘 정리하면 돼요.',
       tone: 'growth',
     }
   }
@@ -133,17 +133,17 @@ export function buildHomeInsight({
   if (!todayDone && openMateCount > 0) {
     return {
       label: isEnglish ? 'Meet people' : '함께 움직이기',
-      title: isEnglish ? `${openMateCount} mate posts are open now.` : `지금 열려 있는 메이트 모집이 ${openMateCount}개예요.`,
+      title: isEnglish ? `${openMateCount} mate posts are open now.` : `메이트 모집 ${openMateCount}개가 열려 있어요.`,
       body: isEnglish
-        ? 'If motivation is low today, borrowing someone else’s momentum can help.'
-        : '오늘 동기부여가 약하면 혼자 버티기보다 남의 리듬을 빌리는 편이 더 쉽습니다.',
+        ? 'Borrow someone else’s momentum.'
+        : '혼자 힘들면 같이 가도 좋아요.',
       tone: 'community',
     }
   }
 
   return {
     label: daypart.label,
-    title: isEnglish ? 'Today just needs one clean save.' : '오늘은 깔끔한 기록 하나면 충분해요.',
+    title: isEnglish ? 'One clean save is enough today.' : '오늘은 한 번이면 충분해요.',
     body: daypart.encouragement,
     tone: 'default',
   }

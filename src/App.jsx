@@ -130,6 +130,7 @@ export default function App() {
   const [selectedCommunityProfile, setSelectedCommunityProfile] = useState(null)
   const [loadingSelectedCommunityProfile, setLoadingSelectedCommunityProfile] = useState(false)
   const [showTestForm, setShowTestForm] = useState(false)
+  const [showTestResult, setShowTestResult] = useState(false)
   const [showWorkoutPanel, setShowWorkoutPanel] = useState(false)
   const [workoutPreset, setWorkoutPreset] = useState(null)
   const [loadingInit, setLoadingInit] = useState(true)
@@ -396,7 +397,7 @@ export default function App() {
         (payload) => {
           if (payload.eventType === 'INSERT') {
             showSuccess(
-              isEnglish ? 'A new notification arrived.' : '새 알림이 도착했어요.',
+              isEnglish ? 'New notification.' : '새 알림.',
               'info',
             )
           }
@@ -505,9 +506,9 @@ export default function App() {
       setReminderPermission(permission)
       showSuccess(
         permission === 'granted'
-          ? (isEnglish ? 'Browser reminders are now enabled.' : '브라우저 리마인더를 켰어요.')
+          ? (isEnglish ? 'Browser alerts are on.' : '브라우저 알림 켜짐.')
           : permission === 'denied'
-            ? (isEnglish ? 'Browser reminders were blocked. The in-app reminder card will still show.' : '브라우저 알림은 차단됐지만 앱 안 리마인더 카드는 계속 보여드릴게요.')
+            ? (isEnglish ? 'Browser alerts blocked. In-app reminders stay on.' : '브라우저 알림 차단. 앱 리마인더는 계속 보여요.')
             : (isEnglish ? 'Reminder permission request was dismissed.' : '리마인더 권한 요청이 닫혔어요.'),
         'info',
       )
@@ -607,6 +608,7 @@ export default function App() {
     setLatestResult(localResult)
     navigateToView(VIEW.PROGRESS)
     setShowTestForm(false)
+    setShowTestResult(true)
     const previousTotalXp = activitySummary.totalXp
     setLoadingAction(true)
     setErrorMessage('')
@@ -617,7 +619,7 @@ export default function App() {
       const gainedXp = Math.max((Number(summary.profile?.total_xp) || 0) - previousTotalXp, 0)
       if (gainedXp > 0) {
         showSuccess(
-          isEnglish ? `Test saved. +${gainedXp} XP.` : `테스트 결과를 저장했어요. +${gainedXp} XP`,
+          isEnglish ? `Test +${gainedXp} XP` : `테스트 +${gainedXp} XP`,
           'info',
         )
       }
@@ -668,6 +670,16 @@ export default function App() {
     setWorkoutPreset(null)
   }, [])
 
+  const openTestFlow = useCallback(() => {
+    setShowTestResult(false)
+    setShowTestForm(true)
+  }, [])
+
+  const closeTestFlow = useCallback(() => {
+    setShowTestForm(false)
+    setShowTestResult(false)
+  }, [])
+
   const handleWorkoutComplete = async (details = {}) => {
     if (guardAuthAction('save_workout', {
       type: 'complete_workout',
@@ -697,8 +709,8 @@ export default function App() {
       const gainedXp = Math.max((Number(summary.profile?.total_xp) || 0) - previousTotalXp, 0)
       showSuccess(
         gainedXp > 0
-          ? (isEnglish ? `${details.workoutType || 'Workout'} saved. +${gainedXp} XP.` : `${details.workoutType || '운동'} 기록이 저장됐어요. +${gainedXp} XP`)
-          : (isEnglish ? `${details.workoutType || 'Workout'} saved.` : `${details.workoutType || '운동'} 기록이 저장됐어요.`),
+          ? (isEnglish ? `${details.workoutType || 'Workout'} +${gainedXp} XP` : `${details.workoutType || '운동'} +${gainedXp} XP`)
+          : (isEnglish ? `${details.workoutType || 'Workout'} saved` : `${details.workoutType || '운동'} 저장`),
         'success',
       )
       setCelebration({ workoutType: details.workoutType || '운동', durationMinutes: Number(details.durationMinutes) || 0, nextWeeklyCount: summary.stats.weeklyCount })
@@ -728,7 +740,7 @@ export default function App() {
       await saveWorkoutTemplate(user.id, template)
       const templates = await fetchWorkoutTemplates(user.id)
       setWorkoutTemplates(templates)
-      showSuccess(isEnglish ? 'Routine saved for one-tap reuse.' : '루틴이 저장됐어요. 다음엔 한 번에 불러올 수 있어요.', 'routine')
+      showSuccess(isEnglish ? 'Routine saved' : '루틴 저장', 'routine')
     } catch (error) {
       setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to save routine.' : '루틴 저장에 실패했습니다.', isEnglish))
     } finally {
@@ -743,7 +755,7 @@ export default function App() {
       await deleteWorkoutTemplate(user.id, templateId)
       const templates = await fetchWorkoutTemplates(user.id)
       setWorkoutTemplates(templates)
-      showSuccess(isEnglish ? 'Routine removed.' : '루틴을 삭제했어요.', 'danger-soft')
+      showSuccess(isEnglish ? 'Routine deleted.' : '루틴 삭제.', 'danger-soft')
     }, isEnglish ? 'Failed to delete routine.' : '루틴 삭제에 실패했습니다.')
   }
 
@@ -756,7 +768,7 @@ export default function App() {
         weightKg: bodyMetrics.latestWeightKg,
       })
       await refreshUserSummary(user.id)
-      showSuccess(isEnglish ? 'Workout updated.' : '운동 기록을 수정했어요.', 'info')
+      showSuccess(isEnglish ? 'Workout updated.' : '운동 수정.', 'info')
     }, isEnglish ? 'Failed to update workout.' : '운동 기록 수정에 실패했습니다.')
   }
 
@@ -768,7 +780,7 @@ export default function App() {
       await Promise.all([refreshUserSummary(user.id), refreshLeaderboard()])
       const doneToday = await hasWorkoutCompleted(user.id, getTodayDateString())
       setTodayDone(doneToday)
-      showSuccess(isEnglish ? 'Workout deleted.' : '운동 기록을 삭제했어요.', 'danger-soft')
+      showSuccess(isEnglish ? 'Workout deleted.' : '운동 삭제.', 'danger-soft')
     }, isEnglish ? 'Failed to delete workout.' : '운동 기록 삭제에 실패했습니다.')
   }
 
@@ -836,7 +848,7 @@ export default function App() {
         details,
       })
       setReportTarget(null)
-      showSuccess(isEnglish ? 'Report submitted.' : '신고를 접수했어요.', 'info')
+      showSuccess(isEnglish ? 'Report sent' : '신고 접수', 'info')
     } catch (error) {
       setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to submit report.' : '신고 접수에 실패했습니다.', isEnglish))
     } finally {
@@ -854,7 +866,7 @@ export default function App() {
       await resolveModerationReport(reportId, nextStatus, resolutionNote)
       await refreshModeration(moderationStatus)
       showSuccess(
-        isEnglish ? 'Report status updated.' : '신고 상태를 업데이트했어요.',
+        isEnglish ? 'Updated' : '처리 완료',
         'info',
       )
     } catch (error) {
@@ -878,8 +890,8 @@ export default function App() {
       ])
       showSuccess(
         nextVisibility === 'visible'
-          ? (isEnglish ? 'Post restored.' : '게시글을 다시 노출했어요.')
-          : (isEnglish ? 'Post hidden from the feed.' : '게시글을 피드에서 숨겼어요.'),
+          ? (isEnglish ? 'Restored' : '복구됨')
+          : (isEnglish ? 'Hidden' : '숨김'),
         nextVisibility === 'visible' ? 'info' : 'danger-soft',
       )
     } catch (error) {
@@ -925,8 +937,8 @@ export default function App() {
 
       showSuccess(
         isBlocked
-          ? (isEnglish ? 'User unblocked.' : '차단을 해제했어요.')
-          : (isEnglish ? 'User blocked and hidden from your community.' : '사용자를 차단했고 커뮤니티에서 바로 숨겼어요.'),
+          ? (isEnglish ? 'Unblocked' : '차단 해제')
+          : (isEnglish ? 'Blocked' : '차단'),
         isBlocked ? 'info' : 'danger-soft',
       )
     } catch (error) {
@@ -1027,10 +1039,10 @@ export default function App() {
       }
       showSuccess(
         nextProfile.needsAvatarReattach
-          ? (isEnglish ? 'Profile saved. Re-attach the profile photo once more to finish it.' : '프로필은 저장됐어요. 프로필 사진만 한 번 더 붙이면 완료돼요.')
+          ? (isEnglish ? 'Saved. Reattach photo.' : '저장됨. 사진 다시 선택')
           : changedReminderEnabled || changedReminderTime
-            ? (isEnglish ? 'Settings saved. Reminder time was updated too.' : '설정을 저장했고 리마인더도 업데이트했어요.')
-            : (isEnglish ? 'Settings saved.' : '설정을 저장했어요.'),
+            ? (isEnglish ? 'Saved. Reminder updated.' : '저장됨. 리마인더 변경')
+            : (isEnglish ? 'Saved' : '저장됨'),
         'info',
       )
     } catch (error) {
@@ -1058,8 +1070,8 @@ export default function App() {
       const gainedXp = Math.max((Number(summary.profile?.total_xp) || 0) - previousTotalXp, 0)
       showSuccess(
         gainedXp > 0
-          ? (isEnglish ? `Weight saved. +${gainedXp} XP.` : `몸무게를 기록했어요. +${gainedXp} XP`)
-          : (isEnglish ? 'Weight saved.' : '몸무게를 기록했어요.'),
+          ? (isEnglish ? `Weight +${gainedXp} XP` : `체중 +${gainedXp} XP`)
+          : (isEnglish ? 'Weight saved' : '체중 저장'),
         'success',
       )
     } catch (error) {
@@ -1081,7 +1093,7 @@ export default function App() {
       await createMatePost(user.id, draft)
       await refreshMatePosts(user.id)
       showSuccess(
-        isEnglish ? 'Mate post is live.' : '메이트 모집글을 등록했어요.',
+        isEnglish ? 'Posted' : '등록됨',
         'success',
       )
       return true
@@ -1103,8 +1115,8 @@ export default function App() {
       await refreshMatePosts(user.id)
       showSuccess(
         isInterested
-          ? (isEnglish ? 'Interest removed.' : '관심 보내기를 취소했어요.')
-          : (isEnglish ? 'Interest sent.' : '관심을 보냈어요.'),
+          ? (isEnglish ? 'Interest off' : '관심 취소')
+          : (isEnglish ? 'Interested' : '관심 보냄'),
         'info',
       )
     }, isEnglish ? 'Failed to update mate interest.' : '관심 상태를 바꾸지 못했어요.')
@@ -1118,8 +1130,8 @@ export default function App() {
       await refreshMatePosts(user.id)
       showSuccess(
         status === 'closed'
-          ? (isEnglish ? 'Mate post closed.' : '메이트 모집을 마감했어요.')
-          : (isEnglish ? 'Mate post reopened.' : '메이트 모집을 다시 열었어요.'),
+          ? (isEnglish ? 'Closed' : '마감')
+          : (isEnglish ? 'Reopened' : '재개'),
         'info',
       )
     }, isEnglish ? 'Failed to update mate post.' : '메이트 모집 상태 변경에 실패했습니다.')
@@ -1154,8 +1166,8 @@ export default function App() {
       }
       showSuccess(
         isFollowing
-          ? (isEnglish ? 'Unfollowed user.' : '언팔로우했어요.')
-          : (isEnglish ? 'Now following user.' : '팔로우했어요.'),
+          ? (isEnglish ? 'Unfollowed' : '팔로우 취소')
+          : (isEnglish ? 'Following' : '팔로우'),
         'info',
       )
     }, isEnglish ? 'Failed to update follow.' : '팔로우 상태 변경에 실패했습니다.')
@@ -1317,6 +1329,13 @@ export default function App() {
     setWorkoutPreset(null)
   }, [showWorkoutPanel, view])
 
+  useEffect(() => {
+    if (view === VIEW.PROGRESS || (!showTestForm && !showTestResult)) return
+
+    setShowTestForm(false)
+    setShowTestResult(false)
+  }, [showTestForm, showTestResult, view])
+
   const handleChangeView = useCallback((nextView) => {
     const access = buildCommunityAccessResult(nextView, hasCommunityNickname, VIEW.COMMUNITY)
 
@@ -1324,8 +1343,8 @@ export default function App() {
       navigateToView(VIEW.PROFILE)
       showSuccess(
         isEnglish
-          ? 'Add a nickname in your profile before using the community.'
-          : '커뮤니티를 사용하려면 먼저 프로필에 닉네임을 입력해주세요.',
+          ? 'Save nickname first.'
+          : '닉네임 먼저 저장',
         'info',
       )
       return
@@ -1345,7 +1364,7 @@ export default function App() {
         unread: false,
       })))
       setUnreadNotificationCount(0)
-      showSuccess(isEnglish ? 'All notifications marked as read.' : '알림을 모두 읽음 처리했어요.', 'info')
+      showSuccess(isEnglish ? 'All read' : '모두 읽음', 'info')
     } catch (error) {
       setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to update notifications.' : '알림 상태를 바꾸지 못했습니다.', isEnglish))
     }
@@ -1431,7 +1450,7 @@ export default function App() {
         showSuccess(
           isEnglish
             ? 'Login complete. Re-attach any new photos, then save your workout.'
-            : '로그인됐어요. 새 사진만 다시 붙인 뒤 운동을 저장해주세요.',
+            : '로그인됐어요. 새 사진만 다시 붙이면 돼요.',
           'info',
         )
         break
@@ -1507,10 +1526,60 @@ export default function App() {
     { key: VIEW.PROFILE, label: isEnglish ? 'Profile' : '프로필' },
   ]
   const visibleErrorMessage = isTransientInitDelayMessage(errorMessage) ? '' : errorMessage
+  const errorState = (() => {
+    if (!visibleErrorMessage) return null
+
+    const normalized = visibleErrorMessage.toLowerCase()
+
+    if (normalized.includes('supabase') || normalized.includes('sql') || normalized.includes('rls')) {
+      return {
+        label: isEnglish ? 'Setup' : '설정',
+        title: isEnglish ? 'Supabase needs one more check.' : 'Supabase 설정을 한 번 더 확인해요.',
+      }
+    }
+
+    if (normalized.includes('network') || visibleErrorMessage.includes('네트워크')) {
+      return {
+        label: isEnglish ? 'Network' : '네트워크',
+        title: isEnglish ? 'Connection looks unstable.' : '연결 상태를 먼저 확인해요.',
+      }
+    }
+
+    if (
+      normalized.includes('sign') ||
+      normalized.includes('auth') ||
+      visibleErrorMessage.includes('로그인') ||
+      visibleErrorMessage.includes('인증')
+    ) {
+      return {
+        label: isEnglish ? 'Account' : '계정',
+        title: isEnglish ? 'The account flow needs another try.' : '계정 작업을 한 번 더 시도해요.',
+      }
+    }
+
+    return {
+      label: isEnglish ? 'Notice' : '안내',
+      title: isEnglish ? 'This view needs a quick check.' : '잠깐 확인이 필요한 상태예요.',
+    }
+  })()
 
   return (
     <main className="app-shell">
-      {visibleErrorMessage && <div className="error-box">{visibleErrorMessage}</div>}
+      {errorState && (
+        <section className="error-box app-error-card" role="status" aria-live="polite">
+          <span className="app-error-kicker">{errorState.label}</span>
+          <strong>{errorState.title}</strong>
+          <p>{visibleErrorMessage}</p>
+          <div className="state-action-row app-error-actions">
+            <button type="button" className="secondary-btn" onClick={() => window.location.reload()}>
+              {isEnglish ? 'Refresh app' : '앱 새로고침'}
+            </button>
+            <button type="button" className="ghost-btn" onClick={() => setErrorMessage('')}>
+              {isEnglish ? 'Hide' : '닫기'}
+            </button>
+          </div>
+        </section>
+      )}
       {successState && (
         <div className={`app-toast ${successState.accent ?? 'default'}`}>
           <span className="app-toast-dot" />
@@ -1615,7 +1684,7 @@ export default function App() {
                 onStartRoutine={(routine) => openWorkoutComposer(routine)}
                 onOpenTest={() => {
                   navigateToView(VIEW.PROGRESS)
-                  setShowTestForm(true)
+                  openTestFlow()
                 }}
                 onSeeCommunity={() => handleChangeView(VIEW.COMMUNITY)}
                 onSelectFeedPreviewUser={(item) => {
@@ -1636,7 +1705,16 @@ export default function App() {
               <ProgressRoute
                 isEnglish={isEnglish}
                 showTestForm={showTestForm}
-                onToggleTestForm={() => setShowTestForm((prev) => !prev)}
+                showTestResult={showTestResult}
+                onToggleTestFlow={() => {
+                  if (showTestForm || showTestResult) {
+                    closeTestFlow()
+                    return
+                  }
+
+                  openTestFlow()
+                }}
+                onCloseTestFlow={closeTestFlow}
                 onGoHome={() => navigateToView(VIEW.HOME)}
                 onSubmitTest={handleSubmitTest}
                 loadingAction={loadingAction}
@@ -1730,6 +1808,7 @@ export default function App() {
                 onRequestAuth={() => openAuthPrompt('guest_profile')}
                 onRequestReminderPermission={handleRequestReminderPermission}
                 onSignOut={handleSignOut}
+                onGoProgress={() => navigateToView(VIEW.PROGRESS)}
                 onSaveProfile={handleUpdateProfile}
                 onSaveWeight={handleSaveWeight}
               />

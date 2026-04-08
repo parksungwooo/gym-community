@@ -3,52 +3,52 @@ import { useI18n } from '../i18n.js'
 function getCopy(reason, isEnglish) {
   const copyMap = {
     save_workout: {
-      title: isEnglish ? 'Log in to save your workout' : '운동 기록을 저장하려면 로그인해주세요',
-      body: isEnglish ? 'Your workout log, calories, photos, and weekly progress need an account.' : '운동 기록, 예상 칼로리, 사진, 주간 진행률은 계정에 저장돼요.',
+      title: isEnglish ? 'Log in to keep this workout.' : '로그인하면 이 기록이 남아요.',
+      body: isEnglish ? 'Workout logs save to your account.' : '운동 기록은 계정에 저장돼요.',
     },
     save_weight: {
-      title: isEnglish ? 'Log in to save your weight' : '몸무게를 기록하려면 로그인해주세요',
-      body: isEnglish ? 'Weight history and body changes are tracked on your account.' : '체중 변화 추이와 바디 기록은 계정과 연결되어 저장됩니다.',
+      title: isEnglish ? 'Log in to keep this weight log.' : '로그인하면 체중 기록이 남아요.',
+      body: isEnglish ? 'Weight records save to your account.' : '체중 기록은 계정에 저장돼요.',
     },
     save_profile: {
-      title: isEnglish ? 'Log in to save your profile' : '프로필을 저장하려면 로그인해주세요',
-      body: isEnglish ? 'Your intro, workout tags, and default sharing settings need an account.' : '한 줄 소개, 운동 태그, 기본 공개 설정은 계정과 함께 저장돼요.',
+      title: isEnglish ? 'Log in to save your profile.' : '로그인하면 프로필이 저장돼요.',
+      body: isEnglish ? 'Profile changes save to your account.' : '프로필 수정은 계정과 함께 저장돼요.',
     },
     save_routine: {
-      title: isEnglish ? 'Log in to save your routine' : '루틴을 저장하려면 로그인해주세요',
-      body: isEnglish ? 'Saved routines stay on your account so you can reuse them later.' : '저장한 루틴은 계정에 붙어서 나중에도 바로 다시 쓸 수 있어요.',
+      title: isEnglish ? 'Log in to keep this routine.' : '로그인하면 이 루틴이 남아요.',
+      body: isEnglish ? 'You can reuse routines after login.' : '로그인 후에는 루틴을 다시 쓸 수 있어요.',
     },
     save_test: {
-      title: isEnglish ? 'Log in to save your test result' : '테스트 결과를 저장하려면 로그인해주세요',
-      body: isEnglish ? 'Your level history and badge progress are saved to your account.' : '레벨 기록과 배지 진행 상황은 계정에 저장됩니다.',
+      title: isEnglish ? 'Log in to keep this result.' : '로그인하면 이 결과가 남아요.',
+      body: isEnglish ? 'Test results save to your account.' : '레벨 결과는 계정에 저장돼요.',
     },
     follow: {
       title: isEnglish ? 'Log in to follow people' : '팔로우하려면 로그인해주세요',
-      body: isEnglish ? 'Follow relationships and your personalized feed need an account.' : '팔로우 관계와 나만의 피드는 계정이 있어야 만들 수 있어요.',
+      body: isEnglish ? 'Following and personal feeds need a login.' : '팔로우와 개인 피드는 로그인 후 열려요.',
     },
     like: {
       title: isEnglish ? 'Log in to like posts' : '좋아요를 누르려면 로그인해주세요',
-      body: isEnglish ? 'Community reactions are saved to your account.' : '커뮤니티 반응은 내 계정 기준으로 기록돼요.',
+      body: isEnglish ? 'Reactions are tied to your account.' : '반응은 내 계정 기준으로 남아요.',
     },
     comment: {
       title: isEnglish ? 'Log in to comment' : '댓글을 남기려면 로그인해주세요',
-      body: isEnglish ? 'Comments are posted from your account so others can recognize you.' : '댓글은 내 계정으로 남겨져서 다른 사람이 나를 알아볼 수 있어요.',
+      body: isEnglish ? 'Comments are posted from your account.' : '댓글은 내 계정으로 남아요.',
     },
     report: {
       title: isEnglish ? 'Log in to report content' : '신고하려면 로그인해주세요',
-      body: isEnglish ? 'Reports are attached to your account so safety actions can be reviewed properly.' : '신고 내역은 계정과 연결되어야 안전 조치를 제대로 검토할 수 있어요.',
+      body: isEnglish ? 'Reports are saved with your account.' : '신고 기록은 계정과 함께 저장돼요.',
     },
     block: {
       title: isEnglish ? 'Log in to block users' : '차단하려면 로그인해주세요',
-      body: isEnglish ? 'Blocking someone personalizes your community experience and needs an account.' : '차단은 내 커뮤니티 화면을 개인화하는 기능이라 계정이 필요해요.',
+      body: isEnglish ? 'Blocking changes your personal community view.' : '차단은 내 커뮤니티 화면에 반영돼요.',
     },
     guest_profile: {
-      title: isEnglish ? 'Keep going with a real account' : '이제 계정으로 이어서 써볼까요?',
-      body: isEnglish ? 'You can keep exploring as a guest, but saving records and building your profile needs a login.' : '게스트로 둘러보는 건 가능하지만, 기록 저장과 프로필 관리는 로그인이 필요해요.',
+      title: isEnglish ? 'Keep going with an account.' : '계정으로 이어서 써볼까요?',
+      body: isEnglish ? 'Logs and profile save after login.' : '기록과 프로필은 로그인 후 저장돼요.',
     },
     premium_upgrade: {
       title: isEnglish ? 'Log in to start Pro' : 'Pro를 시작하려면 로그인해주세요',
-      body: isEnglish ? 'Plans, reports, and challenge perks are tied to your account, so log in first before upgrading.' : '요금제, 리포트, 챌린지 혜택은 계정과 연결되므로 업그레이드 전에 먼저 로그인해야 해요.',
+      body: isEnglish ? 'Upgrades are tied to your account.' : '업그레이드는 계정과 연결돼요.',
     },
   }
 
@@ -86,7 +86,7 @@ export default function AuthRequiredModal({
         </div>
 
         <button type="button" className="ghost-btn auth-modal-close" onClick={onClose} disabled={loading}>
-          {isEnglish ? 'Keep Exploring' : '계속 둘러보기'}
+          {isEnglish ? 'Maybe later' : '나중에'}
         </button>
       </section>
     </div>

@@ -1,4 +1,4 @@
-﻿import { useI18n } from '../i18n.js'
+import { useI18n } from '../i18n.js'
 import { getResultMessage, localizeLevelText } from '../utils/level'
 
 export default function ResultView({ score, level, onStartWorkout }) {
@@ -9,36 +9,36 @@ export default function ResultView({ score, level, onStartWorkout }) {
 
   const handleShare = async () => {
     const shareText = isEnglish
-      ? `My fitness level result: ${score} points, ${displayLevel}. Try yours too!`
-      : `내 체력 테스트 결과: ${score}점, ${displayLevel}. 너도 테스트해봐!`
+      ? `My result: ${score} points, ${displayLevel}.`
+      : `내 결과: ${score}점, ${displayLevel}.`
 
     try {
       await navigator.clipboard.writeText(`${shareText} ${window.location.href}`)
-      alert(isEnglish ? 'Result link copied!' : '결과 링크가 복사됐어요!')
+      alert(isEnglish ? 'Link copied.' : '링크 복사됨.')
     } catch {
-      alert(isEnglish ? 'Copy failed. Please check browser permissions.' : '복사에 실패했어요. 브라우저 권한을 확인해주세요.')
+      alert(isEnglish ? 'Copy failed.' : '복사 실패.')
     }
   }
 
   return (
     <section className="card result-card">
-      <h2>{isEnglish ? 'Test Result' : '테스트 결과'}</h2>
+      <span className="app-section-kicker">{isEnglish ? 'Level test' : '레벨 테스트'}</span>
+      <h2>{isEnglish ? 'Result' : '결과'}</h2>
       <p className="score">{isEnglish ? `${score} pts` : `${score}점`}</p>
       <p className="level-pill">{displayLevel}</p>
       <p className="result-message">{message}</p>
       <p className="subtext">
-        {isEnglish ? 'From here, one workout today matters more than the number.' : '지금부터는 점수보다 오늘 한 번의 기록이 더 중요해요.'}
+        {isEnglish ? 'Now log today.' : '이제 오늘 기록만 남았어요.'}
       </p>
 
       <div className="result-actions">
         <button type="button" className="secondary-btn" onClick={handleShare}>
-          {isEnglish ? 'Share Result' : '결과 공유하기'}
+          {isEnglish ? 'Share' : '공유'}
         </button>
         <button type="button" className="primary-btn" onClick={onStartWorkout}>
-          {isEnglish ? 'Log Today\'s Workout' : '오늘 운동 기록하기'}
+          {isEnglish ? 'Log workout' : '운동 기록'}
         </button>
       </div>
     </section>
   )
 }
-

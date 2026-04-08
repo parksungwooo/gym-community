@@ -496,7 +496,7 @@
 }
 
 .weight-log-btn {
-  min-width: 126px;
+  min-width: 88px;
 }
 
 .body-summary {
@@ -604,7 +604,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
 }
 
 .app-section-heading.compact {
@@ -629,6 +629,7 @@
   margin: 4px 0 0;
   color: #122033;
   font-size: 1.14rem;
+  line-height: 1.2;
   letter-spacing: -0.03em;
 }
 
@@ -639,6 +640,7 @@
 
 .app-section-title.small {
   font-size: 1rem;
+  line-height: 1.24;
 }
 
 .home-status-surface .app-section-title {
@@ -1052,8 +1054,8 @@
   .app-floating-actions {
     top: calc(env(safe-area-inset-top, 0px) + 14px);
     left: auto;
-    right: 18px;
-    width: max-content;
+    right: max(12px, calc(env(safe-area-inset-right, 0px) + 12px));
+    width: auto;
     justify-content: flex-start;
     transform: none;
   }
@@ -1061,6 +1063,7 @@
   .app-action-dock {
     padding: 4px;
     border-radius: 20px;
+    margin-inline-end: 0;
   }
 
   .tab-nav {

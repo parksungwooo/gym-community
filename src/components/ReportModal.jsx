@@ -35,11 +35,11 @@ export default function ReportModal({
     <div className="auth-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
       <section className="auth-modal-card report-modal-card" onClick={(event) => event.stopPropagation()}>
         <span className="auth-modal-kicker">{isEnglish ? 'Safety' : '안전 센터'}</span>
-        <h2>{isEnglish ? 'Report Content' : '신고하기'}</h2>
+        <h2>{isEnglish ? 'Report' : '신고'}</h2>
         <p>
           {isEnglish
-            ? `Tell us what feels wrong about this ${subject?.kind === 'user' ? 'user' : 'post'}.`
-            : `${subject?.kind === 'user' ? '이 사용자' : '이 게시글'}를 왜 신고하는지 알려주세요.`}
+            ? `Why report this ${subject?.kind === 'user' ? 'user' : 'post'}?`
+            : `${subject?.kind === 'user' ? '이 사용자' : '이 게시글'}를 왜 신고하나요?`}
         </p>
 
         <div className="report-reason-grid">
@@ -62,7 +62,7 @@ export default function ReportModal({
           maxLength="240"
           value={details}
           onChange={(event) => setDetails(event.target.value)}
-          placeholder={isEnglish ? 'Add a short note if you want.' : '원하면 짧게 메모를 남겨주세요.'}
+          placeholder={isEnglish ? 'Short note (optional)' : '짧은 메모 (선택)'}
           disabled={loading}
         />
 
@@ -73,7 +73,7 @@ export default function ReportModal({
             onClick={() => onSubmit({ reason, details })}
             disabled={loading}
           >
-            {loading ? (isEnglish ? 'Submitting...' : '신고 중...') : (isEnglish ? 'Submit Report' : '신고 보내기')}
+            {loading ? (isEnglish ? 'Sending...' : '보내는 중...') : (isEnglish ? 'Send' : '보내기')}
           </button>
         </div>
 

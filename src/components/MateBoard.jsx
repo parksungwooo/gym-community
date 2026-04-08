@@ -104,11 +104,11 @@ export default function MateBoard({
       <div className="app-section-heading compact mate-board-header">
         <div>
           <span className="app-section-kicker">{t('메이트', 'Mates')}</span>
-          <h2 className="app-section-title small">{t('같이 운동할 사람을 찾아보세요', 'Find someone to work out with')}</h2>
+          <h2 className="app-section-title small">{t('함께할 사람', 'Find a mate')}</h2>
         </div>
         <div className="mate-board-header-actions">
           <span className="community-mini-pill accent">
-            {isEnglish ? `${openCount} open` : `모집 중 ${openCount}`}
+            {isEnglish ? `${openCount} open` : `열림 ${openCount}`}
           </span>
           <button
             type="button"
@@ -116,15 +116,15 @@ export default function MateBoard({
             onClick={() => setShowComposer((prev) => !prev)}
             disabled={actionLoading}
           >
-            {showComposer ? t('닫기', 'Close') : t('모집글 작성', 'Post request')}
+            {showComposer ? t('닫기', 'Close') : t('글 쓰기', 'Post')}
           </button>
         </div>
       </div>
 
       <p className="subtext compact">
         {t(
-          '지역, 시간대, 운동 스타일만 간단히 적고 함께 운동할 사람을 찾아보세요.',
-          'Share a place, time, and workout style to recruit a simple workout partner post.',
+          '시간, 장소, 운동만 적어보세요.',
+          'Time, place, workout.',
         )}
       </p>
 
@@ -135,7 +135,7 @@ export default function MateBoard({
               className="workout-input settings-input compact"
               value={draft.title}
               onChange={(event) => handleDraftChange('title', event.target.value)}
-              placeholder={t('예: 망원 한강 저녁 러닝 같이 하실 분', 'ex: Evening river run in Mangwon')}
+              placeholder={t('예: 망원 저녁 러닝', 'ex: Evening run in Mangwon')}
               maxLength={60}
               required
             />
@@ -195,12 +195,12 @@ export default function MateBoard({
             maxLength={180}
             value={draft.body}
             onChange={(event) => handleDraftChange('body', event.target.value)}
-            placeholder={t('한줄 분위기, 운동 강도, 준비물 등을 적어보세요.', 'Share the vibe, intensity, or anything to prepare.')}
+            placeholder={t('한 줄 소개', 'One short note')}
           />
 
           <div className="mate-compose-actions">
             <button type="submit" className="primary-btn" disabled={actionLoading}>
-              {t('메이트 모집 올리기', 'Post mate request')}
+              {t('올리기', 'Post')}
             </button>
             <button
               type="button"
@@ -273,11 +273,11 @@ export default function MateBoard({
       {!loading && !filteredPosts.length && (
         <div className="empty-state-card mate-empty-card">
           <span className="empty-state-badge">{t('첫 모집글', 'First post')}</span>
-          <strong>{t('아직 조건에 맞는 모집글이 없어요.', 'No mate posts match this filter yet.')}</strong>
+          <strong>{t('맞는 글이 없어요.', 'No matching posts.')}</strong>
           <p>
             {t(
-              '시간대와 장소를 간단히 적고 먼저 모집글을 올려보세요. 함께 운동할 사람을 더 쉽게 찾을 수 있어요.',
-              'Share your time and area first. It makes it easier to find someone from the community.',
+              '먼저 하나 올려보세요.',
+              'Post one first.',
             )}
           </p>
         </div>
@@ -355,8 +355,8 @@ export default function MateBoard({
                       onClick={() => onToggleInterest?.(post.id, post.interested_by_me)}
                     >
                       {post.interested_by_me
-                        ? t('관심 취소', 'Undo interest')
-                        : t('관심 보내기', 'Send interest')}
+                        ? t('취소', 'Undo')
+                        : t('관심', 'Interest')}
                     </button>
                   )}
 
@@ -367,7 +367,7 @@ export default function MateBoard({
                       disabled={actionLoading}
                       onClick={() => onToggleStatus?.(post.id, 'closed')}
                     >
-                      {t('모집 마감', 'Close post')}
+                      {t('마감', 'Close')}
                     </button>
                   )}
                 </div>

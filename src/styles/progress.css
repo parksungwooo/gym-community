@@ -55,8 +55,8 @@
 .record-module-card.compact,
 .record-health-hero.compact,
 .record-hub-card.compact {
-  padding: 12px;
-  border-radius: 18px;
+  padding: 13px;
+  border-radius: 20px;
 }
 
 .ranking-surface {
@@ -75,7 +75,8 @@
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  padding: 7px 10px;
+  min-height: 30px;
+  padding: 6px 10px;
   background: #eef2f7;
   color: #475569;
   font-size: 0.76rem;
@@ -157,6 +158,7 @@
 
 .record-hub-actions {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 12px;
 }
@@ -178,11 +180,11 @@
 }
 
 .record-health-headline {
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 .record-health-headline.compact {
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .record-health-headline strong {
@@ -194,8 +196,8 @@
 }
 
 .record-health-headline.compact strong {
-  font-size: 1.12rem;
-  line-height: 1.15;
+  font-size: 1.08rem;
+  line-height: 1.18;
 }
 
 .health-stat-grid {
@@ -205,8 +207,8 @@
 }
 
 .health-stat-grid.compact {
-  gap: 8px;
-  margin-top: 12px;
+  gap: 7px;
+  margin-top: 10px;
 }
 
 .health-stat-tile {
@@ -219,8 +221,8 @@
 }
 
 .health-stat-tile.compact {
-  gap: 3px;
-  padding: 11px 12px;
+  gap: 4px;
+  padding: 12px 13px;
   border-radius: 16px;
 }
 
@@ -248,7 +250,7 @@
 .health-stat-meta {
   color: var(--text-sub);
   font-size: 0.82rem;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .record-health-grid {
@@ -289,8 +291,14 @@
 .record-highlight-meta {
   margin: 0;
   color: var(--text-sub);
-  font-size: 0.88rem;
-  line-height: 1.45;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 380px) {
+  .record-hub-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 .record-badge-row {

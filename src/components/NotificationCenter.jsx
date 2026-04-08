@@ -23,7 +23,7 @@ function getNotificationPreview(notification, isEnglish) {
     return notification.metadata.postPreview
   }
 
-  return isEnglish ? 'Open the community to see the latest activity.' : '커뮤니티에서 자세한 활동을 확인해보세요.'
+  return isEnglish ? 'Open community to see activity.' : '커뮤니티에서 확인해보세요.'
 }
 
 function NotificationRow({ notification, onOpen }) {
@@ -83,11 +83,11 @@ export default function NotificationCenter({
         <div className="notification-center-header">
           <div>
             <span className="auth-modal-kicker">{isEnglish ? 'Inbox' : '알림함'}</span>
-            <h2>{isEnglish ? 'Notification Center' : '알림 센터'}</h2>
+            <h2>{isEnglish ? 'Notifications' : '알림'}</h2>
             <p className="subtext">
               {unreadCount > 0
-                ? (isEnglish ? `${unreadCount} unread notifications` : `읽지 않은 알림 ${unreadCount}개`)
-                : (isEnglish ? 'Everything is caught up.' : '새 알림을 모두 확인했어요.')}
+                ? (isEnglish ? `${unreadCount} unread` : `안 읽은 알림 ${unreadCount}개`)
+                : (isEnglish ? 'All caught up.' : '모두 확인했어요.')}
             </p>
           </div>
           <button type="button" className="ghost-btn" onClick={onClose}>
@@ -134,12 +134,17 @@ export default function NotificationCenter({
         ) : (
           <div className="empty-state-card cool notification-empty">
             <span className="empty-state-badge">{isEnglish ? 'Quiet' : '조용함'}</span>
-            <strong>{isEnglish ? 'No notifications yet.' : '아직 알림이 없어요.'}</strong>
+            <strong>{isEnglish ? 'No notifications yet.' : '알림이 아직 없어요.'}</strong>
             <p>
               {isEnglish
-                ? 'New follows, likes, and comments will gather here.'
-                : '새 팔로우, 좋아요, 댓글 알림이 여기에 쌓여요.'}
+                ? 'Follows, likes, and comments appear here.'
+                : '팔로우, 좋아요, 댓글이 여기에 와요.'}
             </p>
+            <div className="state-action-row notification-empty-actions">
+              <button type="button" className="ghost-btn" onClick={onRefresh} disabled={loading}>
+                {loading ? (isEnglish ? 'Refreshing...' : '새로고침 중...') : (isEnglish ? 'Refresh' : '새로고침')}
+              </button>
+            </div>
           </div>
         )}
       </section>

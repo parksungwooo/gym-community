@@ -209,6 +209,31 @@ async function click(session, selector) {
   assert.equal(clicked, true, `Could not click ${selector}`)
 }
 
+async function assertElementInViewport(session, selector, label) {
+  const metrics = await session.evaluate(`(() => {
+    const node = document.querySelector(${JSON.stringify(selector)})
+    if (!node) return null
+    const rect = node.getBoundingClientRect()
+    return {
+      left: rect.left,
+      right: rect.right,
+      top: rect.top,
+      bottom: rect.bottom,
+      width: rect.width,
+      height: rect.height,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+    }
+  })()`)
+
+  assert.ok(metrics, `Could not find ${label}`)
+  assert.ok(metrics.width > 0 && metrics.height > 0, `${label} should have a visible size`)
+  assert.ok(metrics.left >= 0, `${label} is clipped on the left (${metrics.left})`)
+  assert.ok(metrics.top >= 0, `${label} is clipped on the top (${metrics.top})`)
+  assert.ok(metrics.right <= metrics.viewportWidth, `${label} is clipped on the right (${metrics.right} > ${metrics.viewportWidth})`)
+  assert.ok(metrics.bottom <= metrics.viewportHeight, `${label} is clipped on the bottom (${metrics.bottom} > ${metrics.viewportHeight})`)
+}
+
 async function run() {
   assert.equal(fs.existsSync(path.join(DIST_DIR, 'index.html')), true, 'Build output is missing. Run npm run build first.')
 
@@ -241,12 +266,19 @@ async function run() {
     session = new CdpSession(pageWebSocketUrl)
     await session.send('Runtime.enable')
     await session.send('Page.enable')
+    await session.send('Emulation.setDeviceMetricsOverride', {
+      width: 430,
+      height: 980,
+      deviceScaleFactor: 2,
+      mobile: true,
+    })
 
     await waitForCondition(
       session,
       "Boolean(document.querySelector('[data-testid=\"bottom-tab-nav\"]')) && Boolean(document.querySelector('[data-testid=\"home-log-workout\"]'))",
       'home screen',
     )
+    await assertElementInViewport(session, '[data-testid="theme-toggle"]', 'theme toggle button')
 
     await click(session, '[data-testid="home-log-workout"]')
     await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"workout-sheet\"]'))", 'workout sheet')
@@ -268,6 +300,25 @@ async function run() {
       "Boolean(document.querySelector('.record-weight-log-card'))",
       'progress screen',
     )
+    await click(session, '[data-testid="progress-open-level-test"]')
+    await waitForCondition(
+      session,
+      "Boolean(document.querySelector('[data-testid=\"level-test-dialog\"]')) && Boolean(document.querySelector('[data-testid=\"test-question-q1\"]'))",
+      'level test dialog',
+    )
+    await click(session, '[data-testid="test-option-q1-0"]')
+    await click(session, '[data-testid="test-next-question"]')
+    await waitForCondition(
+      session,
+      "Boolean(document.querySelector('[data-testid=\"test-question-q2\"]'))",
+      'second level test question',
+    )
+    await click(session, '[data-testid="level-test-close"]')
+    await waitForCondition(
+      session,
+      "!document.querySelector('[data-testid=\"level-test-dialog\"]')",
+      'closed level test dialog',
+    )
 
     await click(session, '[data-testid="tab-profile"]')
     await waitForCondition(
@@ -282,10 +333,13 @@ async function run() {
       'profile settings menu',
     )
 
+    const initialTheme = await session.evaluate("document.documentElement.dataset.theme || 'light'")
+    const toggledTheme = initialTheme === 'dark' ? 'light' : 'dark'
+
     await click(session, '[data-testid="theme-toggle"]')
     await waitForCondition(
       session,
-      "document.documentElement.dataset.theme === 'light'",
+      `document.documentElement.dataset.theme === ${JSON.stringify(toggledTheme)}`,
       'theme toggle',
     )
 

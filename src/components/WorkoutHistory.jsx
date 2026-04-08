@@ -35,7 +35,7 @@ function formatDate(date, language) {
 }
 
 function formatDuration(minutes, isEnglish) {
-  if (!minutes) return isEnglish ? 'No duration' : '시간 미입력'
+  if (!minutes) return isEnglish ? 'No time' : '시간 없음'
   return isEnglish ? `${minutes} min` : `${minutes}분`
 }
 
@@ -48,7 +48,7 @@ function formatTime(dateTime, language) {
 }
 
 function formatCalories(value, isEnglish) {
-  if (value == null || value === 0) return isEnglish ? 'Calories pending' : '칼로리 계산 대기'
+  if (value == null || value === 0) return isEnglish ? 'Calories TBD' : '칼로리 계산 중'
   return isEnglish ? `~${value} kcal` : `약 ${value}kcal`
 }
 
@@ -292,7 +292,7 @@ function HistoryItem({ item, onUpdate, onDelete, loading, onOpenImage }) {
               <span className="history-edit-handle" />
               <div className="history-edit-title-row">
                 <strong>{isEnglish ? 'Edit Workout' : '운동 기록 수정'}</strong>
-                <span>{formatTime(item.created_at, language) || (isEnglish ? 'Saved log' : '저장된 기록')}</span>
+                <span>{formatTime(item.created_at, language) || (isEnglish ? 'Saved' : '저장됨')}</span>
               </div>
             </div>
 
@@ -345,8 +345,8 @@ function HistoryItem({ item, onUpdate, onDelete, loading, onOpenImage }) {
                 <span className="field-label-text">{isEnglish ? 'Photos' : '사진'}</span>
                 <span className="photo-proof-helper">
                   {isEnglish
-                    ? `Add, remove, or reorder up to ${MAX_PHOTOS}.`
-                    : `최대 ${MAX_PHOTOS}장까지 추가, 제거, 순서 변경이 가능해요.`}
+                    ? `Up to ${MAX_PHOTOS}. Add, remove, reorder.`
+                    : `최대 ${MAX_PHOTOS}장. 추가, 삭제, 순서 변경.`}
                 </span>
               </div>
 
@@ -357,7 +357,7 @@ function HistoryItem({ item, onUpdate, onDelete, loading, onOpenImage }) {
                   onClick={() => fileInputRef.current?.click()}
                   disabled={loading || photoItems.length >= MAX_PHOTOS}
                 >
-                  {isEnglish ? 'Add Photos' : '사진 추가'}
+                  {isEnglish ? 'Photos' : '사진'}
                 </button>
                 <button
                   type="button"
@@ -365,10 +365,10 @@ function HistoryItem({ item, onUpdate, onDelete, loading, onOpenImage }) {
                   onClick={() => cameraInputRef.current?.click()}
                   disabled={loading || photoItems.length >= MAX_PHOTOS}
                 >
-                  {isEnglish ? 'Open Camera' : '카메라 열기'}
+                  {isEnglish ? 'Camera' : '카메라'}
                 </button>
                 <span className="photo-proof-count">
-                  {isEnglish ? `${photoItems.length}/${MAX_PHOTOS} selected` : `${photoItems.length}/${MAX_PHOTOS}장 선택`}
+                  {isEnglish ? `${photoItems.length}/${MAX_PHOTOS}` : `${photoItems.length}/${MAX_PHOTOS}장`}
                 </span>
               </div>
 
@@ -406,7 +406,7 @@ function HistoryItem({ item, onUpdate, onDelete, loading, onOpenImage }) {
                 <span>
                   {Number(durationMinutes)
                     ? (isEnglish ? `${durationMinutes} min` : `${durationMinutes}분`)
-                    : (isEnglish ? 'No duration yet' : '시간 미입력')}
+                    : (isEnglish ? 'No time' : '시간 없음')}
                   {' · '}
                   {formatCalories(item.estimated_calories, isEnglish)}
                 </span>
@@ -464,25 +464,27 @@ export default function WorkoutHistory({ history, onUpdate, onDelete, loading })
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Timeline' : '타임라인'}</span>
-          <h2>{isEnglish ? 'Workout History' : '운동 기록'}</h2>
+          <h2>{isEnglish ? 'History' : '기록'}</h2>
         </div>
         <span className="community-mini-pill">{isEnglish ? `${history.length} logs` : `${history.length}개`}</span>
       </div>
 
       <p className="subtext compact">
         {isEnglish
-          ? 'See your recent logs and the last 7 days in one place.'
-          : '최근 기록과 지난 7일 기록을 한 번에 확인해보세요.'}
+          ? 'Recent logs and the last 7 days.'
+          : '최근 기록과 7일 흐름'}
       </p>
 
-      <div className="week-strip compact">
-        {recentWeek.map((day) => (
-          <article key={day.key} className={`day-pill ${day.done ? 'done' : ''}`}>
-            <span>{day.label}</span>
-            <strong>{day.done ? (isEnglish ? 'Done' : '완료') : '-'}</strong>
-          </article>
-        ))}
-      </div>
+      {(loading || history.length > 0) && (
+        <div className="week-strip compact">
+          {recentWeek.map((day) => (
+            <article key={day.key} className={`day-pill ${day.done ? 'done' : ''}`}>
+              <span>{day.label}</span>
+              <strong>{day.done ? (isEnglish ? 'Done' : '완료') : '-'}</strong>
+            </article>
+          ))}
+        </div>
+      )}
 
       <div className="history-list grouped compact">
         {loading && (
@@ -503,13 +505,13 @@ export default function WorkoutHistory({ history, onUpdate, onDelete, loading })
         )}
 
         {!loading && history.length === 0 && (
-          <div className="empty-state-card">
-            <span className="empty-state-badge">{isEnglish ? 'Timeline' : '타임라인 시작 전'}</span>
-            <strong>{isEnglish ? 'Your workout history will start here.' : '운동 기록 타임라인이 여기서 시작돼요.'}</strong>
+          <div className="empty-state-card cool">
+            <span className="empty-state-badge">{isEnglish ? 'First log' : '첫 기록'}</span>
+            <strong>{isEnglish ? 'No history yet.' : '아직 기록이 없어요.'}</strong>
             <p>
               {isEnglish
-                ? 'Save your first workout and the last 7 days plus timeline cards will fill in here.'
-                : '첫 운동을 저장하면 지난 7일 스트립과 타임라인 카드가 여기서 채워지기 시작해요.'}
+                ? 'Save one workout above to start this view.'
+                : '위에서 운동 한 번 저장하면 여기부터 채워져요.'}
             </p>
           </div>
         )}

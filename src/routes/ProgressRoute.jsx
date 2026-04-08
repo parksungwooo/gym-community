@@ -9,7 +9,9 @@ import { buildProgressInsight } from '../features/app/surfaceInsights'
 export default function ProgressRoute({
   isEnglish,
   showTestForm,
-  onToggleTestForm,
+  showTestResult,
+  onToggleTestFlow,
+  onCloseTestFlow,
   onGoHome,
   onSubmitTest,
   loadingAction,
@@ -30,6 +32,8 @@ export default function ProgressRoute({
   const [weightDraft, setWeightDraft] = useState(null)
   const weightInputValue = weightDraft ?? String(bodyMetrics?.latestWeightKg ?? '')
   const currentLevel = latestResult?.level ?? testResult?.level ?? null
+  const isTestFlowOpen = showTestForm || showTestResult
+
   const progressInsight = useMemo(
     () => buildProgressInsight({
       currentLevel,
@@ -54,7 +58,7 @@ export default function ProgressRoute({
       <section className="card record-hub-card record-hub-card-simple">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Records' : '기록'}</span>
-          <h2>{isEnglish ? 'See your records at a glance.' : '내 기록을 한눈에 보기'}</h2>
+          <h2>{isEnglish ? 'This week' : '이번 주'}</h2>
         </div>
         <div className={`surface-insight-banner ${progressInsight.tone}`}>
           <div className="surface-insight-copy">
@@ -64,9 +68,9 @@ export default function ProgressRoute({
           </div>
         </div>
         <div className="record-hub-actions">
-          <button type="button" className="ghost-btn" onClick={onToggleTestForm}>
-            {showTestForm
-              ? (isEnglish ? 'Close test' : '테스트 닫기')
+          <button type="button" className="ghost-btn" onClick={onToggleTestFlow} data-testid="progress-open-level-test">
+            {isTestFlowOpen
+              ? (isEnglish ? 'Close' : '닫기')
               : (isEnglish ? 'Level test' : '레벨 테스트')}
           </button>
           <button type="button" className="secondary-btn" onClick={onGoHome}>
@@ -79,7 +83,7 @@ export default function ProgressRoute({
         <div className="app-section-heading compact">
           <div>
             <span className="app-section-kicker">{isEnglish ? 'Weight' : '체중'}</span>
-            <h2 className="app-section-title small">{isEnglish ? 'Quick weight log' : '빠른 체중 기록'}</h2>
+            <h2 className="app-section-title small">{isEnglish ? 'Weight log' : '체중 기록'}</h2>
           </div>
           <span className="community-mini-pill">
             {bodyMetrics?.latestWeightKg != null ? `${bodyMetrics.latestWeightKg} kg` : '--'}
@@ -95,18 +99,65 @@ export default function ProgressRoute({
               step="0.1"
               value={weightInputValue}
               onChange={(event) => setWeightDraft(event.target.value)}
-              placeholder={isEnglish ? 'Current weight (kg)' : '현재 몸무게 (kg)'}
+              placeholder="kg"
               disabled={loadingAction}
             />
             <button type="submit" className="secondary-btn weight-log-btn" disabled={loadingAction}>
-              {loadingAction ? (isEnglish ? 'Saving...' : '저장 중...') : (isEnglish ? 'Save weight' : '체중 저장')}
+              {loadingAction ? (isEnglish ? 'Saving...' : '저장 중...') : (isEnglish ? 'Save' : '저장')}
             </button>
           </div>
         </form>
       </section>
 
-      {showTestForm && <TestForm onSubmit={onSubmitTest} loading={loadingAction} />}
-      {testResult && <ResultView score={testResult.score} level={testResult.level} onStartWorkout={onGoHome} />}
+      {isTestFlowOpen && (
+        <div
+          className="auth-modal-backdrop record-test-flow-overlay"
+          role="presentation"
+          onClick={onCloseTestFlow}
+          data-testid="level-test-backdrop"
+        >
+          <div
+            className="record-test-flow-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={isEnglish ? 'Fitness level test' : '체력 레벨 테스트'}
+            data-testid="level-test-dialog"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="record-test-flow-shell">
+              <div className="record-test-flow-header">
+                <span className="auth-modal-kicker">
+                  {showTestForm
+                    ? (isEnglish ? '3-Min Check' : '3분 체크')
+                    : (isEnglish ? 'Result' : '결과')}
+                </span>
+                <button
+                  type="button"
+                  className="sheet-close-btn"
+                  onClick={onCloseTestFlow}
+                  data-testid="level-test-close"
+                >
+                  {isEnglish ? 'Close' : '닫기'}
+                </button>
+              </div>
+
+              <div className="record-test-flow-body">
+                {showTestForm && <TestForm onSubmit={onSubmitTest} loading={loadingAction} />}
+                {!showTestForm && showTestResult && testResult && (
+                  <ResultView
+                    score={testResult.score}
+                    level={testResult.level}
+                    onStartWorkout={() => {
+                      onCloseTestFlow?.()
+                      onGoHome?.()
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ProgressPanel
         stats={workoutStats}

@@ -28,6 +28,33 @@ export default function PublicProfileCard({
 
   if (!profile && !loading) return null
 
+  const statItems = [
+    {
+      label: t('활동', 'Activity'),
+      value: `Lv ${profile?.activity_level ?? 1}`,
+    },
+    {
+      label: t('이번 주', 'This week'),
+      value: isEnglish ? `${profile?.weekly_count ?? 0} logs` : `${profile?.weekly_count ?? 0}회`,
+    },
+    {
+      label: t('연속', 'Streak'),
+      value: isEnglish ? `${profile?.streak_days ?? 0} days` : `${profile?.streak_days ?? 0}일`,
+    },
+    {
+      label: t('팔로워', 'Followers'),
+      value: String(profile?.follower_count ?? 0),
+    },
+    {
+      label: t('체력', 'Level'),
+      value: profile?.latest_level ? localizeLevelText(profile.latest_level, language) : t('아직 없음', 'No level yet'),
+    },
+    {
+      label: t('총 XP', 'XP'),
+      value: `${profile?.total_xp ?? 0} XP`,
+    },
+  ]
+
   return (
     <section className="card public-profile-card community-profile-spotlight">
       {loading ? (
@@ -53,12 +80,12 @@ export default function PublicProfileCard({
                 alt={profile?.display_name || (isEnglish ? 'Public profile' : '공개 프로필')}
               />
               <div className="public-profile-copy">
-                <span className="app-section-kicker">{t('공개 프로필', 'Public profile')}</span>
+                <span className="app-section-kicker">{t('프로필', 'Profile')}</span>
                 <h2>{profile?.display_name}</h2>
                 <p className="subtext">
                   {profile?.bio?.trim()
                     ? profile.bio
-                    : t('아직 짧은 소개를 입력하지 않았어요.', 'This user has not added a short intro yet.')}
+                    : t('소개가 아직 없어요.', 'No intro yet.')}
                 </p>
               </div>
             </div>
@@ -88,7 +115,7 @@ export default function PublicProfileCard({
                 </>
               )}
               <button type="button" className="ghost-btn" onClick={onClear}>
-                {t('프로필 닫기', 'Close profile')}
+                {t('닫기', 'Close')}
               </button>
             </div>
           </div>
@@ -102,44 +129,15 @@ export default function PublicProfileCard({
           )}
 
           <div className="public-profile-stats">
-            <StatChip
-              label={t('활동 레벨', 'Activity level')}
-              value={`Lv ${profile?.activity_level ?? 1}`}
-            />
-            <StatChip
-              label={t('주간 포인트', 'Weekly points')}
-              value={String(profile?.weekly_points ?? 0)}
-            />
-            <StatChip
-              label={t('총 XP', 'Total XP')}
-              value={`${profile?.total_xp ?? 0} XP`}
-            />
-            <StatChip
-              label={t('이번 주 운동', 'This week')}
-              value={isEnglish ? `${profile?.weekly_count ?? 0} workouts` : `${profile?.weekly_count ?? 0}회 운동`}
-            />
-            <StatChip
-              label={t('현재 연속', 'Current streak')}
-              value={isEnglish ? `${profile?.streak_days ?? 0} days` : `${profile?.streak_days ?? 0}일`}
-            />
-            <StatChip
-              label={t('체력 레벨', 'Fitness level')}
-              value={profile?.latest_level ? localizeLevelText(profile.latest_level, language) : t('아직 없음', 'No level yet')}
-            />
-            <StatChip
-              label={t('팔로워', 'Followers')}
-              value={String(profile?.follower_count ?? 0)}
-            />
-            <StatChip
-              label={t('팔로잉', 'Following')}
-              value={String(profile?.following_count ?? 0)}
-            />
+            {statItems.map((item) => (
+              <StatChip key={item.label} label={item.label} value={item.value} />
+            ))}
           </div>
 
           <p className="subtext public-profile-footnote">
             {t(
-              '이 프로필이 열린 동안 아래 피드는 이 사람의 게시물 중심으로 좁혀서 보여줘요.',
-              'While this profile is open, the feed below stays filtered to this person.',
+              '아래에는 이 사람 글만 보여요.',
+              'The feed below shows only this person.',
             )}
           </p>
         </>

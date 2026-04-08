@@ -34,15 +34,15 @@ export default function UserSearchPanel({
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Search' : '검색'}</span>
-          <h2 className="app-section-title small">{isEnglish ? 'Find People' : '사람 찾기'}</h2>
+          <h2 className="app-section-title small">{isEnglish ? 'People' : '사람 찾기'}</h2>
         </div>
-        <span className="community-mini-pill">{trimmedQuery ? (isEnglish ? `${rows.length} results` : `${rows.length}명`) : (isEnglish ? 'Search by nickname' : '닉네임 검색')}</span>
+        <span className="community-mini-pill">{trimmedQuery ? (isEnglish ? `${rows.length} found` : `${rows.length}명`) : (isEnglish ? 'Nickname' : '닉네임')}</span>
       </div>
 
       <p className="subtext compact">
         {isEnglish
-          ? 'Search by nickname and jump straight into a public profile.'
-          : '닉네임으로 찾아서 바로 공개 프로필을 열 수 있어요.'}
+          ? 'Search by nickname.'
+          : '닉네임 검색'}
       </p>
 
       <div className="user-search-input-row">
@@ -51,7 +51,7 @@ export default function UserSearchPanel({
           type="search"
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder={isEnglish ? 'Search nickname' : '닉네임 검색'}
+          placeholder={isEnglish ? 'Nickname' : '닉네임'}
         />
         {!!trimmedQuery && (
           <button type="button" className="ghost-btn" onClick={() => onQueryChange('')}>
@@ -63,7 +63,7 @@ export default function UserSearchPanel({
       {trimmedQuery.length > 0 && trimmedQuery.length < 2 && (
         <div className="empty-state-card cool user-search-empty">
           <span className="empty-state-badge">{isEnglish ? 'Tip' : '팁'}</span>
-          <strong>{isEnglish ? 'Type at least 2 characters.' : '2글자 이상 입력해보세요.'}</strong>
+          <strong>{isEnglish ? 'Type 2+ characters.' : '2글자 이상 입력해요.'}</strong>
         </div>
       )}
 
@@ -85,9 +85,9 @@ export default function UserSearchPanel({
 
       {!loading && trimmedQuery.length >= 2 && !rows.length && (
         <div className="empty-state-card cool user-search-empty">
-          <span className="empty-state-badge">{isEnglish ? 'No Match' : '검색 결과 없음'}</span>
-          <strong>{isEnglish ? 'No users matched that nickname.' : '해당 닉네임과 일치하는 사람이 없어요.'}</strong>
-          <p>{isEnglish ? 'Try a shorter keyword or a different spelling.' : '더 짧은 키워드나 다른 철자로 다시 검색해보세요.'}</p>
+          <span className="empty-state-badge">{isEnglish ? 'No Match' : '없음'}</span>
+          <strong>{isEnglish ? 'No matching users.' : '일치하는 사람이 없어요.'}</strong>
+          <p>{isEnglish ? 'Try another keyword.' : '다른 키워드로 찾아요.'}</p>
         </div>
       )}
 
@@ -112,7 +112,7 @@ export default function UserSearchPanel({
                       <p className="suggested-user-meta">
                         {isEnglish
                           ? `${item.weekly_count} this week · ${item.total_workouts} total`
-                          : `이번 주 ${item.weekly_count}회 · 누적 ${item.total_workouts}회`}
+                          : `${item.weekly_count} 이번 주 · ${item.total_workouts} 누적`}
                       </p>
                     </div>
                   </div>

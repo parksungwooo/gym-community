@@ -182,8 +182,8 @@ export default function HomeDashboard({
   const goalProgress = Math.max(0, Math.min(challenge?.progress ?? 0, 100))
 
   const heroTitle = todayDone
-    ? t('오늘 운동은 이미 기록했어요', 'Today already has a saved workout.')
-    : t('오늘 운동 한 번만 기록하면 충분해요', 'One workout log is enough for today.')
+    ? t('오늘 기록 완료', 'Saved for today')
+    : t('오늘 한 번이면 돼요', 'One log is enough today')
 
   const heroBadgeLabel = todayDone
     ? t('오늘 완료', 'Saved today')
@@ -194,16 +194,16 @@ export default function HomeDashboard({
   const heroDescription = nickname
     ? todayDone
       ? t(
-          `${nickname}님, 오늘은 이미 초록불이에요. 이제 이번 주 흐름만 이어가면 충분해요.`,
-          `${nickname}, today is already in the green. Just keep the weekly rhythm going now.`,
+          `${nickname}님, 오늘 기록은 이미 끝났어요.`,
+          `${nickname}, today is already done.`,
         )
       : t(
-          `${nickname}님, 길게 하지 않아도 괜찮아요. 운동 종류와 시간만 남겨도 오늘 흐름을 이어갈 수 있어요.`,
-          `${nickname}, it does not have to be long. Type and time are enough to keep your rhythm going.`,
+          `${nickname}님, 짧게 남겨도 충분해요.`,
+          `${nickname}, a short log is enough.`,
         )
     : t(
-        '운동 종류와 시간만 적어도 오늘 기록은 충분해요.',
-        'Workout type and time are enough to keep today moving.',
+        '종류와 시간만 적어도 충분해요.',
+        'Type and time are enough.',
       )
 
   const recentWorkoutTitle = stats.lastWorkoutType
@@ -215,24 +215,24 @@ export default function HomeDashboard({
         stats.lastWorkoutDuration ? t(`${stats.lastWorkoutDuration}분`, `${stats.lastWorkoutDuration} min`) : null,
         stats.lastWorkoutCalories ? formatCalories(stats.lastWorkoutCalories, isEnglish) : null,
       ].filter(Boolean).join(' · ')
-    : t('첫 운동을 기록하면 최근 운동이 여기에 보여요.', 'Your latest workout will appear here after the first save.')
+    : t('첫 기록이 여기에 보여요.', 'Your first log shows here.')
 
   const showReminderInline = reminder?.enabled && !todayDone
   const reminderTitle = reminder?.due
-    ? t('지금이 오늘 운동 리마인더 시간이에요.', 'It is time for today’s workout reminder.')
+    ? t('지금 기록할 시간이에요.', 'Time to log today.')
     : t(
-        `오늘 리마인더는 ${reminder?.reminderTimeLabel}에 울리도록 설정돼 있어요.`,
-        `Today’s reminder is set for ${reminder?.reminderTimeLabel}.`,
+        `리마인더 ${reminder?.reminderTimeLabel}`,
+        `Reminder ${reminder?.reminderTimeLabel}`,
       )
 
   const reminderBody = reminder?.due
     ? t(
-        '지금 한 번만 기록해도 연속 기록과 주간 목표를 같이 지킬 수 있어요.',
-        'One quick workout now keeps both your streak and weekly goal alive.',
+        '한 번만 남기면 흐름이 이어져요.',
+        'One quick save keeps the streak alive.',
       )
     : t(
-        '복잡하게 생각하지 않도록, 다시 돌아올 시간을 미리 잡아뒀어요.',
-        'A gentle nudge is queued up so you can come back without overthinking it.',
+        '돌아올 시간을 잡아뒀어요.',
+        'A return time is already set.',
       )
 
   const featuredFeedSection =
@@ -242,6 +242,9 @@ export default function HomeDashboard({
     ?? { label: t('피드', 'Feed'), items: [] }
 
   const featuredPost = featuredFeedSection.items[0] ?? null
+  const emptyFeedSecondaryAction = !currentLevel
+    ? { label: t('레벨 테스트', 'Level test'), onClick: onOpenTest }
+    : { label: t('커뮤니티 보기', 'Open community'), onClick: onSeeCommunity }
 
   return (
     <section className="home-dashboard-app streamlined-home home-dashboard-redesign home-dashboard-clean">
@@ -274,8 +277,8 @@ export default function HomeDashboard({
               {workoutLoading
                 ? t('여는 중...', 'Opening...')
                 : todayDone
-                  ? t('운동 하나 더 기록', 'Log one more workout')
-                  : t('오늘 운동 기록하기', 'Log today’s workout')}
+                  ? t('추가 기록', 'Add log')
+                  : t('운동 기록', 'Log workout')}
             </button>
 
             {topRoutine ? (
@@ -284,11 +287,11 @@ export default function HomeDashboard({
                 className="ghost-btn home-focus-secondary"
                 onClick={() => onStartRoutine?.(topRoutine)}
               >
-                {t(`루틴 다시 시작 · ${topRoutine.name}`, `Restart routine · ${topRoutine.name}`)}
+                {t(`루틴 · ${topRoutine.name}`, `Routine · ${topRoutine.name}`)}
               </button>
             ) : !currentLevel ? (
               <button type="button" className="ghost-btn home-focus-secondary" onClick={onOpenTest}>
-                {t('레벨 테스트 먼저 하기', 'Take the level test first')}
+                {t('레벨 테스트', 'Level test')}
               </button>
             ) : null}
           </div>
@@ -335,11 +338,11 @@ export default function HomeDashboard({
       <section className="card home-feed-preview-shell compact-home-feed minimal-home-feed">
         <div className="home-module-heading home-feed-preview-heading">
           <div>
-            <span className="app-section-kicker">{t('피드 한 장', 'One story')}</span>
-            <h3>{t('지금 커뮤니티에서 가장 먼저 볼 이야기', 'The first community story to see now')}</h3>
+            <span className="app-section-kicker">{t('지금 피드', 'Now in feed')}</span>
+            <h3>{t('지금 볼 한 장', 'One story to see')}</h3>
           </div>
           <button type="button" className="ghost-btn" onClick={onSeeCommunity}>
-            {t('커뮤니티 보기', 'See community')}
+            {t('커뮤니티', 'Community')}
           </button>
         </div>
 
@@ -353,16 +356,19 @@ export default function HomeDashboard({
         ) : (
           <div className="empty-state-card cool home-feed-empty">
             <span className="empty-state-badge">{t('피드', 'Feed')}</span>
-            <strong>{t('새 운동 기록이 쌓이면 여기가 바로 채워져요.', 'This area fills as soon as new workout stories land.')}</strong>
+            <strong>{t('아직 피드가 조용해요.', 'Feed is quiet for now.')}</strong>
             <p>
               {t(
-                '아직 보여줄 피드가 없어요. 오늘 운동을 기록하거나 몇 명을 팔로우하면 이 공간이 먼저 살아나요.',
-                'There is nothing to show yet. Log a workout or follow a few people and this section wakes up first.',
+                '운동 한 번 기록하거나 커뮤니티를 열어보면 여기부터 채워져요.',
+                'One log or a quick visit to community starts this area.',
               )}
             </p>
-            <div className="home-feed-empty-actions">
+            <div className="state-action-row home-feed-empty-actions">
               <button type="button" className="primary-btn" onClick={onOpenWorkoutComposer}>
-                {t('오늘 운동 기록하기', 'Log today’s workout')}
+                {t('운동 기록', 'Log workout')}
+              </button>
+              <button type="button" className="ghost-btn" onClick={emptyFeedSecondaryAction.onClick}>
+                {emptyFeedSecondaryAction.label}
               </button>
             </div>
           </div>

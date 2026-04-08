@@ -12,31 +12,31 @@ function formatTimestamp(value, locale) {
 }
 
 function getReportStatusLabel(status, isEnglish) {
-  if (status === 'reviewed') return isEnglish ? 'Reviewed' : '검토 완료'
-  if (status === 'dismissed') return isEnglish ? 'Dismissed' : '기각됨'
-  return isEnglish ? 'Open' : '접수됨'
+  if (status === 'reviewed') return isEnglish ? 'Done' : '완료'
+  if (status === 'dismissed') return isEnglish ? 'Dismissed' : '기각'
+  return isEnglish ? 'Open' : '접수'
 }
 
 function getPostVisibilityCopy(status, isEnglish) {
   if (status === 'hidden_by_author') {
     return {
-      label: isEnglish ? 'Hidden by author' : '작성자가 숨김',
-      actionLabel: isEnglish ? 'Restore post' : '게시글 복구',
+      label: isEnglish ? 'Author hidden' : '작성자 숨김',
+      actionLabel: isEnglish ? 'Restore' : '복구',
       actionTone: 'restore',
     }
   }
 
   if (status === 'hidden_by_admin') {
     return {
-      label: isEnglish ? 'Post hidden' : '게시글 숨김됨',
-      actionLabel: isEnglish ? 'Restore post' : '게시글 복구',
+      label: isEnglish ? 'Hidden' : '숨김',
+      actionLabel: isEnglish ? 'Restore' : '복구',
       actionTone: 'restore',
     }
   }
 
   return {
-    label: isEnglish ? 'Post visible' : '게시글 노출 중',
-    actionLabel: isEnglish ? 'Hide post' : '게시글 숨기기',
+    label: isEnglish ? 'Visible' : '노출 중',
+    actionLabel: isEnglish ? 'Hide' : '숨기기',
     actionTone: 'hide',
   }
 }
@@ -61,16 +61,15 @@ export default function ModerationPanel({
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Admin' : '운영'}</span>
-          <h2>{isEnglish ? 'Report Queue' : '신고 관리'}</h2>
+          <h2>{isEnglish ? 'Reports' : '신고'}</h2>
         </div>
         <span className="community-mini-pill">
           {isEnglish ? `${reports.length} reports` : `${reports.length}건`}
         </span>
       </div>
+
       <p className="subtext compact">
-        {isEnglish
-          ? 'Review reports, hide problematic posts, and leave a clear moderation note.'
-          : '신고를 검토하고, 문제가 있는 글을 바로 숨기고, 처리 메모까지 남겨보세요.'}
+        {isEnglish ? 'Review and hide.' : '검토하고 숨기기'}
       </p>
 
       <div className="moderation-toolbar">
@@ -80,9 +79,9 @@ export default function ModerationPanel({
           onChange={(event) => onStatusChange(event.target.value)}
           disabled={loading || actionLoading}
         >
-          <option value="open">{isEnglish ? 'Open' : '접수됨'}</option>
-          <option value="reviewed">{isEnglish ? 'Reviewed' : '검토 완료'}</option>
-          <option value="dismissed">{isEnglish ? 'Dismissed' : '기각됨'}</option>
+          <option value="open">{isEnglish ? 'Open' : '접수'}</option>
+          <option value="reviewed">{isEnglish ? 'Done' : '완료'}</option>
+          <option value="dismissed">{isEnglish ? 'Dismissed' : '기각'}</option>
         </select>
         <button
           type="button"
@@ -107,12 +106,8 @@ export default function ModerationPanel({
       ) : !reports.length ? (
         <div className="empty-state-card cool">
           <span className="empty-state-badge">{isEnglish ? 'Clear' : '조용함'}</span>
-          <strong>{isEnglish ? 'No reports in this queue.' : '이 상태의 신고가 없어요.'}</strong>
-          <p>
-            {isEnglish
-              ? 'Once users report posts or accounts, they will appear here.'
-              : '사용자 신고가 들어오면 여기에서 바로 확인할 수 있어요.'}
-          </p>
+          <strong>{isEnglish ? 'No reports.' : '신고 없음'}</strong>
+          <p>{isEnglish ? 'New ones show here.' : '새 신고가 보여요.'}</p>
         </div>
       ) : (
         <div className="moderation-report-list">
@@ -135,8 +130,8 @@ export default function ModerationPanel({
 
                 <p className="moderation-report-meta">
                   {isEnglish
-                    ? `Reporter: ${report.reporter_name || 'Unknown'} / Target: ${report.target_name || report.post_author_name || 'Unknown'}`
-                    : `신고자: ${report.reporter_name || '알 수 없음'} / 대상: ${report.target_name || report.post_author_name || '알 수 없음'}`}
+                    ? `From ${report.reporter_name || 'Unknown'} / To ${report.target_name || report.post_author_name || 'Unknown'}`
+                    : `${report.reporter_name || '이름없음'} / ${report.target_name || report.post_author_name || '이름없음'}`}
                 </p>
 
                 {report.post_id && (
@@ -146,9 +141,7 @@ export default function ModerationPanel({
                     </span>
                     {report.post_hidden_reason && (
                       <span className="moderation-post-note">
-                        {isEnglish
-                          ? `Latest note: ${report.post_hidden_reason}`
-                          : `최근 메모: ${report.post_hidden_reason}`}
+                        {isEnglish ? `Note ${report.post_hidden_reason}` : `메모 ${report.post_hidden_reason}`}
                       </span>
                     )}
                   </div>
@@ -161,7 +154,7 @@ export default function ModerationPanel({
                   className="workout-textarea settings-textarea compact"
                   rows="3"
                   maxLength="240"
-                  placeholder={isEnglish ? 'Leave a moderation note' : '처리 메모를 남겨주세요'}
+                  placeholder={isEnglish ? 'Note' : '메모'}
                   value={resolutionNote}
                   onChange={(event) => setResolutionNotes((prev) => ({
                     ...prev,
@@ -187,7 +180,7 @@ export default function ModerationPanel({
                     onClick={() => onResolve(report.id, 'reviewed', resolutionNote)}
                     disabled={actionLoading}
                   >
-                    {isEnglish ? 'Mark Reviewed' : '검토 완료'}
+                    {isEnglish ? 'Done' : '완료'}
                   </button>
                   <button
                     type="button"

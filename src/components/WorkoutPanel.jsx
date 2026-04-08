@@ -40,11 +40,11 @@ function PhotoProofList({ items, isEnglish, onRemove, onMove }) {
   if (!items.length) {
     return (
       <div className="photo-proof-empty">
-        <strong>{isEnglish ? 'No proof photo added yet' : '아직 인증 사진이 없어요'}</strong>
+        <strong>{isEnglish ? 'No photos' : '사진 없음'}</strong>
         <p>
           {isEnglish
-            ? 'On mobile, camera access is requested only when you tap the camera button.'
-            : '모바일에서는 카메라 버튼을 눌렀을 때만 브라우저가 권한을 요청해요.'}
+            ? 'Camera asks on tap.'
+            : '카메라는 눌릴 때만 물어요.'}
         </p>
       </div>
     )
@@ -117,16 +117,16 @@ export default function WorkoutPanel({
 
   const noteHint = useMemo(() => {
     if (workoutType === '러닝') {
-      return isEnglish ? 'ex: Park 3km, pace felt steady' : '예: 공원 3km, 페이스 안정적'
+      return isEnglish ? 'ex: Park 3km, steady' : '예: 공원 3km, 안정적'
     }
 
     if (workoutType === '웨이트') {
-      return isEnglish ? 'ex: Lower body 40 min, focused on squats' : '예: 하체 40분, 스쿼트 중심'
+      return isEnglish ? 'ex: Lower body 40 min, squats' : '예: 하체 40분, 스쿼트'
     }
 
     return isEnglish
-      ? 'ex: Leave a short note about how your body felt today'
-      : '예: 오늘 몸 상태나 운동 느낌을 짧게 남겨보세요'
+      ? 'ex: Felt light today'
+      : '예: 오늘 몸이 가벼웠어요'
   }, [isEnglish, workoutType])
 
   const resetForm = () => {
@@ -211,17 +211,17 @@ export default function WorkoutPanel({
       <div className="workout-capture-header compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Workout Sheet' : '운동 기록'}</span>
-          <h2>{isEnglish ? "Log Today's Workout" : '오늘 운동 기록하기'}</h2>
+          <h2>{isEnglish ? 'Workout Log' : '운동 기록'}</h2>
           <p className="subtext compact">
             {isEnglish
-              ? 'Type, time, photos, and a sharing choice are enough to save today.'
-              : '운동 종류와 시간만 정해도 오늘 기록은 충분해요. 필요하면 사진과 공개 여부도 함께 설정해보세요.'}
+              ? 'Type and time are enough.'
+              : '종류와 시간만 적으면 돼요.'}
           </p>
         </div>
 
         <div className="capture-header-actions">
           <span className={`capture-status subtle ${todayDone ? 'done' : ''}`}>
-            {todayDone ? (isEnglish ? 'More logs available today' : '오늘은 더 기록할 수 있어요') : (isEnglish ? 'Ready to log' : '바로 기록할 수 있어요')}
+            {todayDone ? (isEnglish ? 'More available' : '추가 가능') : (isEnglish ? 'Ready' : '준비됨')}
           </span>
           {onClose ? (
             <button type="button" className="sheet-close-btn" onClick={onClose} disabled={loading}>
@@ -239,7 +239,7 @@ export default function WorkoutPanel({
             onClick={() => setShowRoutineTools((prev) => !prev)}
             disabled={loading}
           >
-            {isEnglish ? `Routines (${routineTemplates.length})` : `루틴 (${routineTemplates.length})`}
+            {isEnglish ? 'Routines' : '루틴'}
           </button>
           <button
             type="button"
@@ -247,12 +247,12 @@ export default function WorkoutPanel({
             onClick={() => setShowOptionalFields((prev) => !prev)}
             disabled={loading}
           >
-            {isEnglish ? 'Photos · Note · Share' : '사진 · 메모 · 공개'}
+            {isEnglish ? 'Extras' : '옵션'}
           </button>
         </section>
 
         <section className="sheet-section quick-choice-section compact">
-          <span className="field-label-text">{isEnglish ? 'Common Workouts' : '자주 하는 운동'}</span>
+          <span className="field-label-text">{isEnglish ? 'Quick Picks' : '빠른 선택'}</span>
           <div className="quick-chip-row compact">
             {WORKOUT_OPTIONS.map((option) => (
               <button key={option} type="button" className={`quick-choice-chip compact ${workoutType === option ? 'active' : ''}`} onClick={() => setWorkoutType(option)} disabled={loading}>
@@ -277,7 +277,7 @@ export default function WorkoutPanel({
         <div className="sheet-section capture-field-grid-sheet compact">
           <div className="capture-field-grid">
             <label className="field-label">
-              <span className="field-label-text">{isEnglish ? 'Workout Type' : '운동 종류 직접 선택'}</span>
+              <span className="field-label-text">{isEnglish ? 'Workout Type' : '직접 선택'}</span>
               <select className="workout-select compact" value={workoutType} onChange={(event) => setWorkoutType(event.target.value)} disabled={loading}>
                 {WORKOUT_OPTIONS.map((option) => (
                   <option key={option} value={option}>{getWorkoutTypeLabel(option, language)}</option>
@@ -294,13 +294,13 @@ export default function WorkoutPanel({
 
         <div className="sheet-summary-bar compact">
           <div className="capture-helper-card compact">
-            <span className="capture-helper-label">{isEnglish ? "Today's Logs" : '오늘 기록 수'}</span>
+            <span className="capture-helper-label">{isEnglish ? "Today's Logs" : '오늘 기록'}</span>
             <strong className="capture-helper-value">{todayCount}</strong>
           </div>
 
           {recentWorkout?.workoutType && (
             <button type="button" className="reuse-workout-btn compact" onClick={handleReuseRecent} disabled={loading}>
-              {isEnglish ? 'Reuse Latest Workout' : '최근 운동 다시 쓰기'}
+              {isEnglish ? 'Recent Log' : '최근 기록'}
               <span>
                 <span className="reuse-inline-mark">{getWorkoutMark(recentWorkout.workoutType)}</span>
                 {getWorkoutTypeLabel(recentWorkout.workoutType, language)}
@@ -313,13 +313,13 @@ export default function WorkoutPanel({
         {showRoutineTools && (
           <section className="sheet-section routine-section compact">
             <div className="routine-header-row">
-              <span className="field-label-text">{isEnglish ? 'Saved Routines' : '저장된 루틴'}</span>
-              <span className="routine-count-pill">{isEnglish ? `${routineTemplates.length} saved` : `${routineTemplates.length}개 저장됨`}</span>
+              <span className="field-label-text">{isEnglish ? 'Routines' : '루틴'}</span>
+              <span className="routine-count-pill">{isEnglish ? `${routineTemplates.length}` : `${routineTemplates.length}개`}</span>
             </div>
 
             <div className="routine-save-row compact">
               <label className="field-label routine-name-field">
-                <span className="field-label-text">{isEnglish ? 'Routine Name' : '루틴 이름'}</span>
+                <span className="field-label-text">{isEnglish ? 'Name' : '이름'}</span>
                 <input
                   className="workout-input compact"
                   type="text"
@@ -332,7 +332,7 @@ export default function WorkoutPanel({
               </label>
 
               <button type="button" className="secondary-btn routine-save-btn compact" onClick={handleSaveRoutine} disabled={loading || !routineName.trim()}>
-                {isEnglish ? 'Save Current Routine' : '현재 조합 저장'}
+                {isEnglish ? 'Save' : '저장'}
               </button>
             </div>
 
@@ -362,8 +362,8 @@ export default function WorkoutPanel({
               </div>
             ) : (
               <div className="routine-empty-card compact">
-                <strong>{isEnglish ? 'Save the combinations you repeat often' : '자주 하는 조합을 저장해보세요'}</strong>
-                <p>{isEnglish ? 'Once saved, the next workout can start in one tap.' : '한 번 저장해두면 다음 운동은 한 번에 시작할 수 있어요.'}</p>
+                <strong>{isEnglish ? 'Save a combo' : '조합 저장'}</strong>
+                <p>{isEnglish ? 'Start faster next time.' : '다음엔 더 빨라요.'}</p>
               </div>
             )}
           </section>
@@ -372,26 +372,26 @@ export default function WorkoutPanel({
         {showOptionalFields && (
           <>
             <label className="field-label sheet-section compact">
-              <span className="field-label-text">{isEnglish ? 'Quick Note' : '짧은 메모'}</span>
+              <span className="field-label-text">{isEnglish ? 'Note' : '메모'}</span>
               <textarea className="workout-textarea compact" rows="3" maxLength="120" placeholder={noteHint} value={note} onChange={(event) => setNote(event.target.value)} disabled={loading} />
             </label>
 
             <section className="sheet-section compact">
               <div className="photo-proof-header">
-                <span className="field-label-text">{isEnglish ? 'Photo Proof' : '사진 인증'}</span>
+                <span className="field-label-text">{isEnglish ? 'Photos' : '사진'}</span>
                 <span className="photo-proof-helper">
-                  {isEnglish ? `Optional. Up to ${MAX_PHOTOS} photos. Drag-style order with up/down controls.` : `선택 사항이에요. 최대 ${MAX_PHOTOS}장까지 올릴 수 있고 위/아래 버튼으로 순서를 바꿀 수 있어요.`}
+                  {isEnglish ? `Up to ${MAX_PHOTOS}.` : `최대 ${MAX_PHOTOS}장`}
                 </span>
               </div>
 
               <div className="photo-proof-actions">
                 <button type="button" className="secondary-btn photo-proof-btn" onClick={() => galleryInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
-                  {isEnglish ? 'Choose Photos' : '사진 선택'}
+                  {isEnglish ? 'Photos' : '사진'}
                 </button>
                 <button type="button" className="ghost-btn photo-proof-btn" onClick={() => cameraInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
-                  {isEnglish ? 'Open Camera' : '카메라 열기'}
+                  {isEnglish ? 'Camera' : '카메라'}
                 </button>
-                <span className="photo-proof-count">{isEnglish ? `${photoItems.length}/${MAX_PHOTOS} selected` : `${photoItems.length}/${MAX_PHOTOS}장 선택됨`}</span>
+                <span className="photo-proof-count">{isEnglish ? `${photoItems.length}/${MAX_PHOTOS}` : `${photoItems.length}/${MAX_PHOTOS}장`}</span>
               </div>
 
               <input ref={galleryInputRef} className="hidden-file-input" type="file" accept="image/*" multiple onChange={handleFileChange} />
@@ -405,7 +405,7 @@ export default function WorkoutPanel({
                 <div>
                   <span className="field-label-text">{isEnglish ? 'Share to Feed' : '피드 공개'}</span>
                   <p className="photo-proof-helper">
-                    {isEnglish ? 'Turn this off to save privately in your records only.' : '끄면 내 기록에만 저장되고 커뮤니티 피드에는 올라가지 않아요.'}
+                    {isEnglish ? 'Off for private.' : '끄면 비공개'}
                   </p>
                 </div>
                 <button type="button" className={`toggle-chip ${shareToFeed ? 'active' : ''}`} onClick={() => setShareToFeed((prev) => !prev)} disabled={loading}>
@@ -419,10 +419,10 @@ export default function WorkoutPanel({
         <div className="sheet-submit-bar compact">
           <div className="sheet-submit-copy">
             <strong>{getWorkoutTypeLabel(workoutType, language)}</strong>
-            <span>{Number(durationMinutes) ? (isEnglish ? `${durationMinutes} min planned` : `${durationMinutes}분 운동으로 저장돼요`) : (isEnglish ? 'Duration not set' : '운동 시간이 아직 없어요')}</span>
+            <span>{Number(durationMinutes) ? (isEnglish ? `${durationMinutes} min` : `${durationMinutes}분`) : (isEnglish ? 'No time' : '시간 없음')}</span>
           </div>
           <button type="submit" className="primary-btn capture-submit-btn compact" disabled={loading}>
-            {loading ? (isEnglish ? 'Saving workout...' : '운동 저장 중...') : todayDone ? (isEnglish ? 'Save Another Workout Today' : '오늘 운동 추가 저장') : (isEnglish ? "Save Today's Workout" : '오늘 운동 기록 저장')}
+            {loading ? (isEnglish ? 'Saving...' : '저장 중...') : todayDone ? (isEnglish ? 'Save more' : '추가 저장') : (isEnglish ? 'Save' : '저장')}
           </button>
         </div>
       </form>

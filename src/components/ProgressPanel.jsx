@@ -9,22 +9,23 @@ function formatDate(date, language) {
   }
 
   return new Date(date).toLocaleDateString(language === 'en' ? 'en-US' : 'ko-KR', {
-    month: 'long',
+    month: 'short',
     day: 'numeric',
   })
 }
 
 function getWorkoutMark(type) {
-  switch (type) {
-    case '러닝': return 'RN'
-    case '웨이트': return 'WT'
-    case '스트레칭': return 'ST'
-    case '요가': return 'YG'
-    case '필라테스': return 'PL'
-    case '사이클': return 'CY'
-    case '빠른 체크인': return 'QC'
-    default: return 'ET'
-  }
+  const normalized = String(type ?? '').toLowerCase()
+
+  if (normalized.includes('러닝') || normalized.includes('run')) return 'RN'
+  if (normalized.includes('웨이트') || normalized.includes('weight')) return 'WT'
+  if (normalized.includes('스트레칭') || normalized.includes('stretch')) return 'ST'
+  if (normalized.includes('요가') || normalized.includes('yoga')) return 'YG'
+  if (normalized.includes('필라테스') || normalized.includes('pilates')) return 'PL'
+  if (normalized.includes('사이클') || normalized.includes('cycle') || normalized.includes('bike')) return 'CY'
+  if (normalized.includes('체력') || normalized.includes('quick')) return 'QC'
+
+  return 'ET'
 }
 
 function HealthStatTile({ label, value, meta, tone = 'default' }) {
@@ -38,14 +39,51 @@ function HealthStatTile({ label, value, meta, tone = 'default' }) {
 }
 
 function formatWeightChange(value, isEnglish) {
-  if (value == null) return isEnglish ? 'No previous entry' : '이전 기록 없음'
+  if (value == null) return '--'
   if (value === 0) return isEnglish ? 'No change' : '변화 없음'
   return `${value > 0 ? '+' : ''}${value} kg`
 }
 
 function formatCalories(value, isEnglish) {
-  if (!value) return isEnglish ? 'No calorie data yet' : '아직 칼로리 기록이 없어요'
+  if (value == null) return '--'
   return isEnglish ? `~${value} kcal` : `약 ${value}kcal`
+}
+
+function getHeroCopy(weeklyCount, weeklyGoal, isEnglish) {
+  if (weeklyCount >= weeklyGoal) {
+    return {
+      title: isEnglish ? 'Weekly goal done.' : '주간 목표 완료',
+      body: isEnglish ? 'You hit the pace.' : '이번 주 페이스를 채웠어요.',
+    }
+  }
+
+  if (weeklyCount > 0) {
+    return {
+      title: isEnglish ? 'Your rhythm is showing.' : '이번 주 흐름이 보여요.',
+      body: isEnglish ? 'Logs, streak, and level together.' : '기록, 연속, 레벨을 같이 봐요.',
+    }
+  }
+
+  return {
+    title: isEnglish ? 'The first log starts here.' : '첫 기록부터 시작해요.',
+    body: isEnglish ? 'One workout opens the page.' : '운동 한 번이면 이 화면이 채워져요.',
+  }
+}
+
+function getGoalMeta(targetDeltaKg, isEnglish) {
+  if (targetDeltaKg == null) {
+    return isEnglish ? 'Set a goal first.' : '목표를 정하면 보여요.'
+  }
+
+  if (targetDeltaKg === 0) {
+    return isEnglish ? 'Goal reached.' : '목표 달성'
+  }
+
+  if (targetDeltaKg > 0) {
+    return isEnglish ? `${targetDeltaKg} kg left.` : `${targetDeltaKg}kg 남음`
+  }
+
+  return isEnglish ? `${Math.abs(targetDeltaKg)} kg past.` : `${Math.abs(targetDeltaKg)}kg 초과`
 }
 
 export default function ProgressPanel({
@@ -59,62 +97,78 @@ export default function ProgressPanel({
   recentActivityEvents = [],
 }) {
   const { language, isEnglish } = useI18n()
-  const maxCount = Math.max(...(stats.typeCounts?.map((item) => item.count) ?? [1]))
-  const visibleActivityEvents = recentActivityEvents.slice(0, 5)
+  const safeTypeCounts = stats.typeCounts ?? []
+  const maxCount = Math.max(...safeTypeCounts.map((item) => item.count), 1)
+  const visibleActivityEvents = recentActivityEvents.slice(0, 4)
   const visibleBadges = achievementBadges.length
     ? achievementBadges.map((item) => item.badge_key)
     : badges
   const latestWorkoutName = stats.lastWorkoutType
     ? getWorkoutTypeLabel(stats.lastWorkoutType, language)
-    : (isEnglish ? 'No workout yet' : '아직 운동 기록이 없어요')
+    : (isEnglish ? 'No workout yet' : '아직 기록 없음')
+  const heroCopy = getHeroCopy(stats.weeklyCount ?? 0, weeklyGoal, isEnglish)
 
-  const latestWorkoutMeta = stats.lastWorkoutDuration
-    ? `${isEnglish ? `${stats.lastWorkoutDuration} min` : `${stats.lastWorkoutDuration}분`} · ${formatCalories(stats.lastWorkoutCalories, isEnglish)}${stats.lastWorkoutNote ? ` · ${stats.lastWorkoutNote}` : ''}`
-    : stats.lastWorkoutNote || (isEnglish ? 'No duration saved' : '시간 기록 없음')
+  const latestWorkoutMetaParts = [
+    stats.lastWorkoutDuration
+      ? (isEnglish ? `${stats.lastWorkoutDuration} min` : `${stats.lastWorkoutDuration}분`)
+      : null,
+    stats.lastWorkoutCalories != null ? formatCalories(stats.lastWorkoutCalories, isEnglish) : null,
+  ].filter(Boolean)
+
+  const latestWorkoutMeta = latestWorkoutMetaParts.length
+    ? latestWorkoutMetaParts.join(' · ')
+    : stats.lastWorkoutNote || (isEnglish ? 'Time not saved yet.' : '시간 기록 없음')
 
   const trendPoints = bodyMetrics?.history?.slice(-6) ?? []
   const weightValues = trendPoints.map((item) => item.weightKg)
   const maxWeight = weightValues.length ? Math.max(...weightValues) : 0
   const minWeight = weightValues.length ? Math.min(...weightValues) : 0
   const range = maxWeight - minWeight || 1
+  const weeklyCount = stats.weeklyCount ?? 0
+  const lastWorkoutDateLabel = stats.lastWorkoutDate ? formatDate(stats.lastWorkoutDate, language) : '--'
+  const levelMeta = latestResult
+    ? (isEnglish ? `${latestResult.score} pts` : `${latestResult.score}점`)
+    : (isEnglish ? 'Test pending' : '테스트 전')
+  const bmiMeta = bodyMetrics?.bmi != null
+    ? `${getBmiCategory(bodyMetrics.bmi, isEnglish)} · ${bodyMetrics.heightCm}cm / ${bodyMetrics.latestWeightKg}kg`
+    : (isEnglish ? 'Add height and weight.' : '키와 체중을 입력해요.')
+  const trendMeta = isEnglish
+    ? `Prev ${formatWeightChange(bodyMetrics?.changeFromPreviousKg, isEnglish)} · First ${formatWeightChange(bodyMetrics?.changeFromStartKg, isEnglish)}`
+    : `직전 ${formatWeightChange(bodyMetrics?.changeFromPreviousKg, isEnglish)} · 처음 ${formatWeightChange(bodyMetrics?.changeFromStartKg, isEnglish)}`
 
   return (
     <section className="record-health-screen compact-record-screen">
       <section className="card record-health-hero compact">
         <div className="app-section-heading compact">
           <div>
-            <span className="app-section-kicker">{isEnglish ? 'Records' : '기록'}</span>
-            <h2 className="app-section-title small">{isEnglish ? 'Health Snapshot' : '건강 스냅샷'}</h2>
+            <span className="app-section-kicker">{isEnglish ? 'This week' : '이번 주'}</span>
+            <h2 className="app-section-title small">{isEnglish ? 'Summary' : '요약'}</h2>
           </div>
-          <span className="community-mini-pill">{isEnglish ? `${stats.weeklyCount}/${weeklyGoal} week` : `주 ${stats.weeklyCount}/${weeklyGoal}`}</span>
+          <span className="community-mini-pill">{`${weeklyCount}/${weeklyGoal}`}</span>
         </div>
 
         <div className="record-health-headline compact">
-          <strong>{isEnglish ? 'Your week at a glance.' : '이번 주 기록을 한눈에 볼 수 있어요.'}</strong>
-          <p className="subtext compact">
-            {isEnglish
-              ? 'Workouts, calories, and body metrics are shown together.'
-              : '운동 기록, 칼로리, 체형 지표를 한 번에 보여줍니다.'}
-          </p>
+          <strong>{heroCopy.title}</strong>
+          <p className="subtext compact">{heroCopy.body}</p>
         </div>
 
         <div className="health-stat-grid compact">
           <HealthStatTile
             label={isEnglish ? 'Today' : '오늘'}
-            value={isEnglish ? `${stats.todayCount} logs` : `${stats.todayCount}개`}
+            value={isEnglish ? `${stats.todayCount ?? 0} logs` : `${stats.todayCount ?? 0}개`}
             meta={formatCalories(stats.todayCalories, isEnglish)}
             tone="cool"
           />
           <HealthStatTile
             label={isEnglish ? 'Streak' : '연속'}
-            value={isEnglish ? `${stats.streak} days` : `${stats.streak}일`}
-            meta={isEnglish ? `Last ${stats.lastWorkoutDate ? formatDate(stats.lastWorkoutDate, language) : 'none'}` : `마지막 ${stats.lastWorkoutDate ? formatDate(stats.lastWorkoutDate, language) : '없음'}`}
+            value={isEnglish ? `${stats.streak ?? 0} days` : `${stats.streak ?? 0}일`}
+            meta={isEnglish ? `Last ${lastWorkoutDateLabel}` : `마지막 ${lastWorkoutDateLabel}`}
             tone="warm"
           />
           <HealthStatTile
             label={isEnglish ? 'Level' : '레벨'}
-            value={latestResult ? localizeLevelText(latestResult.level, language) : (isEnglish ? 'Not tested' : '측정 전')}
-            meta={latestResult ? (isEnglish ? `${latestResult.score} pts` : `${latestResult.score}점`) : (isEnglish ? 'First test pending' : '첫 테스트 대기')}
+            value={latestResult ? localizeLevelText(latestResult.level, language) : (isEnglish ? 'Not tested' : '미측정')}
+            meta={levelMeta}
           />
         </div>
       </section>
@@ -123,30 +177,30 @@ export default function ProgressPanel({
         <section className="card record-module-card compact activity-card">
           <div className="app-section-heading compact">
             <div>
-              <span className="app-section-kicker">{isEnglish ? 'Activity XP' : '활동 XP'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'This Week\'s Growth' : '이번 주 활동 성장'}</h2>
+              <span className="app-section-kicker">XP</span>
+              <h2 className="app-section-title small">{isEnglish ? 'Activity XP' : '활동 XP'}</h2>
             </div>
             <span className="community-mini-pill accent">{`${activitySummary?.totalXp ?? 0} XP`}</span>
           </div>
           <div className="health-stat-grid compact">
             <HealthStatTile
-              label={isEnglish ? 'Weekly Points' : '주간 포인트'}
+              label={isEnglish ? 'Board' : '보드'}
               value={String(activitySummary?.weeklyPoints ?? 0)}
-              meta={isEnglish ? 'Used in the community board' : '커뮤니티 랭킹 기준'}
+              meta={isEnglish ? 'This week' : '이번 주'}
               tone="cool"
             />
             <HealthStatTile
-              label={isEnglish ? 'Today XP' : '오늘 XP'}
+              label={isEnglish ? 'Today' : '오늘'}
               value={`${activitySummary?.todayXp ?? 0} XP`}
-              meta={isEnglish ? 'Earned from today\'s actions' : '오늘 쌓인 활동 XP'}
+              meta={isEnglish ? 'Earned' : '획득'}
               tone="warm"
             />
             <HealthStatTile
-              label={isEnglish ? 'Activity Level' : '활동 레벨'}
+              label={isEnglish ? 'Level' : '레벨'}
               value={`Lv ${activitySummary?.levelValue ?? 1}`}
               meta={activitySummary?.nextLevelValue
-                ? (isEnglish ? `${activitySummary.remainingXp} XP to next` : `다음 레벨까지 ${activitySummary.remainingXp} XP`)
-                : (isEnglish ? 'Max level reached' : '최고 레벨 도달')}
+                ? (isEnglish ? `Next ${activitySummary?.remainingXp ?? 0} XP` : `다음 ${activitySummary?.remainingXp ?? 0} XP`)
+                : (isEnglish ? 'Max' : '최고')}
             />
           </div>
           <div className="goal-progress-block">
@@ -158,8 +212,8 @@ export default function ProgressPanel({
             </div>
             <p className="record-highlight-meta">
               {achievementBadges.length
-                ? (isEnglish ? `${achievementBadges.length} activity badges unlocked so far.` : `지금까지 활동 배지 ${achievementBadges.length}개를 얻었어요.`)
-                : (isEnglish ? 'Save a few workouts to start unlocking activity badges.' : '운동 기록을 쌓기 시작하면 활동 배지가 열려요.')}
+                ? (isEnglish ? `${achievementBadges.length} badges` : `배지 ${achievementBadges.length}개`)
+                : (isEnglish ? 'Badges open as you log.' : '기록이 쌓이면 배지가 열려요.')}
             </p>
           </div>
         </section>
@@ -167,8 +221,8 @@ export default function ProgressPanel({
         <section className="card record-module-card compact activity-card">
           <div className="app-section-heading compact">
             <div>
-              <span className="app-section-kicker">{isEnglish ? 'Recent XP' : '최근 XP'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Latest Activity Events' : '최근 활동 이벤트'}</h2>
+              <span className="app-section-kicker">{isEnglish ? 'Recent' : '최근'}</span>
+              <h2 className="app-section-title small">{isEnglish ? 'Recent XP' : '최근 XP'}</h2>
             </div>
             <span className="community-mini-pill">{visibleActivityEvents.length}</span>
           </div>
@@ -184,7 +238,7 @@ export default function ProgressPanel({
                     </div>
                     <div className="activity-event-score">
                       <strong>{`+${event.xp_amount} XP`}</strong>
-                      <span>{event.weekly_points ? `+${event.weekly_points}P` : (isEnglish ? 'No weekly points' : '주간 포인트 없음')}</span>
+                      <span>{event.weekly_points ? `+${event.weekly_points}P` : '-'}</span>
                     </div>
                   </article>
                 )
@@ -192,13 +246,9 @@ export default function ProgressPanel({
             </div>
           ) : (
             <div className="empty-state-card cool">
-              <span className="empty-state-badge">{isEnglish ? 'XP' : 'XP'}</span>
-              <strong>{isEnglish ? 'Recent activity XP will appear here.' : '최근 활동 XP가 여기에 쌓여요.'}</strong>
-              <p>
-                {isEnglish
-                  ? 'Workout logs, body check-ins, and test results will start filling this feed.'
-                  : '운동 기록, 몸무게 체크, 체력 테스트 결과가 여기에 순서대로 쌓입니다.'}
-              </p>
+              <span className="empty-state-badge">XP</span>
+              <strong>{isEnglish ? 'No recent XP yet.' : '최근 XP가 아직 없어요.'}</strong>
+              <p>{isEnglish ? 'Logs and tests fill this.' : '기록과 테스트가 쌓이면 보여요.'}</p>
             </div>
           )}
         </section>
@@ -209,26 +259,26 @@ export default function ProgressPanel({
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Calories' : '칼로리'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Estimated Burn' : '예상 소모 칼로리'}</h2>
+              <h2 className="app-section-title small">{isEnglish ? 'Burn' : '소모량'}</h2>
             </div>
           </div>
           <div className="health-stat-grid compact">
             <HealthStatTile
               label={isEnglish ? 'Today' : '오늘'}
               value={formatCalories(stats.todayCalories, isEnglish)}
-              meta={isEnglish ? 'Saved workout logs only' : '저장된 운동 기록 기준'}
+              meta={isEnglish ? 'Saved logs' : '기록 기준'}
               tone="cool"
             />
             <HealthStatTile
-              label={isEnglish ? 'This Week' : '이번 주'}
+              label={isEnglish ? 'Week' : '주간'}
               value={formatCalories(stats.weeklyCalories, isEnglish)}
-              meta={isEnglish ? `${stats.weeklyCount} workouts counted` : `${stats.weeklyCount}회 운동 기준`}
+              meta={isEnglish ? `${weeklyCount} logs` : `${weeklyCount}개`}
               tone="warm"
             />
             <HealthStatTile
               label={isEnglish ? 'Total' : '누적'}
               value={formatCalories(stats.totalCalories, isEnglish)}
-              meta={isEnglish ? 'Recent history window' : '최근 기록 구간 합계'}
+              meta={isEnglish ? 'All logs' : '전체 기록'}
             />
           </div>
         </section>
@@ -236,19 +286,15 @@ export default function ProgressPanel({
         <section className="card record-module-card compact">
           <div className="app-section-heading compact">
             <div>
-              <span className="app-section-kicker">{isEnglish ? 'Body' : '체형'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'BMI' : 'BMI'}</h2>
+              <span className="app-section-kicker">{isEnglish ? 'Body' : '몸'}</span>
+              <h2 className="app-section-title small">BMI</h2>
             </div>
           </div>
           <div className="record-highlight-block compact">
             <strong className="record-highlight-title">
-              {bodyMetrics?.bmi != null ? bodyMetrics.bmi : (isEnglish ? 'Need more data' : '데이터 필요')}
+              {bodyMetrics?.bmi != null ? bodyMetrics.bmi : '--'}
             </strong>
-            <p className="record-highlight-meta">
-              {bodyMetrics?.bmi != null
-                ? `${getBmiCategory(bodyMetrics.bmi, isEnglish)} · ${bodyMetrics.heightCm} cm / ${bodyMetrics.latestWeightKg} kg`
-                : (isEnglish ? 'Add height and weight in your profile to calculate BMI.' : '프로필에서 키와 몸무게를 입력하면 BMI를 계산할 수 있어요.')}
-            </p>
+            <p className="record-highlight-meta">{bmiMeta}</p>
           </div>
         </section>
       </section>
@@ -258,7 +304,7 @@ export default function ProgressPanel({
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Goal' : '목표'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Progress to Target' : '목표 체중 진행률'}</h2>
+              <h2 className="app-section-title small">{isEnglish ? 'Progress' : '진행'}</h2>
             </div>
             <span className="community-mini-pill accent">
               {bodyMetrics?.goalProgressPercent != null ? `${bodyMetrics.goalProgressPercent}%` : '--'}
@@ -271,15 +317,7 @@ export default function ProgressPanel({
                 style={{ width: `${bodyMetrics?.goalProgressPercent ?? 0}%` }}
               />
             </div>
-            <p className="record-highlight-meta">
-              {bodyMetrics?.targetDeltaKg == null
-                ? (isEnglish ? 'Set a target weight and log at least one weight entry.' : '목표 체중을 설정하고 몸무게를 한 번 이상 기록해보세요.')
-                : bodyMetrics.targetDeltaKg === 0
-                  ? (isEnglish ? 'You are at your target weight.' : '현재 목표 체중에 도달했어요.')
-                  : bodyMetrics.targetDeltaKg > 0
-                    ? (isEnglish ? `${bodyMetrics.targetDeltaKg} kg left to lose.` : `${bodyMetrics.targetDeltaKg}kg 더 감량하면 목표예요.`)
-                    : (isEnglish ? `${Math.abs(bodyMetrics.targetDeltaKg)} kg beyond target.` : `목표보다 ${Math.abs(bodyMetrics.targetDeltaKg)}kg 더 나아갔어요.`)}
-            </p>
+            <p className="record-highlight-meta">{getGoalMeta(bodyMetrics?.targetDeltaKg, isEnglish)}</p>
           </div>
         </section>
 
@@ -287,7 +325,7 @@ export default function ProgressPanel({
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Latest' : '최근'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Latest Workout' : '최근 운동'}</h2>
+              <h2 className="app-section-title small">{isEnglish ? 'Workout' : '최근 운동'}</h2>
             </div>
             <span className="workout-mark">{getWorkoutMark(stats.lastWorkoutType)}</span>
           </div>
@@ -303,7 +341,7 @@ export default function ProgressPanel({
         <div className="app-section-heading compact">
           <div>
             <span className="app-section-kicker">{isEnglish ? 'Trend' : '추이'}</span>
-            <h2 className="app-section-title small">{isEnglish ? 'Weight Trend' : '체중 변화 추이'}</h2>
+            <h2 className="app-section-title small">{isEnglish ? 'Weight trend' : '체중 추이'}</h2>
           </div>
           <span className="community-mini-pill">
             {bodyMetrics?.latestWeightKg != null ? `${bodyMetrics.latestWeightKg} kg` : '--'}
@@ -326,21 +364,13 @@ export default function ProgressPanel({
                 )
               })}
             </div>
-            <p className="record-highlight-meta">
-              {isEnglish ? 'Change vs previous:' : '직전 기록 대비'} {formatWeightChange(bodyMetrics?.changeFromPreviousKg, isEnglish)}
-              {' · '}
-              {isEnglish ? 'Change vs first:' : '첫 기록 대비'} {formatWeightChange(bodyMetrics?.changeFromStartKg, isEnglish)}
-            </p>
+            <p className="record-highlight-meta">{trendMeta}</p>
           </div>
         ) : (
           <div className="empty-state-card cool">
             <span className="empty-state-badge">{isEnglish ? 'Weight' : '체중'}</span>
-            <strong>{isEnglish ? 'Your trend will appear after the first entry.' : '첫 체중 기록 후 추이가 보이기 시작해요.'}</strong>
-            <p>
-              {isEnglish
-                ? 'Log your weight in the profile tab and we will chart the recent movement here.'
-                : '프로필 탭에서 몸무게를 기록하면 최근 변화를 여기서 보여드릴게요.'}
-            </p>
+            <strong>{isEnglish ? 'The first entry starts this.' : '첫 체중부터 시작돼요.'}</strong>
+            <p>{isEnglish ? 'Log it in Profile.' : '프로필에서 기록해요.'}</p>
           </div>
         )}
       </section>
@@ -350,30 +380,38 @@ export default function ProgressPanel({
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Badges' : '배지'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Unlocked' : '획득 배지'}</h2>
+              <h2 className="app-section-title small">{isEnglish ? 'Unlocked' : '획득'}</h2>
             </div>
             <span className="community-mini-pill accent">{visibleBadges.length}</span>
           </div>
 
-          <div className="badge-row record-badge-row compact">
-            {visibleBadges.map((badge) => (
-              <span key={badge} className="badge-pill profile-badge">{getBadgeLabel(badge, language)}</span>
-            ))}
-          </div>
+          {visibleBadges.length ? (
+            <div className="badge-row record-badge-row compact">
+              {visibleBadges.map((badge) => (
+                <span key={badge} className="badge-pill profile-badge">{getBadgeLabel(badge, language)}</span>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state-card cool">
+              <span className="empty-state-badge">{isEnglish ? 'Badge' : '배지'}</span>
+              <strong>{isEnglish ? 'No badges yet.' : '아직 배지가 없어요.'}</strong>
+              <p>{isEnglish ? 'They unlock as you log.' : '기록이 쌓이면 열려요.'}</p>
+            </div>
+          )}
         </section>
 
         <section className="card record-module-card compact">
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Pattern' : '패턴'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Workout Types' : '운동 종류별 기록'}</h2>
+              <h2 className="app-section-title small">{isEnglish ? 'Types' : '운동 종류'}</h2>
             </div>
-            <span className="community-mini-pill">{stats.typeCounts?.length ?? 0}</span>
+            <span className="community-mini-pill">{safeTypeCounts.length}</span>
           </div>
 
           <div className="type-stats-list compact">
-            {stats.typeCounts?.length ? (
-              stats.typeCounts.map((item) => (
+            {safeTypeCounts.length ? (
+              safeTypeCounts.map((item) => (
                 <article key={item.type} className="type-stat-card record-type-card compact">
                   <div className="type-stat-copy">
                     <div className="type-stat-title-row">
@@ -389,13 +427,9 @@ export default function ProgressPanel({
               ))
             ) : (
               <div className="empty-state-card cool">
-                <span className="empty-state-badge">{isEnglish ? 'Pattern' : '패턴 준비 중'}</span>
-                <strong>{isEnglish ? 'Workout patterns will build here.' : '운동 패턴이 여기서 쌓여갈 거예요.'}</strong>
-                <p>
-                  {isEnglish
-                    ? 'As you log more workouts, your favorite types and rhythm will become easier to spot.'
-                    : '운동 기록이 쌓일수록 자주 하는 운동과 패턴이 더 분명해집니다.'}
-                </p>
+                <span className="empty-state-badge">{isEnglish ? 'Pattern' : '패턴'}</span>
+                <strong>{isEnglish ? 'Patterns build here.' : '패턴이 여기에 쌓여요.'}</strong>
+                <p>{isEnglish ? 'More logs make it clearer.' : '기록이 늘수록 더 또렷해져요.'}</p>
               </div>
             )}
           </div>

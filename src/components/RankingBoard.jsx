@@ -42,16 +42,16 @@ export default function RankingBoard({
     <section className="card community-block-card ranking-surface compact community-ranking-redesign">
       <div className="app-section-heading compact">
         <div>
-          <span className="app-section-kicker">{t('보드', 'Board')}</span>
-          <h2>{t('주간 활동 랭킹', 'Weekly activity ranking')}</h2>
+          <span className="app-section-kicker">{t('랭킹', 'Ranking')}</span>
+          <h2>{t('이번 주', 'This week')}</h2>
         </div>
-        <span className="community-mini-pill accent">{t('이번 주 상위 활동 회원', 'Top movers')}</span>
+        <span className="community-mini-pill accent">{t('상위 활동', 'Top')}</span>
       </div>
 
       <p className="subtext compact">
         {t(
-          '이번 주 활동 포인트를 먼저 보고, 그다음 운동량과 체력 신호를 함께 반영한 보드예요.',
-          'This board weighs weekly activity points first, then workout volume and fitness signals.',
+          '포인트와 운동량 기준이에요.',
+          'Based on activity.',
         )}
       </p>
 
@@ -75,11 +75,11 @@ export default function RankingBoard({
       {!loading && !rows.length && (
         <div className="empty-state-card warm">
           <span className="empty-state-badge">{t('랭킹 준비 중', 'Ranking loading up')}</span>
-          <strong>{t('이번 주 보드가 아직 비어 있어요.', 'The weekly board is still empty.')}</strong>
+          <strong>{t('랭킹이 아직 비어 있어요.', 'Ranking is still empty.')}</strong>
           <p>
             {t(
-              '기록과 포인트가 더 쌓이면 여기부터 커뮤니티 열기가 만들어질 거예요.',
-              'As more logs and points stack up, the community energy will start here.',
+              '기록이 쌓이면 여기 보여요.',
+              'Logs will show here.',
             )}
           </p>
         </div>
@@ -110,8 +110,8 @@ export default function RankingBoard({
                     <strong className="ranking-name">{item.display_name}</strong>
                     <p className="ranking-meta">
                       {t(
-                        `주간 ${item.weekly_points ?? 0}P · ${item.weekly_count ?? 0}회 운동`,
-                        `${item.weekly_points ?? 0} pts · ${item.weekly_count ?? 0} workouts`,
+                        `${item.weekly_points ?? 0}P · ${item.weekly_count ?? 0}회`,
+                        `${item.weekly_points ?? 0} pts · ${item.weekly_count ?? 0} logs`,
                       )}
                     </p>
                   </div>
@@ -147,8 +147,8 @@ export default function RankingBoard({
           onClick={() => setExpanded((prev) => !prev)}
         >
           {expanded
-            ? t('상위 3명만 보기', 'Show top 3')
-            : t(`전체 랭킹 보기 (${rows.length}명)`, `See full ranking (${rows.length})`)}
+            ? t('상위 3명', 'Top 3')
+            : t(`전체 ${rows.length}`, `All ${rows.length}`)}
         </button>
       )}
     </section>

@@ -52,32 +52,27 @@ function getTypeLabel(type, isEnglish) {
 
 function getPostContent(post, language) {
   const isEnglish = language === 'en'
+  const note = post.metadata?.note?.trim()
 
   switch (post.type) {
     case 'workout_complete': {
-      const workoutType = getWorkoutTypeLabel(post.metadata?.workoutType, language)
-      const durationText = post.metadata?.durationMinutes
-        ? isEnglish ? ` · ${post.metadata.durationMinutes} min` : ` · ${post.metadata.durationMinutes}분`
-        : ''
-      const noteText = post.metadata?.note ? ` · ${post.metadata.note}` : ''
-      return isEnglish
-        ? `${workoutType}${durationText} completed${noteText}`
-        : `${workoutType}${durationText} 운동 완료${noteText}`
+      if (note) return note
+      return isEnglish ? 'Workout logged.' : '운동 기록 완료.'
     }
     case 'test_result':
       return isEnglish
-        ? `Logged a fitness test result: ${localizeLevelText(post.metadata?.level, language)} (${post.metadata?.score ?? 0} pts).`
-        : `체력 테스트 결과 ${localizeLevelText(post.metadata?.level, language)} (${post.metadata?.score ?? 0}점)를 기록했어요.`
+        ? `${localizeLevelText(post.metadata?.level, language)} · ${post.metadata?.score ?? 0} pts`
+        : `${localizeLevelText(post.metadata?.level, language)} · ${post.metadata?.score ?? 0}점`
     case 'level_up':
       return isEnglish
-        ? `Reached ${localizeLevelText(post.metadata?.to, language)}.`
-        : `${localizeLevelText(post.metadata?.to, language)} 레벨에 도달했어요.`
+        ? `${localizeLevelText(post.metadata?.to, language)} reached`
+        : `${localizeLevelText(post.metadata?.to, language)} 도달`
     case 'profile_update':
-      return isEnglish ? 'Updated profile and weekly goal.' : '프로필과 주간 목표를 업데이트했어요.'
+      return isEnglish ? 'Profile updated.' : '프로필 업데이트'
     case 'challenge_complete':
       return isEnglish
-        ? `Completed the weekly ${post.metadata?.goal ?? 0}-workout challenge.`
-        : `주간 ${post.metadata?.goal ?? 0}회 운동 챌린지를 달성했어요.`
+        ? `Goal done · ${post.metadata?.goal ?? 0}`
+        : `주간 목표 완료 · ${post.metadata?.goal ?? 0}회`
     default:
       return post.content
   }
@@ -205,7 +200,7 @@ function FeedCard({
                 />
               </div>
               <span className="feed-story-image-hint">
-                {isEnglish ? 'Tap to expand' : '눌러서 크게 보기'}
+                {isEnglish ? 'Open' : '열기'}
               </span>
             </button>
           ))}
@@ -219,7 +214,7 @@ function FeedCard({
             className={`like-btn ${post.likedByMe ? 'liked' : ''}`}
             onClick={() => onToggleLike(post.id, post.likedByMe)}
           >
-            {isEnglish ? `Like ${post.likeCount}` : `좋아요 ${post.likeCount}`}
+            {isEnglish ? `Likes ${post.likeCount}` : `좋아요 ${post.likeCount}`}
           </button>
           <button
             type="button"
@@ -230,8 +225,8 @@ function FeedCard({
             }}
           >
             {commentOpen
-              ? (isEnglish ? `Close comments (${post.comments.length})` : `댓글 닫기 ${post.comments.length}`)
-              : (isEnglish ? `Comments ${post.comments.length}` : `댓글 ${post.comments.length}`)}
+              ? (isEnglish ? `Hide ${post.comments.length}` : `접기 ${post.comments.length}`)
+              : (isEnglish ? `Replies ${post.comments.length}` : `댓글 ${post.comments.length}`)}
           </button>
           {post.user_id !== currentUserId && (
             <div className="feed-more-wrap">
@@ -240,7 +235,7 @@ function FeedCard({
                 className="ghost-chip feed-more-btn"
                 onClick={() => setMenuOpen((prev) => !prev)}
               >
-                {isEnglish ? 'More' : '더보기'}
+                {isEnglish ? 'Menu' : '메뉴'}
               </button>
               {menuOpen && (
                 <div className="feed-action-menu">
@@ -277,10 +272,10 @@ function FeedCard({
             type="text"
             value={comment}
             onChange={(event) => setComment(event.target.value)}
-            placeholder={isEnglish ? 'Leave a short comment' : '짧은 댓글 남기기'}
+            placeholder={isEnglish ? 'Comment' : '댓글'}
             maxLength={120}
           />
-          <button type="submit">{isEnglish ? 'Send' : '등록'}</button>
+          <button type="submit">{isEnglish ? 'Post' : '등록'}</button>
         </form>
       )}
 
@@ -329,7 +324,7 @@ export default function FeedList({
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Feed' : '피드'}</span>
-          <h2>{isEnglish ? 'Community stories' : '커뮤니티 스토리'}</h2>
+          <h2>{isEnglish ? 'Community' : '커뮤니티'}</h2>
         </div>
         <span className="community-mini-pill">{isEnglish ? `${visiblePosts.length} posts` : `${visiblePosts.length}개`}</span>
       </div>
@@ -342,7 +337,7 @@ export default function FeedList({
               : `${shortUser(selectedUser.user_id, selectedUser.display_name, isEnglish)}님의 게시물`}
           </strong>
           <button type="button" className="ghost-chip" onClick={onClearSelectedUser}>
-            {isEnglish ? 'Show All' : '전체 보기'}
+            {isEnglish ? 'All' : '전체'}
           </button>
         </div>
       )}
@@ -391,17 +386,17 @@ export default function FeedList({
           </span>
           <strong>
             {filter === 'following'
-              ? (isEnglish ? 'No posts from people you follow yet.' : '팔로우한 사람의 게시물이 아직 없어요.')
-              : (isEnglish ? 'There is nothing in the feed yet.' : '아직 피드에 보일 기록이 없어요.')}
+              ? (isEnglish ? 'No following posts.' : '팔로우 글이 없어요.')
+              : (isEnglish ? 'Feed is empty.' : '피드가 비어 있어요.')}
           </strong>
           <p>
             {filter === 'following'
               ? (isEnglish
-                ? 'Follow a few more active people to make this tab come alive faster.'
-                : '조금 더 활동적인 사람을 팔로우하면 이 탭이 더 빨리 살아나요.')
+                ? 'Follow more people.'
+                : '더 팔로우해보세요.')
               : (isEnglish
-                ? 'As workouts, tests, and profile updates stack up, the community feed will start moving naturally.'
-                : '운동 기록, 테스트, 프로필 업데이트가 쌓이면 커뮤니티 피드가 자연스럽게 움직이기 시작해요.')}
+                ? 'Posts will show up here.'
+                : '글이 여기 쌓여요.')}
           </p>
         </div>
       )}

@@ -5,23 +5,23 @@ import { localizeLevelText } from '../utils/level'
 function buildReason(item, currentLevel, language) {
   if (currentLevel && item.latest_level === currentLevel) {
     return language === 'en'
-      ? `Same ${localizeLevelText(currentLevel, language)} circle`
+      ? `Same ${localizeLevelText(currentLevel, language)}`
       : `${localizeLevelText(currentLevel, language)} 그룹`
   }
 
   if ((item.weekly_points ?? 0) >= 60) {
-    return language === 'en' ? 'Strong activity this week' : '이번 주 활동이 아주 좋아요'
+    return language === 'en' ? 'Active this week' : '이번 주 활발'
   }
 
   if ((item.weekly_count ?? 0) >= 4) {
-    return language === 'en' ? 'Keeping a weekly rhythm' : '이번 주 꾸준히 운동 중'
+    return language === 'en' ? 'Good rhythm' : '주간 페이스 유지'
   }
 
   if ((item.total_workouts ?? 0) >= 10) {
-    return language === 'en' ? 'Already building a habit' : '꾸준히 운동하는 사람'
+    return language === 'en' ? 'Building a habit' : '운동 습관 형성 중'
   }
 
-  return language === 'en' ? 'Recommended for your pace' : '지금 페이스와 잘 맞는 추천'
+  return language === 'en' ? 'Similar pace' : '비슷한 페이스'
 }
 
 function FollowButton({ isFollowing, disabled, onClick, isEnglish }) {
@@ -65,15 +65,15 @@ export default function SuggestedUsers({
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{t('사람', 'People')}</span>
-          <h2 className="app-section-title small">{t('함께 운동하기 좋은 사람', 'People to move with')}</h2>
+          <h2 className="app-section-title small">{t('함께할 사람', 'Suggested people')}</h2>
         </div>
         <span className="community-mini-pill">{isEnglish ? `${rows.length} picks` : `${rows.length}명 추천`}</span>
       </div>
 
       <p className="subtext compact">
         {t(
-          '지금 내 레벨과 운동 페이스가 비슷한 사람부터 가볍게 연결해보세요.',
-          'Start with people who feel close to your current level and rhythm.',
+          '비슷한 페이스부터 만나보세요.',
+          'Start with a similar pace.',
         )}
       </p>
 
@@ -101,11 +101,11 @@ export default function SuggestedUsers({
       {!loading && !rows.length && (
         <div className="empty-state-card">
           <span className="empty-state-badge">{t('곧 채워져요', 'Coming soon')}</span>
-          <strong>{t('추천할 사람이 여기에 나타날 거예요.', 'Suggested people will appear here.')}</strong>
+          <strong>{t('추천이 여기 보여요.', 'Suggestions appear here.')}</strong>
           <p>
             {t(
-              '운동 기록이 조금만 더 쌓이면 비슷한 페이스의 사람을 골라서 보여드릴게요.',
-              'Once a few more workout logs stack up, we will start matching people with a similar pace.',
+              '기록이 더 쌓이면 추천돼요.',
+              'More logs will unlock suggestions.',
             )}
           </p>
         </div>

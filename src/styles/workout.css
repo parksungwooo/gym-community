@@ -8,7 +8,7 @@
 }
 
 .workout-capture-card.compact {
-  padding: 12px;
+  padding: 14px;
 }
 
 .sheet-handle {
@@ -45,8 +45,8 @@
 .sheet-tool-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 10px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .sheet-tool-toggle {
@@ -54,10 +54,12 @@
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.92);
   color: #334155;
-  padding: 11px 12px;
+  min-height: 42px;
+  padding: 10px 12px;
   font-size: 0.84rem;
   font-weight: 800;
   text-align: center;
+  line-height: 1.2;
 }
 
 .sheet-tool-toggle.active {
@@ -74,8 +76,8 @@
 }
 
 .sheet-section.compact {
-  padding: 11px;
-  border-radius: 14px;
+  padding: 12px;
+  border-radius: 16px;
 }
 
 .routine-section {
@@ -292,8 +294,9 @@
   border-radius: 0;
   background: transparent;
   color: var(--text-sub);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
+  line-height: 1.4;
 }
 
 .capture-status.done {
@@ -317,7 +320,8 @@
   align-items: center;
   justify-content: center;
   min-width: 54px;
-  padding: 8px 11px;
+  min-height: 40px;
+  padding: 8px 12px;
   border-radius: 999px;
   border: 1px solid rgba(203, 213, 225, 0.9);
   background: rgba(255, 255, 255, 0.94);
@@ -357,7 +361,8 @@
 }
 
 .quick-choice-chip.compact {
-  padding: 8px 11px;
+  min-height: 40px;
+  padding: 9px 12px;
   font-size: 0.84rem;
 }
 
@@ -384,7 +389,8 @@
 .mini-btn {
   border: none;
   border-radius: 12px;
-  padding: 9px 12px;
+  min-height: 36px;
+  padding: 9px 11px;
   background: #eef2f7;
   color: #334155;
   font-weight: 800;
@@ -464,6 +470,7 @@
 
 .workout-select.compact,
 .workout-input.compact {
+  min-height: 44px;
   padding: 11px 12px;
   border-radius: 13px;
 }
@@ -481,9 +488,10 @@
 }
 
 .workout-textarea.compact {
-  min-height: 84px;
+  min-height: 88px;
   padding: 11px 12px;
   border-radius: 13px;
+  line-height: 1.48;
 }
 
 .week-strip,
@@ -544,11 +552,22 @@
 }
 
 .calendar-cell {
-  min-height: 74px;
-  padding: 10px 8px;
+  min-height: 62px;
+  padding: 8px 6px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.calendar-cell span {
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.calendar-cell strong {
+  min-height: 18px;
+  font-size: 1.15rem;
+  line-height: 1;
 }
 
 .calendar-cell.empty {
@@ -581,7 +600,7 @@
 
 .record-test-copy h2 {
   margin: 0;
-  font-size: 1.42rem;
+  font-size: 1.34rem;
   line-height: 1.14;
 }
 
@@ -600,16 +619,33 @@
   flex-shrink: 0;
 }
 
+.record-test-progressbar {
+  position: relative;
+  overflow: hidden;
+  margin-top: 14px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(203, 213, 225, 0.56);
+}
+
+.record-test-progressbar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2563eb 0%, #60a5fa 70%, #7cc2ff 100%);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+}
+
 .question-form {
   display: grid;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .question-card {
   border: 1px solid rgba(226, 232, 240, 0.94);
   border-radius: 24px;
-  padding: 16px;
+  padding: 14px;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.04);
 }
@@ -645,18 +681,18 @@
 .option-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
-  margin-top: 14px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .option-btn {
   border: 1px solid rgba(203, 213, 225, 0.9);
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   border-radius: 18px;
-  padding: 14px 16px;
+  padding: 12px 14px;
   text-align: left;
   color: #243244;
-  font-size: 0.98rem;
+  font-size: 0.94rem;
   font-weight: 800;
   box-shadow: 0 10px 18px rgba(15, 23, 42, 0.03);
 }
@@ -672,6 +708,78 @@
   margin-top: -2px;
 }
 
+.record-test-step-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.record-test-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 10px;
+}
+
+.record-test-actions.single {
+  grid-template-columns: 1fr;
+}
+
+.record-test-flow-overlay {
+  z-index: 72;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 0;
+  background: rgba(8, 17, 29, 0.94);
+  backdrop-filter: blur(12px);
+  animation: fade-in-sheet 180ms ease;
+}
+
+.record-test-flow-panel {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg-shell);
+  animation: slide-up-sheet 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.record-test-flow-shell {
+  display: grid;
+  gap: 12px;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding:
+    max(14px, calc(env(safe-area-inset-top, 0px) + 8px))
+    14px
+    max(24px, calc(env(safe-area-inset-bottom, 0px) + 16px));
+}
+
+.record-test-flow-header,
+.record-test-flow-body {
+  width: min(100%, 560px);
+  margin: 0 auto;
+}
+
+.record-test-flow-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.record-test-flow-body {
+  display: grid;
+  gap: 12px;
+}
+
+.record-test-flow-body .record-test-card,
+.record-test-flow-body .result-card {
+  margin: 0;
+}
+
 @media (min-width: 420px) {
   .option-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -684,7 +792,7 @@
   }
 
   .record-test-copy h2 {
-    font-size: 1.28rem;
+    font-size: 1.2rem;
   }
 
   .record-test-progress {
@@ -693,15 +801,27 @@
     padding: 0 12px;
   }
 
+  .record-test-progressbar {
+    margin-top: 12px;
+  }
+
   .question-card {
-    padding: 14px;
+    padding: 13px;
     border-radius: 20px;
   }
 
   .option-btn {
-    min-height: 72px;
+    min-height: 64px;
     display: flex;
     align-items: center;
+  }
+
+  .record-test-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .record-test-flow-shell {
+    padding-inline: 12px;
   }
 }
 
@@ -710,11 +830,13 @@
 .ghost-btn {
   width: 100%;
   border: none;
-  border-radius: 15px;
+  min-height: 46px;
+  border-radius: 16px;
   padding: 12px 15px;
-  margin-top: 8px;
+  margin-top: 6px;
   cursor: pointer;
   font-weight: 800;
+  line-height: 1.2;
 }
 
 .primary-btn {
