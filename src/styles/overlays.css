@@ -2290,7 +2290,8 @@
 
 :root[data-theme='dark'] .profile-menu-button,
 :root[data-theme='dark'] .profile-menu-note-card,
-:root[data-theme='dark'] .profile-next-step-card {
+:root[data-theme='dark'] .profile-next-step-card,
+:root[data-theme='dark'] .profile-setup-inline {
   background: var(--surface-white);
   border-color: var(--line-soft);
   color: var(--text-main);
@@ -2326,6 +2327,15 @@
   color: var(--text-sub);
 }
 
+:root[data-theme='dark'] .profile-setup-inline-copy strong {
+  color: var(--text-main);
+}
+
+:root[data-theme='dark'] .profile-setup-inline-label,
+:root[data-theme='dark'] .community-utility-label {
+  color: var(--text-sub);
+}
+
 :root[data-theme='dark'] .profile-next-step-chip {
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-sub);
@@ -2336,6 +2346,10 @@
   color: #bbf7d0;
 }
 
+:root[data-theme='dark'] .community-utility-inline {
+  border-top-color: rgba(148, 163, 184, 0.2);
+}
+
 :root[data-theme='dark'] .app-action-dock,
 :root[data-theme='dark'] .theme-toggle-btn,
 :root[data-theme='dark'] .notification-trigger,
@@ -2343,7 +2357,7 @@
 :root[data-theme='dark'] .selected-user-banner,
 :root[data-theme='dark'] .community-tab-shell,
 :root[data-theme='dark'] .tab-nav {
-  background: rgba(9, 16, 28, 0.86);
+  background: rgba(9, 16, 28, 0.9);
   border-color: rgba(90, 169, 255, 0.12);
   box-shadow: var(--shadow-soft);
 }
@@ -2368,6 +2382,16 @@
 
 :root[data-theme='dark'] .tab-icon {
   background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme='dark'] .tab-btn.active {
+  background: rgba(90, 169, 255, 0.14);
+  color: #dbeafe;
+  box-shadow: none;
+}
+
+:root[data-theme='dark'] .tab-btn.active .tab-icon {
+  background: linear-gradient(135deg, rgba(90, 169, 255, 0.92), rgba(59, 130, 246, 0.72));
 }
 
 :root[data-theme='dark'] .primary-btn {
@@ -2678,6 +2702,7 @@
 :root[data-theme='dark'] .capture-helper-card,
 :root[data-theme='dark'] .record-health-hero,
 :root[data-theme='dark'] .record-hub-card,
+:root[data-theme='dark'] .record-hub-glance-item,
 :root[data-theme='dark'] .health-stat-tile,
 :root[data-theme='dark'] .health-stat-tile.cool,
 :root[data-theme='dark'] .health-stat-tile.warm,
@@ -2765,6 +2790,9 @@
 
 :root[data-theme='dark'] .routine-template-copy span,
 :root[data-theme='dark'] .routine-template-note,
+:root[data-theme='dark'] .record-hub-copy p,
+:root[data-theme='dark'] .record-hub-glance-item span,
+:root[data-theme='dark'] .record-hub-glance-item small,
 :root[data-theme='dark'] .health-stat-label,
 :root[data-theme='dark'] .health-stat-meta,
 :root[data-theme='dark'] .record-highlight-meta,

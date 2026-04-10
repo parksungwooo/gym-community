@@ -6,6 +6,21 @@ const WORKOUT_OPTIONS = ['러닝', '웨이트', '스트레칭', '요가', '필�
 const QUICK_DURATION_OPTIONS = [20, 30, 45, 60]
 const MAX_PHOTOS = 4
 
+function shouldOpenManualEditor(selection = {}) {
+  const workoutType = selection?.workoutType
+  const durationMinutes = Number(selection?.durationMinutes)
+
+  return (
+    (workoutType && !WORKOUT_OPTIONS.includes(workoutType))
+    || (Number.isFinite(durationMinutes) && durationMinutes > 0 && !QUICK_DURATION_OPTIONS.includes(durationMinutes))
+  )
+}
+
+function getSelectableWorkoutOptions(workoutType) {
+  if (!workoutType || WORKOUT_OPTIONS.includes(workoutType)) return WORKOUT_OPTIONS
+  return [...WORKOUT_OPTIONS, workoutType]
+}
+
 function getWorkoutMark(type) {
   switch (type) {
     case '러닝': return 'RN'
@@ -98,6 +113,7 @@ export default function WorkoutPanel({
   const { language, isEnglish } = useI18n()
   const galleryInputRef = useRef(null)
   const cameraInputRef = useRef(null)
+  const defaultOptionalFields = Boolean(initialSelection?.note || initialSelection?.defaultShareToFeed === false)
   const [workoutType, setWorkoutType] = useState(() => initialSelection?.workoutType || '러닝')
   const [durationMinutes, setDurationMinutes] = useState(() => String(initialSelection?.durationMinutes || 30))
   const [note, setNote] = useState(() => initialSelection?.note || '')
@@ -105,15 +121,23 @@ export default function WorkoutPanel({
   const [photoItems, setPhotoItems] = useState([])
   const [shareToFeed, setShareToFeed] = useState(() => initialSelection?.defaultShareToFeed !== false)
   const [showRoutineTools, setShowRoutineTools] = useState(false)
-  const [showOptionalFields, setShowOptionalFields] = useState(
-    Boolean(initialSelection?.note || initialSelection?.defaultShareToFeed === false),
-  )
+  const [showOptionalFields, setShowOptionalFields] = useState(defaultOptionalFields)
+  const [showManualEditor, setShowManualEditor] = useState(() => shouldOpenManualEditor(initialSelection))
 
   useEffect(() => () => {
     photoItems.forEach((item) => {
       if (item.kind === 'new' && item.previewUrl) URL.revokeObjectURL(item.previewUrl)
     })
   }, [photoItems])
+
+  const selectableWorkoutOptions = useMemo(
+    () => getSelectableWorkoutOptions(workoutType),
+    [workoutType],
+  )
+  const usesCustomSelection = useMemo(
+    () => shouldOpenManualEditor({ workoutType, durationMinutes }),
+    [durationMinutes, workoutType],
+  )
 
   const noteHint = useMemo(() => {
     if (workoutType === '러닝') {
@@ -129,17 +153,85 @@ export default function WorkoutPanel({
       : '예: 오늘 몸이 가벼웠어요'
   }, [isEnglish, workoutType])
 
+  const optionalSummary = useMemo(() => {
+    const summaryParts = []
+
+    if (note.trim()) summaryParts.push(isEnglish ? 'Note added' : '메모 있음')
+    if (photoItems.length > 0) summaryParts.push(isEnglish ? `${photoItems.length} photo${photoItems.length > 1 ? 's' : ''}` : `사진 ${photoItems.length}장`)
+    if (!shareToFeed) summaryParts.push(isEnglish ? 'Private' : '비공개')
+
+    if (summaryParts.length > 0) {
+      return summaryParts.join(' · ')
+    }
+
+    return isEnglish ? 'Note, photos, privacy' : '메모, 사진, 공개 설정'
+  }, [isEnglish, note, photoItems.length, shareToFeed])
+
+  const manualSummary = useMemo(() => {
+    const durationValue = Number(durationMinutes)
+    const summaryParts = [getWorkoutTypeLabel(workoutType, language)]
+
+    if (durationValue > 0) {
+      summaryParts.push(isEnglish ? `${durationValue} min` : `${durationValue}분`)
+    }
+
+    return summaryParts.join(' · ')
+  }, [durationMinutes, isEnglish, language, workoutType])
+
+  const routineSummary = useMemo(() => {
+    if (routineTemplates.length > 0) {
+      return isEnglish
+        ? `${routineTemplates.length} saved routine${routineTemplates.length > 1 ? 's' : ''}`
+        : `${routineTemplates.length}개 저장됨`
+    }
+
+    return isEnglish ? 'Save for later' : '저장해두고 재사용'
+  }, [isEnglish, routineTemplates.length])
+
+  const hasOptionalContent = note.trim().length > 0 || photoItems.length > 0 || !shareToFeed
+  const optionalActionLabel = showOptionalFields
+    ? (isEnglish ? 'Editing' : '\uC791\uC131 \uC911')
+    : hasOptionalContent
+      ? (isEnglish ? 'Review' : '\uB2E4\uC2DC \uBCF4\uAE30')
+      : (isEnglish ? 'Add details' : '\uC138\uBD80 \uCD94\uAC00')
+  const routineActionLabel = showRoutineTools
+    ? (isEnglish ? 'Choosing' : '\uC120\uD0DD \uC911')
+    : routineTemplates.length > 0
+      ? (isEnglish ? 'Load one' : '\uBD88\uB7EC\uC624\uAE30')
+      : (isEnglish ? 'Save one' : '\uD558\uB098 \uC800\uC7A5')
+  const manualActionLabel = showManualEditor
+    ? (isEnglish ? 'Close details' : '\uC870\uC815 \uB2EB\uAE30')
+    : usesCustomSelection
+      ? (isEnglish ? 'Adjust custom' : '\uAC12 \uC870\uC815')
+      : (isEnglish ? 'Use custom' : '\uC9C1\uC811 \uC870\uC815')
+
+  const syncManualEditor = (nextWorkoutType, nextDurationMinutes) => {
+    setShowManualEditor(
+      shouldOpenManualEditor({
+        workoutType: nextWorkoutType,
+        durationMinutes: nextDurationMinutes,
+      }),
+    )
+  }
+
   const resetForm = () => {
+    const nextWorkoutType = recentWorkout?.workoutType || initialSelection?.workoutType || '러닝'
+    const nextDurationMinutes = recentWorkout?.durationMinutes || initialSelection?.durationMinutes || 30
+
     photoItems.forEach((item) => {
       if (item.kind === 'new' && item.previewUrl) URL.revokeObjectURL(item.previewUrl)
     })
-    setWorkoutType(recentWorkout?.workoutType || initialSelection?.workoutType || '러닝')
-    setDurationMinutes(String(recentWorkout?.durationMinutes || initialSelection?.durationMinutes || 30))
+
+    setWorkoutType(nextWorkoutType)
+    setDurationMinutes(String(nextDurationMinutes))
     setNote('')
+    setRoutineName(initialSelection?.name || '')
     setPhotoItems([])
     setShareToFeed(initialSelection?.defaultShareToFeed !== false)
     setShowRoutineTools(false)
-    setShowOptionalFields(false)
+    setShowOptionalFields(defaultOptionalFields)
+    syncManualEditor(nextWorkoutType, nextDurationMinutes)
+
     if (galleryInputRef.current) galleryInputRef.current.value = ''
     if (cameraInputRef.current) cameraInputRef.current.value = ''
   }
@@ -160,19 +252,54 @@ export default function WorkoutPanel({
     }
   }
 
+  const handleQuickWorkoutTypePick = (option) => {
+    setWorkoutType(option)
+    syncManualEditor(option, durationMinutes)
+  }
+
+  const handleQuickDurationPick = (value) => {
+    setDurationMinutes(String(value))
+    syncManualEditor(workoutType, value)
+  }
+
+  const handleWorkoutTypeChange = (event) => {
+    const nextWorkoutType = event.target.value
+    setWorkoutType(nextWorkoutType)
+    syncManualEditor(nextWorkoutType, durationMinutes)
+  }
+
+  const handleDurationChange = (event) => {
+    const nextDurationMinutes = event.target.value
+    setDurationMinutes(nextDurationMinutes)
+    syncManualEditor(workoutType, nextDurationMinutes)
+  }
+
   const handleReuseRecent = () => {
     if (!recentWorkout?.workoutType) return
-    setWorkoutType(recentWorkout.workoutType)
-    setDurationMinutes(String(recentWorkout.durationMinutes || 30))
-    setNote(recentWorkout.note || '')
+
+    const nextWorkoutType = recentWorkout.workoutType
+    const nextDurationMinutes = recentWorkout.durationMinutes || 30
+    const nextNote = recentWorkout.note || ''
+
+    setWorkoutType(nextWorkoutType)
+    setDurationMinutes(String(nextDurationMinutes))
+    setNote(nextNote)
+    if (nextNote) setShowOptionalFields(true)
+    syncManualEditor(nextWorkoutType, nextDurationMinutes)
   }
 
   const handleApplyRoutine = (routine) => {
-    setWorkoutType(routine.workout_type || '러닝')
-    setDurationMinutes(String(routine.duration_minutes || 30))
-    setNote(routine.note || '')
+    const nextWorkoutType = routine.workout_type || '러닝'
+    const nextDurationMinutes = routine.duration_minutes || 30
+    const nextNote = routine.note || ''
+
+    setWorkoutType(nextWorkoutType)
+    setDurationMinutes(String(nextDurationMinutes))
+    setNote(nextNote)
     setRoutineName(routine.name || '')
     setShowRoutineTools(false)
+    if (nextNote) setShowOptionalFields(true)
+    syncManualEditor(nextWorkoutType, nextDurationMinutes)
   }
 
   const handleSaveRoutine = async () => {
@@ -237,19 +364,36 @@ export default function WorkoutPanel({
         <section className="sheet-tool-row compact">
           <button
             type="button"
-            className={`sheet-tool-toggle ${showRoutineTools ? 'active' : ''}`}
-            onClick={() => setShowRoutineTools((prev) => !prev)}
-            disabled={loading}
-          >
-            {isEnglish ? 'Routines' : '루틴'}
-          </button>
-          <button
-            type="button"
-            className={`sheet-tool-toggle ${showOptionalFields ? 'active' : ''}`}
+            className={`sheet-tool-toggle detail ${showOptionalFields ? 'active' : ''}`}
             onClick={() => setShowOptionalFields((prev) => !prev)}
             disabled={loading}
+            data-testid="workout-toggle-extras"
+            aria-label={isEnglish ? `Notes and photos, ${optionalActionLabel}` : `\uBA54\uBAA8\uC640 \uC0AC\uC9C4, ${optionalActionLabel}`}
           >
-            {isEnglish ? 'Extras' : '옵션'}
+            <span className="sheet-tool-copy">
+              <strong>{isEnglish ? 'Notes & Photos' : '메모·사진'}</strong>
+              <span>{optionalSummary}</span>
+            </span>
+            <span className="sheet-tool-state" aria-hidden="true" data-label={optionalActionLabel}>
+              {showOptionalFields ? (isEnglish ? 'Open' : '열림') : (isEnglish ? 'Add' : '추가')}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className={`sheet-tool-toggle detail ${showRoutineTools ? 'active' : ''}`}
+            onClick={() => setShowRoutineTools((prev) => !prev)}
+            disabled={loading}
+            data-testid="workout-toggle-routines"
+            aria-label={isEnglish ? `Saved routines, ${routineActionLabel}` : `\uC800\uC7A5 \uB8E8\uD2F4, ${routineActionLabel}`}
+          >
+            <span className="sheet-tool-copy">
+              <strong>{isEnglish ? 'Saved Routines' : '저장 루틴'}</strong>
+              <span>{routineSummary}</span>
+            </span>
+            <span className="sheet-tool-state" aria-hidden="true" data-label={routineActionLabel}>
+              {showRoutineTools ? (isEnglish ? 'Open' : '열림') : (isEnglish ? 'View' : '보기')}
+            </span>
           </button>
         </section>
 
@@ -257,7 +401,13 @@ export default function WorkoutPanel({
           <span className="field-label-text">{isEnglish ? 'Quick Picks' : '빠른 선택'}</span>
           <div className="quick-chip-row compact">
             {WORKOUT_OPTIONS.map((option) => (
-              <button key={option} type="button" className={`quick-choice-chip compact ${workoutType === option ? 'active' : ''}`} onClick={() => setWorkoutType(option)} disabled={loading}>
+              <button
+                key={option}
+                type="button"
+                className={`quick-choice-chip compact ${workoutType === option ? 'active' : ''}`}
+                onClick={() => handleQuickWorkoutTypePick(option)}
+                disabled={loading}
+              >
                 <span className="quick-chip-mark">{getWorkoutMark(option)}</span>
                 {getWorkoutTypeLabel(option, language)}
               </button>
@@ -269,30 +419,60 @@ export default function WorkoutPanel({
           <span className="field-label-text">{isEnglish ? 'Duration' : '운동 시간'}</span>
           <div className="quick-chip-row compact">
             {QUICK_DURATION_OPTIONS.map((value) => (
-              <button key={value} type="button" className={`quick-choice-chip compact ${Number(durationMinutes) === value ? 'active' : ''}`} onClick={() => setDurationMinutes(String(value))} disabled={loading}>
+              <button
+                key={value}
+                type="button"
+                className={`quick-choice-chip compact ${Number(durationMinutes) === value ? 'active' : ''}`}
+                onClick={() => handleQuickDurationPick(value)}
+                disabled={loading}
+              >
                 {isEnglish ? `${value} min` : `${value}분`}
               </button>
             ))}
           </div>
         </section>
 
-        <div className="sheet-section capture-field-grid-sheet compact">
-          <div className="capture-field-grid">
-            <label className="field-label">
-              <span className="field-label-text">{isEnglish ? 'Workout Type' : '직접 선택'}</span>
-              <select className="workout-select compact" value={workoutType} onChange={(event) => setWorkoutType(event.target.value)} disabled={loading}>
-                {WORKOUT_OPTIONS.map((option) => (
-                  <option key={option} value={option}>{getWorkoutTypeLabel(option, language)}</option>
-                ))}
-              </select>
-            </label>
+        <section className={`sheet-section manual-edit-section compact ${showManualEditor ? 'expanded' : ''} ${usesCustomSelection ? 'customized' : ''}`}>
+          <button
+            type="button"
+            className="manual-edit-toggle"
+            aria-expanded={showManualEditor}
+            onClick={() => setShowManualEditor((prev) => !prev)}
+            disabled={loading}
+            aria-label={isEnglish ? `Fine tune, ${manualActionLabel}` : `\uC138\uBD80 \uC870\uC815, ${manualActionLabel}`}
+          >
+            <span className="manual-edit-copy">
+              <span className="manual-edit-label">{isEnglish ? 'Fine Tune' : '세부 조정'}</span>
+              <strong className="manual-edit-value">{manualSummary}</strong>
+              <span className="manual-edit-helper">
+                {usesCustomSelection
+                  ? (isEnglish ? 'A custom time is active. Open this to adjust it.' : '현재 빠른 선택에 없는 값이 적용돼 있어요.')
+                  : (isEnglish ? 'Only open this when you need a custom time.' : '빠른 선택에 없는 시간만 여기서 바꾸면 돼요.')}
+              </span>
+            </span>
+            <span className="manual-edit-action" aria-hidden="true" data-label={manualActionLabel}>
+              {showManualEditor ? (isEnglish ? 'Hide' : '접기') : (isEnglish ? 'Open' : '열기')}
+            </span>
+          </button>
 
-            <label className="field-label">
-              <span className="field-label-text">{isEnglish ? 'Duration (min)' : '운동 시간(분)'}</span>
-              <input className="workout-input compact" type="number" min="0" max="300" step="5" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} disabled={loading} />
-            </label>
-          </div>
-        </div>
+          {showManualEditor && (
+            <div className="capture-field-grid manual-edit-fields">
+              <label className="field-label">
+                <span className="field-label-text">{isEnglish ? 'Workout Type' : '직접 선택'}</span>
+                <select className="workout-select compact" value={workoutType} onChange={handleWorkoutTypeChange} disabled={loading}>
+                  {selectableWorkoutOptions.map((option) => (
+                    <option key={option} value={option}>{getWorkoutTypeLabel(option, language)}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="field-label">
+                <span className="field-label-text">{isEnglish ? 'Duration (min)' : '운동 시간(분)'}</span>
+                <input className="workout-input compact" type="number" min="0" max="300" step="5" value={durationMinutes} onChange={handleDurationChange} disabled={loading} />
+              </label>
+            </div>
+          )}
+        </section>
 
         <div className="sheet-summary-bar compact">
           <div className="capture-helper-card compact">
@@ -419,10 +599,6 @@ export default function WorkoutPanel({
         )}
 
         <div className="sheet-submit-bar compact">
-          <div className="sheet-submit-copy">
-            <strong>{getWorkoutTypeLabel(workoutType, language)}</strong>
-            <span>{Number(durationMinutes) ? (isEnglish ? `${durationMinutes} min` : `${durationMinutes}분`) : (isEnglish ? 'No time' : '시간 없음')}</span>
-          </div>
           <button type="submit" className="primary-btn capture-submit-btn compact" disabled={loading}>
             {loading ? (isEnglish ? 'Saving...' : '저장 중...') : todayDone ? (isEnglish ? 'Save more' : '추가 저장') : (isEnglish ? 'Save' : '저장')}
           </button>

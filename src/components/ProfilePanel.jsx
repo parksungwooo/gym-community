@@ -326,10 +326,37 @@ export default function ProfilePanel({
         <div className="app-section-heading compact">
           <div>
             <span className="app-section-kicker">{t('마이페이지', 'My page')}</span>
-            <h2 className="app-section-title small">{t('메뉴', 'Menu')}</h2>
+            <h2 className="app-section-title small">{t('빠른 이동', 'Quick access')}</h2>
           </div>
           <span className="community-mini-pill">{activeSectionTitle}</span>
         </div>
+
+        {setupCard && (
+          <>
+            <div className="profile-setup-inline">
+              <div className="profile-setup-inline-copy">
+                <span className="profile-setup-inline-label">{t('다음 한 걸음', 'Next best step')}</span>
+                <strong>{setupCard.title}</strong>
+              </div>
+              <button
+                type="button"
+                className="secondary-btn profile-setup-inline-btn"
+                onClick={setupCard.action}
+                disabled={loading || authLoading}
+              >
+                {setupCard.actionLabel}
+              </button>
+            </div>
+
+            <div className="profile-next-step-status inline">
+              {readySteps.map((step) => (
+                <span key={step.key} className={`profile-next-step-chip ${step.done ? 'done' : ''}`}>
+                  {step.label}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
 
         <div className="profile-menu-grid">
           {menuItems.map((item) => (

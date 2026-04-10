@@ -55,6 +55,14 @@ export default function CommunityRoute({
   const t = (ko, en) => (isEnglish ? en : ko)
   const [activeTab, setActiveTab] = useState('feed')
   const [activeUtility, setActiveUtility] = useState(null)
+
+  const handleTabChange = (nextTab) => {
+    setActiveTab(nextTab)
+    if (nextTab !== 'feed') {
+      setActiveUtility(null)
+    }
+  }
+
   const communityInsight = useMemo(
     () => buildCommunityInsight({
       currentLevel,
@@ -81,6 +89,7 @@ export default function CommunityRoute({
       visibleMatePosts,
     ],
   )
+
   const communityCountLabel = activeTab === 'mate'
     ? t(`메이트 ${visibleMatePosts.length}`, `${visibleMatePosts.length} mates`)
     : t(`피드 ${visibleFeedPosts.length}`, `${visibleFeedPosts.length} posts`)
@@ -91,8 +100,6 @@ export default function CommunityRoute({
     onEnsureLeaderboard?.().catch(() => {})
   }, [activeUtility, loadingLeaderboard, onEnsureLeaderboard, visibleLeaderboard.length])
 
-
-
   return (
     <div className="view-stage community-stage-clean">
       <section className="card community-tab-shell community-screen-shell compact-community-shell">
@@ -101,14 +108,8 @@ export default function CommunityRoute({
             <span className="app-section-kicker">{t('커뮤니티', 'Community')}</span>
             <h2>{t('피드부터 보면 돼요.', 'Start with the feed.')}</h2>
           </div>
-          <span className="community-mini-pill">{communityCountLabel}</span>
-        </div>
-
-        <div className={`surface-insight-banner ${communityInsight.tone}`}>
-          <div className="surface-insight-copy">
-            <span>{communityInsight.label}</span>
-            <strong>{communityInsight.title}</strong>
-            <p>{communityInsight.body}</p>
+          <div className="community-screen-head-meta">
+            <span className="community-mini-pill">{communityCountLabel}</span>
           </div>
         </div>
 
@@ -121,7 +122,7 @@ export default function CommunityRoute({
           <button
             type="button"
             className={`community-tab-btn ${activeTab === 'feed' ? 'active' : ''}`}
-            onClick={() => setActiveTab('feed')}
+            onClick={() => handleTabChange('feed')}
             data-testid="community-tab-feed"
           >
             {t('피드', 'Feed')}
@@ -129,30 +130,43 @@ export default function CommunityRoute({
           <button
             type="button"
             className={`community-tab-btn ${activeTab === 'mate' ? 'active' : ''}`}
-            onClick={() => setActiveTab('mate')}
+            onClick={() => handleTabChange('mate')}
             data-testid="community-tab-mate"
           >
             {t('메이트', 'Mates')}
           </button>
         </div>
 
-        <div className="community-utility-row">
-          <button
-            type="button"
-            className={`ghost-chip community-utility-btn ${activeUtility === 'discover' ? 'active' : ''}`}
-            onClick={() => setActiveUtility((current) => (current === 'discover' ? null : 'discover'))}
-            data-testid="community-utility-discover"
-          >
-            {t('사람 찾기', 'Discover people')}
-          </button>
-          <button
-            type="button"
-            className={`ghost-chip community-utility-btn ${activeUtility === 'ranking' ? 'active' : ''}`}
-            onClick={() => setActiveUtility((current) => (current === 'ranking' ? null : 'ranking'))}
-            data-testid="community-utility-ranking"
-          >
-            {t('주간 랭킹', 'Weekly ranking')}
-          </button>
+        <div className={`surface-insight-banner ${communityInsight.tone} community-insight-banner compact`}>
+          <div className="surface-insight-copy">
+            <span>{communityInsight.label}</span>
+            <strong>{communityInsight.title}</strong>
+            <p>{communityInsight.body}</p>
+          </div>
+
+          {activeTab === 'feed' && (
+            <div className="community-utility-inline">
+              <span className="community-utility-label">{t('더 둘러보기', 'Explore more')}</span>
+              <div className="community-utility-row compact">
+                <button
+                  type="button"
+                  className={`ghost-chip community-utility-btn ${activeUtility === 'discover' ? 'active' : ''}`}
+                  onClick={() => setActiveUtility((current) => (current === 'discover' ? null : 'discover'))}
+                  data-testid="community-utility-discover"
+                >
+                  {t('사람 찾기', 'Discover people')}
+                </button>
+                <button
+                  type="button"
+                  className={`ghost-chip community-utility-btn ${activeUtility === 'ranking' ? 'active' : ''}`}
+                  onClick={() => setActiveUtility((current) => (current === 'ranking' ? null : 'ranking'))}
+                  data-testid="community-utility-ranking"
+                >
+                  {t('주간 랭킹', 'Weekly ranking')}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

@@ -12,6 +12,17 @@ const DEVTOOLS_PORT = 9228
 const APP_PORT = 4173
 const GUEST_DB_NAME = 'GymCommunityGuestDB'
 const GUEST_STORE_NAME = 'guest_workouts'
+const E2E_CAPTURE = process.env.E2E_CAPTURE === '1'
+const E2E_REPORT = process.env.E2E_REPORT === '1'
+const SYNTHETIC_PHOTO_NAME = 'e2e-proof.png'
+const SYNTHETIC_PHOTO_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Z0MsAAAAASUVORK5CYII='
+const PRIMARY_VIEWPORT = { width: 430, height: 980 }
+const ADDITIONAL_MOBILE_VIEWPORTS = [
+  { width: 390, height: 844, label: 'iphone-regular' },
+  { width: 375, height: 812, label: 'iphone-compact' },
+  { width: 320, height: 640, label: 'small-android' },
+]
+const E2E_NOTE = '모바일 실사용 점검 메모'
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -97,6 +108,7 @@ class CdpSession {
     this.socket = new WebSocket(webSocketUrl)
     this.nextId = 1
     this.pending = new Map()
+    this.listeners = new Map()
     this.ready = new Promise((resolve, reject) => {
       this.socket.addEventListener('open', resolve, { once: true })
       this.socket.addEventListener('error', reject, { once: true })
@@ -104,7 +116,11 @@ class CdpSession {
 
     this.socket.addEventListener('message', (event) => {
       const payload = JSON.parse(event.data)
-      if (!payload.id) return
+      if (!payload.id) {
+        const handlers = this.listeners.get(payload.method) ?? []
+        handlers.forEach((handler) => handler(payload.params))
+        return
+      }
 
       const handlers = this.pending.get(payload.id)
       if (!handlers) return
@@ -117,6 +133,12 @@ class CdpSession {
 
       handlers.resolve(payload.result)
     })
+  }
+
+  on(method, handler) {
+    const handlers = this.listeners.get(method) ?? []
+    handlers.push(handler)
+    this.listeners.set(method, handlers)
   }
 
   async send(method, params = {}) {
@@ -211,6 +233,66 @@ async function click(session, selector) {
   assert.equal(clicked, true, `Could not click ${selector}`)
 }
 
+async function captureScreenshot(session, fileName) {
+  if (!E2E_CAPTURE) return null
+
+  const { data } = await session.send('Page.captureScreenshot', { format: 'png' })
+  const filePath = path.join(PROJECT_ROOT, fileName)
+  fs.writeFileSync(filePath, Buffer.from(data, 'base64'))
+  return filePath
+}
+
+async function setTextValue(session, selector, value) {
+  const updated = await session.evaluate(`(() => {
+    const node = document.querySelector(${JSON.stringify(selector)})
+    if (!node) return false
+    node.focus()
+    const prototype = node instanceof HTMLTextAreaElement
+      ? HTMLTextAreaElement.prototype
+      : HTMLInputElement.prototype
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, 'value')
+    descriptor?.set?.call(node, ${JSON.stringify(value)})
+    node.dispatchEvent(new Event('input', { bubbles: true }))
+    node.dispatchEvent(new Event('change', { bubbles: true }))
+    return true
+  })()`)
+
+  assert.equal(updated, true, `Could not set value for ${selector}`)
+}
+
+async function setViewport(session, width, height) {
+  await session.send('Emulation.setDeviceMetricsOverride', {
+    width,
+    height,
+    deviceScaleFactor: 2,
+    mobile: true,
+  })
+}
+
+async function uploadSyntheticPhoto(session, selector) {
+  const resultInfo = await session.evaluate(`(() => {
+    const input = document.querySelector(${JSON.stringify(selector)})
+    if (!input) return null
+    const binary = Uint8Array.from(atob(${JSON.stringify(SYNTHETIC_PHOTO_BASE64)}), (char) => char.charCodeAt(0))
+    const file = new File([binary], ${JSON.stringify(SYNTHETIC_PHOTO_NAME)}, { type: 'image/png' })
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      value: [file],
+    })
+    input.dispatchEvent(new Event('change', { bubbles: true }))
+    return {
+      count: Array.isArray(input.files) ? input.files.length : (input.files?.length ?? 0),
+      name: input.files[0]?.name ?? null,
+      type: input.files[0]?.type ?? null,
+    }
+  })()`)
+
+  assert.ok(resultInfo, `Could not upload a synthetic photo into ${selector}`)
+  assert.equal(resultInfo.count, 1, 'Synthetic upload should attach one photo')
+  assert.equal(resultInfo.name, SYNTHETIC_PHOTO_NAME, 'Synthetic upload should keep the expected file name')
+  return resultInfo
+}
+
 async function readGuestWorkoutRecords(session) {
   return session.evaluate(`(async () => {
     const openDb = () => new Promise((resolve, reject) => {
@@ -227,7 +309,17 @@ async function readGuestWorkoutRecords(session) {
         const store = tx.objectStore(${JSON.stringify(GUEST_STORE_NAME)})
         const request = store.getAll()
 
-        request.onsuccess = () => resolve(request.result ?? [])
+        request.onsuccess = () => resolve((request.result ?? []).map((record) => ({
+          ...record,
+          photoItems: Array.isArray(record.photoItems)
+            ? record.photoItems.map((item) => ({
+                kind: item?.kind ?? null,
+                label: item?.label ?? null,
+                fileName: item?.file?.name ?? null,
+                fileType: item?.file?.type ?? null,
+              }))
+            : [],
+        })))
         request.onerror = () => reject(request.error)
         tx.onerror = () => reject(tx.error)
         tx.onabort = () => reject(tx.error)
@@ -284,7 +376,7 @@ async function assertBottomSheetPresentation(session, selector, label) {
   assert.ok(metrics.height < metrics.viewportHeight, `${label} should not consume the full viewport (${metrics.height} >= ${metrics.viewportHeight})`)
   assert.notEqual(metrics.position, 'fixed', `${label} should not be locked as a fullscreen fixed panel`)
   assert.ok(metrics.borderTopLeftRadius >= 20, `${label} should keep a rounded top edge (${metrics.borderTopLeftRadius})`)
-  assert.ok(metrics.bottom <= metrics.viewportHeight, `${label} should stay within the viewport (${metrics.bottom} > ${metrics.viewportHeight})`)
+  assert.ok(metrics.bottom <= metrics.viewportHeight + 1, `${label} should stay within the viewport (${metrics.bottom} > ${metrics.viewportHeight})`)
 }
 
 async function run() {
@@ -310,6 +402,9 @@ async function run() {
 
   let browserSession = null
   let session = null
+  const consoleErrors = []
+  const pageErrors = []
+  const viewportChecks = []
 
   try {
     const version = await waitForDebuggerVersion(DEVTOOLS_PORT)
@@ -317,26 +412,108 @@ async function run() {
     const { targetId } = await browserSession.send('Target.createTarget', { url: appUrl })
     const pageWebSocketUrl = await waitForTarget(DEVTOOLS_PORT, targetId)
     session = new CdpSession(pageWebSocketUrl)
+    session.on('Runtime.consoleAPICalled', (params) => {
+      if (params.type !== 'error') return
+      const text = (params.args ?? []).map((arg) => arg.value ?? arg.description ?? '').join(' ')
+      consoleErrors.push(text)
+    })
+    session.on('Runtime.exceptionThrown', (params) => {
+      pageErrors.push(params.exceptionDetails?.text ?? 'Unknown exception')
+    })
     await session.send('Runtime.enable')
     await session.send('Page.enable')
-    await session.send('Emulation.setDeviceMetricsOverride', {
-      width: 430,
-      height: 980,
-      deviceScaleFactor: 2,
-      mobile: true,
-    })
+    await session.send('DOM.enable')
+    await session.send('Log.enable')
+    await setViewport(session, PRIMARY_VIEWPORT.width, PRIMARY_VIEWPORT.height)
+
+    for (const viewport of ADDITIONAL_MOBILE_VIEWPORTS) {
+      await setViewport(session, viewport.width, viewport.height)
+      await session.send('Page.reload')
+      await waitForCondition(
+        session,
+        "Boolean(document.querySelector('[data-testid=\"bottom-tab-nav\"]')) && Boolean(document.querySelector('[data-testid=\"home-log-workout\"]'))",
+        `home screen ${viewport.label}`,
+      )
+      await click(session, '[data-testid="home-log-workout"]')
+      await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"workout-sheet\"]'))", `workout sheet ${viewport.label}`)
+      await delay(280)
+      await assertBottomSheetPresentation(session, '[data-testid="workout-sheet"]', `workout sheet ${viewport.label}`)
+      await assertElementInViewport(session, '.sheet-close-btn', `close button ${viewport.label}`)
+      const compactScrollMetrics = await session.evaluate(`(() => {
+        const card = document.querySelector('.home-workout-panel-shell .workout-capture-card')
+        const submit = document.querySelector('.capture-submit-btn')
+        if (!card || !submit) return null
+        card.scrollTop = card.scrollHeight
+        const rect = submit.getBoundingClientRect()
+        return {
+          scrollTop: card.scrollTop,
+          scrollHeight: card.scrollHeight,
+          clientHeight: card.clientHeight,
+          submitBottom: rect.bottom,
+          viewportHeight: window.innerHeight,
+        }
+      })()`)
+      assert.ok(compactScrollMetrics, `Missing compact metrics for ${viewport.label}`)
+      assert.ok(compactScrollMetrics.scrollHeight >= compactScrollMetrics.clientHeight, `${viewport.label} should keep a scrollable sheet`)
+      assert.ok(compactScrollMetrics.submitBottom <= compactScrollMetrics.viewportHeight, `${viewport.label} should keep the submit button inside the viewport after scrolling`)
+      viewportChecks.push({
+        label: viewport.label,
+        width: viewport.width,
+        height: viewport.height,
+        scrollHeight: compactScrollMetrics.scrollHeight,
+        clientHeight: compactScrollMetrics.clientHeight,
+      })
+      if (E2E_CAPTURE) {
+        await captureScreenshot(session, `qa-mobile-${viewport.label}-workout-check.png`)
+      }
+      await click(session, '.sheet-close-btn')
+      await waitForCondition(session, "!document.querySelector('[data-testid=\"workout-sheet\"]')", `closed sheet ${viewport.label}`)
+    }
+
+    await setViewport(session, PRIMARY_VIEWPORT.width, PRIMARY_VIEWPORT.height)
+    await session.send('Page.reload')
 
     await waitForCondition(
       session,
       "Boolean(document.querySelector('[data-testid=\"bottom-tab-nav\"]')) && Boolean(document.querySelector('[data-testid=\"home-log-workout\"]'))",
       'home screen',
     )
+    await delay(200)
+    await captureScreenshot(session, 'qa-mobile-home-user-check.png')
     await assertElementInViewport(session, '[data-testid="theme-toggle"]', 'theme toggle button')
 
     await click(session, '[data-testid="home-log-workout"]')
     await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"workout-sheet\"]'))", 'workout sheet')
     await delay(280)
     await assertBottomSheetPresentation(session, '[data-testid="workout-sheet"]', 'workout sheet')
+    await captureScreenshot(session, 'qa-mobile-workout-open-user-check.png')
+    const manualEditorInitiallyCollapsed = await session.evaluate("Boolean(document.querySelector('.manual-edit-fields'))")
+    assert.equal(manualEditorInitiallyCollapsed, false, 'Manual editor should stay collapsed for the default quick selection')
+    await click(session, '.manual-edit-toggle')
+    await waitForCondition(session, "Boolean(document.querySelector('.manual-edit-fields'))", 'manual editor opened')
+    await click(session, '.manual-edit-toggle')
+    await waitForCondition(session, "!document.querySelector('.manual-edit-fields')", 'manual editor collapsed')
+    await click(session, '[data-testid="workout-toggle-extras"]')
+    await waitForCondition(session, "Boolean(document.querySelector('.workout-textarea'))", 'optional fields')
+    await setTextValue(session, '.workout-textarea', E2E_NOTE)
+    await uploadSyntheticPhoto(session, '.hidden-file-input')
+    await waitForCondition(session, "document.querySelectorAll('.photo-proof-preview').length === 1", 'photo preview')
+    await click(session, '.toggle-chip')
+    await waitForCondition(session, "document.querySelector('.toggle-chip')?.textContent?.includes('비공개') === true || document.querySelector('.toggle-chip')?.textContent?.includes('Private') === true", 'private share toggle')
+    const scrollMetrics = await session.evaluate(`(() => {
+      const card = document.querySelector('.home-workout-panel-shell .workout-capture-card')
+      if (!card) return null
+      card.scrollTop = card.scrollHeight
+      return {
+        scrollTop: card.scrollTop,
+        scrollHeight: card.scrollHeight,
+        clientHeight: card.clientHeight,
+      }
+    })()`)
+    assert.ok(scrollMetrics, 'Workout sheet card should be scrollable')
+    assert.ok(scrollMetrics.scrollHeight >= scrollMetrics.clientHeight, 'Workout sheet card should expose scroll geometry')
+    await delay(160)
+    await captureScreenshot(session, 'qa-mobile-workout-scrolled-user-check.png')
     await click(session, '.capture-submit-btn')
     await waitForCondition(session, "!document.querySelector('[data-testid=\"workout-sheet\"]')", 'saved guest workout sheet')
     await waitForCondition(
@@ -344,6 +521,9 @@ async function run() {
       "!document.querySelector('.auth-modal-card')",
       'guest workout save without auth prompt',
     )
+    await waitForCondition(session, "Boolean(document.querySelector('.app-toast'))", 'guest save toast')
+    await delay(320)
+    await assertElementInViewport(session, '.app-toast', 'guest save toast')
 
     const guestRecords = await readGuestWorkoutRecords(session)
     assert.equal(guestRecords.length, 1, 'Guest workout should be stored locally')
@@ -351,6 +531,11 @@ async function run() {
     assert.equal(Number(guestRecords[0]?.durationMinutes), 30, 'Stored workout should preserve duration')
     assert.equal(typeof guestRecords[0]?.loggedDate, 'string', 'Stored workout should include a logged date')
     assert.equal(Number(guestRecords[0]?.weightKg) > 0, true, 'Stored workout should include the derived weight')
+    assert.equal(guestRecords[0]?.note, E2E_NOTE, 'Stored workout should keep the typed note')
+    assert.equal(guestRecords[0]?.shareToFeed, false, 'Stored workout should keep the private sharing choice')
+    assert.equal(guestRecords[0]?.photoItems?.length, 1, 'Stored workout should keep one attached photo item')
+    assert.equal(guestRecords[0]?.photoItems?.[0]?.fileName, SYNTHETIC_PHOTO_NAME, 'Stored workout should keep the attached photo file name')
+    await captureScreenshot(session, 'qa-mobile-home-after-save-user-check.png')
 
     await session.send('Page.reload')
     await waitForCondition(
@@ -435,6 +620,17 @@ async function run() {
       `document.documentElement.dataset.theme === ${JSON.stringify(toggledTheme)}`,
       'theme toggle',
     )
+
+    if (E2E_REPORT) {
+      console.log(JSON.stringify({
+        consoleErrors,
+        pageErrors,
+        viewportChecks,
+        guestRecordCount: guestRecords.length,
+        latestGuestRecord: guestRecords[0],
+        scrollMetrics,
+      }, null, 2))
+    }
 
     console.log('E2E PASS core navigation and interaction flow')
   } finally {

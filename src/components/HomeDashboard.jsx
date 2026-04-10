@@ -217,6 +217,26 @@ export default function HomeDashboard({
       ].filter(Boolean).join(' · ')
     : t('첫 기록이 여기에 보여요.', 'Your first log shows here.')
 
+  const recentWorkoutFootnote = stats.lastWorkoutType
+    ? t(
+        `최근 운동 ${recentWorkoutTitle}${recentWorkoutMeta ? ` · ${recentWorkoutMeta}` : ''}`,
+        `Latest ${recentWorkoutTitle}${recentWorkoutMeta ? ` · ${recentWorkoutMeta}` : ''}`,
+      )
+    : t('최근 운동은 기록을 남기면 여기서 보여요.', 'Recent workouts show up here after you log.')
+
+  const heroMetrics = [
+    {
+      eyebrow: t('주간 목표', 'Weekly goal'),
+      value: `${goalCurrent}/${goalTarget}`,
+      detail: `${goalProgress}%`,
+    },
+    {
+      eyebrow: t('연속 기록', 'Streak'),
+      value: t(`${stats.streak}일`, `${stats.streak} days`),
+      detail: t(`오늘 XP ${activitySummary?.todayXp ?? 0}`, `Today XP ${activitySummary?.todayXp ?? 0}`),
+    },
+  ]
+
   const showReminderInline = reminder?.enabled && !todayDone
   const reminderTitle = reminder?.due
     ? t('지금 기록할 시간이에요.', 'Time to log today.')
@@ -297,27 +317,17 @@ export default function HomeDashboard({
           </div>
 
           <div className="home-focus-summary-strip">
-            <MetricPill
-              eyebrow={t('주간 목표', 'Weekly goal')}
-              value={`${goalCurrent}/${goalTarget}`}
-              detail={`${goalProgress}%`}
-            />
-            <MetricPill
-              eyebrow={t('연속 기록', 'Streak')}
-              value={t(`${stats.streak}일`, `${stats.streak} days`)}
-              detail={t('흐름 유지 중', 'Keep it going')}
-            />
-            <MetricPill
-              eyebrow={t('오늘 XP', 'Today XP')}
-              value={`${activitySummary?.todayXp ?? 0} XP`}
-              detail={t(`활동 Lv ${activityLevelValue}`, `Activity Lv ${activityLevelValue}`)}
-            />
-            <MetricPill
-              eyebrow={t('최근 운동', 'Latest')}
-              value={recentWorkoutTitle}
-              detail={recentWorkoutMeta}
-            />
+            {heroMetrics.map((item) => (
+              <MetricPill
+                key={item.eyebrow}
+                eyebrow={item.eyebrow}
+                value={item.value}
+                detail={item.detail}
+              />
+            ))}
           </div>
+
+          <p className="home-focus-footnote">{recentWorkoutFootnote}</p>
 
           {showReminderInline && (
             <div className={`home-focus-inline-banner ${reminder?.due ? 'due' : ''}`}>

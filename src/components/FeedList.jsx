@@ -200,7 +200,7 @@ function FeedCard({
                 />
               </div>
               <span className="feed-story-image-hint">
-                {isEnglish ? 'Open' : '열기'}
+                {isEnglish ? 'View photo' : '사진 보기'}
               </span>
             </button>
           ))}
@@ -234,8 +234,12 @@ function FeedCard({
                 type="button"
                 className="ghost-chip feed-more-btn"
                 onClick={() => setMenuOpen((prev) => !prev)}
+                aria-expanded={menuOpen}
+                aria-haspopup="menu"
               >
-                {isEnglish ? 'Menu' : '메뉴'}
+                {menuOpen
+                  ? (isEnglish ? 'Close options' : '옵션 닫기')
+                  : (isEnglish ? 'Post options' : '게시물 옵션')}
               </button>
               {menuOpen && (
                 <div className="feed-action-menu">

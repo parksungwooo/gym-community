@@ -47,6 +47,32 @@ export default function ProgressRoute({
     [activitySummary, bodyMetrics, currentLevel, isEnglish, weeklyGoal, workoutHistory, workoutStats],
   )
 
+  const levelSummary = currentLevel
+    ? (isEnglish ? `Level ${currentLevel}` : `레벨 ${currentLevel}`)
+    : (isEnglish ? 'Test not started' : '테스트 전')
+  const latestWeightSummary = bodyMetrics?.latestWeightKg != null
+    ? `${bodyMetrics.latestWeightKg} kg`
+    : (isEnglish ? 'Not set yet' : '아직 없음')
+  const recordHubGlanceItems = [
+    {
+      label: isEnglish ? 'Weekly goal' : '주간 목표',
+      value: `${workoutStats?.weeklyCount ?? 0}/${weeklyGoal}`,
+      detail: isEnglish
+        ? `${activitySummary?.todayXp ?? 0} XP today`
+        : `오늘 XP ${activitySummary?.todayXp ?? 0}`,
+    },
+    {
+      label: isEnglish ? 'Current status' : '현재 상태',
+      value: levelSummary,
+      detail: latestWeightSummary,
+    },
+  ]
+  const levelTestActionLabel = isTestFlowOpen
+    ? (isEnglish ? 'Close level test' : '레벨 테스트 닫기')
+    : currentLevel
+      ? (isEnglish ? 'Review level test' : '레벨 테스트 다시 보기')
+      : (isEnglish ? 'Open level test' : '레벨 테스트 열기')
+
   const handleWeightSubmit = async (event) => {
     event.preventDefault()
     await onSaveWeight?.(weightInputValue)
@@ -56,26 +82,41 @@ export default function ProgressRoute({
   return (
     <div className="view-stage">
       <section className="card record-hub-card record-hub-card-simple">
-        <div>
+        <div className="record-hub-copy">
           <span className="app-section-kicker">{isEnglish ? 'Records' : '기록'}</span>
           <h2>{isEnglish ? 'This week' : '이번 주'}</h2>
+          <p>
+            {isEnglish
+              ? 'Start with a workout, then track weight or review your level when needed.'
+              : '운동부터 남기고, 필요할 때 체중과 레벨을 이어서 확인하세요.'}
+          </p>
         </div>
+
+        <div className="record-hub-actions">
+          <button type="button" className="primary-btn" onClick={onGoHome}>
+            {isEnglish ? 'Log workout now' : '지금 운동 기록하기'}
+          </button>
+          <button type="button" className="ghost-btn" onClick={onToggleTestFlow} data-testid="progress-open-level-test">
+            {levelTestActionLabel}
+          </button>
+        </div>
+
+        <div className="record-hub-glance">
+          {recordHubGlanceItems.map((item) => (
+            <div key={item.label} className="record-hub-glance-item">
+              <span>{item.label}</span>
+              <strong>{item.value}</strong>
+              <small>{item.detail}</small>
+            </div>
+          ))}
+        </div>
+
         <div className={`surface-insight-banner ${progressInsight.tone}`}>
           <div className="surface-insight-copy">
             <span>{progressInsight.label}</span>
             <strong>{progressInsight.title}</strong>
             <p>{progressInsight.body}</p>
           </div>
-        </div>
-        <div className="record-hub-actions">
-          <button type="button" className="ghost-btn" onClick={onToggleTestFlow} data-testid="progress-open-level-test">
-            {isTestFlowOpen
-              ? (isEnglish ? 'Close' : '닫기')
-              : (isEnglish ? 'Level test' : '레벨 테스트')}
-          </button>
-          <button type="button" className="secondary-btn" onClick={onGoHome}>
-            {isEnglish ? 'Log workout' : '운동 기록'}
-          </button>
         </div>
       </section>
 

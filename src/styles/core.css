@@ -453,31 +453,31 @@ button:active {
 .tab-nav {
   position: fixed;
   left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
   z-index: 30;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  width: min(560px, calc(100vw - 24px));
-  padding: 8px;
+  gap: 4px;
+  width: min(540px, calc(100vw - 20px));
+  padding: 6px;
   transform: translateX(-50%);
-  border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  background: rgba(255, 255, 255, 0.84);
-  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.14);
-  backdrop-filter: blur(20px);
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(18px);
 }
 
 .tab-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   border: none;
-  border-radius: 16px;
+  border-radius: 14px;
   background: transparent;
   color: #64748b;
-  padding: 10px 8px;
+  padding: 8px 6px 7px;
   font-weight: 700;
 }
 
@@ -485,10 +485,10 @@ button:active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 999px;
-  background: rgba(37, 99, 235, 0.08);
+  background: rgba(37, 99, 235, 0.06);
 }
 
 .tab-icon svg {
@@ -502,17 +502,17 @@ button:active {
 }
 
 .tab-text {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
-  color: #eff6ff;
-  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.26);
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  box-shadow: none;
 }
 
 .tab-btn.active .tab-icon {
-  background: rgba(255, 255, 255, 0.14);
+  background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
 }
 
 .tab-btn.active .tab-icon svg {

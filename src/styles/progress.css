@@ -156,11 +156,67 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 249, 255, 0.96) 100%);
 }
 
+.record-hub-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.record-hub-copy h2 {
+  margin: 0;
+}
+
+.record-hub-copy p {
+  margin: 0;
+  max-width: 34ch;
+  color: #5f7188;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
 .record-hub-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 12px;
+}
+
+.record-hub-actions .primary-btn,
+.record-hub-actions .ghost-btn {
+  width: 100%;
+}
+
+.record-hub-glance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.record-hub-glance-item {
+  display: grid;
+  gap: 4px;
+  padding: 11px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.record-hub-glance-item span {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.record-hub-glance-item strong {
+  color: #122033;
+  font-size: 0.98rem;
+  line-height: 1.28;
+}
+
+.record-hub-glance-item small {
+  color: #607086;
+  font-size: 0.76rem;
+  line-height: 1.42;
 }
 
 .record-health-screen {
@@ -297,6 +353,10 @@
 
 @media (max-width: 380px) {
   .record-hub-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .record-hub-glance {
     grid-template-columns: 1fr;
   }
 }

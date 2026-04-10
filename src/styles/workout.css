@@ -62,10 +62,75 @@
   line-height: 1.2;
 }
 
+.sheet-tool-toggle.detail {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 12px;
+  min-height: 64px;
+  text-align: left;
+}
+
+.sheet-tool-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sheet-tool-copy strong {
+  color: #f8fafc;
+  font-size: 0.84rem;
+  font-weight: 900;
+  line-height: 1.22;
+}
+
+.sheet-tool-copy span {
+  color: rgba(226, 232, 240, 0.82);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.38;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sheet-tool-state {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 82px;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(226, 232, 240, 0.92);
+  color: #475569;
+  font-size: 0;
+  font-weight: 900;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sheet-tool-state::after {
+  content: attr(data-label);
+  font-size: 0.74rem;
+  line-height: 1;
+}
+
 .sheet-tool-toggle.active {
   background: rgba(219, 234, 254, 0.94);
   color: #1d4ed8;
   border-color: rgba(37, 99, 235, 0.22);
+}
+
+.sheet-tool-toggle.active .sheet-tool-copy strong,
+.sheet-tool-toggle.active .sheet-tool-state {
+  color: #1d4ed8;
+}
+
+.sheet-tool-toggle.active .sheet-tool-state {
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .sheet-section {
@@ -412,6 +477,96 @@
   gap: 10px;
 }
 
+.manual-edit-section {
+  display: grid;
+  gap: 10px;
+}
+
+.manual-edit-section.compact {
+  gap: 8px;
+}
+
+.manual-edit-section.customized {
+  border-color: rgba(37, 99, 235, 0.22);
+  background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%);
+}
+
+.manual-edit-section.expanded {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.54);
+}
+
+.manual-edit-toggle {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.manual-edit-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.manual-edit-label {
+  color: rgba(226, 232, 240, 0.74);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.manual-edit-value {
+  color: #f8fafc;
+  font-size: 0.96rem;
+  font-weight: 900;
+  line-height: 1.28;
+}
+
+.manual-edit-helper {
+  color: rgba(226, 232, 240, 0.78);
+  font-size: 0.8rem;
+  line-height: 1.42;
+}
+
+.manual-edit-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 92px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(226, 232, 240, 0.92);
+  color: #334155;
+  font-size: 0;
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.manual-edit-action::after {
+  content: attr(data-label);
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.manual-edit-section.customized .manual-edit-action,
+.manual-edit-section.expanded .manual-edit-action {
+  background: rgba(219, 234, 254, 0.96);
+  color: #1d4ed8;
+}
+
+.manual-edit-fields {
+  margin-top: 2px;
+}
+
 .capture-submit-btn {
   margin-top: 0;
 }
@@ -426,16 +581,16 @@
 
 .sheet-submit-bar {
   display: grid;
-  gap: 10px;
-  padding: 14px;
+  gap: 0;
+  padding: 10px 12px;
   border-radius: 18px;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(30, 58, 95, 0.94) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(19, 31, 53, 0.94) 0%, rgba(25, 40, 66, 0.94) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .sheet-submit-bar.compact {
-  gap: 8px;
-  padding: 12px;
+  gap: 0;
+  padding: 10px 12px;
   border-radius: 16px;
 }
 
@@ -453,6 +608,12 @@
   color: rgba(248, 250, 252, 0.76);
   font-size: 0.82rem;
   line-height: 1.4;
+}
+
+.capture-submit-btn.compact {
+  min-height: 48px;
+  border-radius: 18px;
+  margin-top: 0;
 }
 
 .workout-select,
@@ -838,6 +999,20 @@
 
   .record-test-flow-shell {
     padding-inline: 12px;
+  }
+
+  .sheet-tool-toggle.detail {
+    min-height: 60px;
+    padding: 10px 11px;
+  }
+
+  .manual-edit-toggle {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .manual-edit-action {
+    align-self: flex-start;
   }
 }
 

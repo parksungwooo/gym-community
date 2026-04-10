@@ -160,6 +160,30 @@ const tests = [
     },
   },
   {
+    name: 'guest workout records keep private share choice and photo items for later sync',
+    run() {
+      const record = buildGuestWorkoutRecord({
+        workoutType: '러닝',
+        durationMinutes: 30,
+        note: 'sync me later',
+        shareToFeed: false,
+        photoItems: [
+          {
+            kind: 'new',
+            label: 'proof.png',
+            file: { name: 'proof.png', type: 'image/png' },
+          },
+        ],
+      })
+
+      assert.equal(record.shareToFeed, false)
+      assert.equal(record.photoItems.length, 1)
+      assert.equal(record.photoItems[0].label, 'proof.png')
+      assert.equal(record.photoItems[0].file.name, 'proof.png')
+      assert.equal(record.note, 'sync me later')
+    },
+  },
+  {
     name: 'actionable error copy explains IndexedDB failures clearly',
     run() {
       const message = getActionableErrorMessage(
