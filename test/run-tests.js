@@ -2,7 +2,9 @@ import assert from 'node:assert/strict'
 import process from 'node:process'
 
 import { createAuthPromptState, sanitizePendingAction } from '../src/features/auth/authFlow.js'
+import { getActionableErrorMessage } from '../src/features/app/appFlowUtils.js'
 import { buildCommunityAccessResult } from '../src/features/community/communityFlow.js'
+import { buildGuestWorkoutRecord } from '../src/lib/guestStorage.js'
 import { buildNotificationNavigation } from '../src/features/notifications/notificationFlow.js'
 import { getActivityEventMeta, getActivityLevelProgress } from '../src/utils/activityLevel.js'
 import { buildAppHistoryState, getHashForView, parseViewFromHash, shouldPushHomeBackGuard } from '../src/utils/appRouting.js'
@@ -111,12 +113,12 @@ const tests = [
     },
   },
   {
-    name: 'community gate redirects to profile when nickname is missing',
+    name: 'community gate allows access even when nickname is missing',
     run() {
       const result = buildCommunityAccessResult('community', false, 'community')
 
-      assert.equal(result.allowed, false)
-      assert.equal(result.redirectView, 'profile')
+      assert.equal(result.allowed, true)
+      assert.equal(result.redirectView, 'community')
     },
   },
   {
@@ -138,6 +140,35 @@ const tests = [
       assert.equal(shouldPushHomeBackGuard('home', true, {}), false)
       assert.equal(shouldPushHomeBackGuard('community', false, {}), false)
       assert.equal(shouldPushHomeBackGuard('home', false, { appHomeGuard: true }), false)
+    },
+  },
+  {
+    name: 'guest workout records preserve logged date and include a stable id',
+    run() {
+      const now = new Date('2026-04-10T07:08:09.000Z')
+      const record = buildGuestWorkoutRecord({
+        workoutType: 'Run',
+        durationMinutes: 30,
+      }, now)
+
+      assert.equal(record.workoutType, 'Run')
+      assert.equal(record.durationMinutes, 30)
+      assert.equal(record.loggedDate, '2026-04-10')
+      assert.equal(record.created_at, '2026-04-10T07:08:09.000Z')
+      assert.equal(typeof record.id, 'string')
+      assert.ok(record.id.length > 0)
+    },
+  },
+  {
+    name: 'actionable error copy explains IndexedDB failures clearly',
+    run() {
+      const message = getActionableErrorMessage(
+        new Error('IndexedDB InvalidStateError'),
+        'fallback',
+        true,
+      )
+
+      assert.match(message, /Local storage is unavailable/i)
     },
   },
   {

@@ -72,6 +72,7 @@ export default function AuthRequiredModal({
   return (
     <div className="auth-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
       <section className="auth-modal-card" onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="modal-close-x" onClick={onClose} aria-label={isEnglish ? 'Close' : '닫기'}>&times;</button>
         <span className="auth-modal-kicker">{isEnglish ? 'Account Needed' : '로그인 필요'}</span>
         <h2>{copy.title}</h2>
         <p>{copy.body}</p>

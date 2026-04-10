@@ -1,7 +1,7 @@
 export const THEME_STORAGE_KEY = 'gym-community-theme'
 
 export function normalizeThemeMode(value) {
-  return value === 'dark' ? 'dark' : 'light'
+  return value === 'light' ? 'light' : 'dark'
 }
 
 export function getNextThemeMode(value) {

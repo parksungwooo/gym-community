@@ -63,6 +63,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from './services/communityService'
+import { deleteGuestWorkouts, getGuestWorkouts, saveGuestWorkout } from './lib/guestStorage.js'
 import {
   buildAppHistoryState,
   getHashForView,
@@ -276,6 +277,59 @@ export default function App() {
     setSuccessState({ message, accent })
   }, [])
 
+  const syncGuestWorkoutsToAccount = useCallback(async (nextUser) => {
+    if (!nextUser?.id) return
+
+    const pendingGuestLogs = await getGuestWorkouts()
+
+    if (!pendingGuestLogs.length) return
+
+    const syncResults = await Promise.allSettled(
+      pendingGuestLogs.map(async (log) => {
+        const {
+          id,
+          created_at: _createdAt,
+          loggedDate,
+          ...workoutDetails
+        } = log
+
+        await completeWorkout(
+          nextUser.id,
+          loggedDate || getTodayDateString(),
+          workoutDetails,
+        )
+
+        return id
+      }),
+    )
+
+    const syncedIds = syncResults
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => result.value)
+      .filter(Boolean)
+
+    const failedCount = syncResults.length - syncedIds.length
+
+    if (syncedIds.length > 0) {
+      await deleteGuestWorkouts(syncedIds)
+      await Promise.all([refreshFeed(nextUser.id), refreshUserSummary(nextUser.id)])
+      showSuccess(
+        isEnglish
+          ? `Synced ${syncedIds.length} local workout${syncedIds.length === 1 ? '' : 's'}.`
+          : `로컬 운동 기록 ${syncedIds.length}개를 동기화했어요.`,
+        'info',
+      )
+    }
+
+    if (failedCount > 0) {
+      setErrorMessage(
+        isEnglish
+          ? `${failedCount} local workout ${failedCount === 1 ? 'is' : 'are'} still waiting to sync. Sign in again or refresh and try once more.`
+          : `로컬 운동 기록 ${failedCount}개는 아직 동기화되지 않았어요. 다시 로그인하거나 새로고침 후 다시 시도해주세요.`,
+      )
+    }
+  }, [isEnglish, refreshFeed, refreshUserSummary, setErrorMessage, showSuccess])
+
   const handleUpgradePlan = useCallback((planId) => {
     if (isPro) {
       showSuccess(
@@ -315,6 +369,20 @@ export default function App() {
       try {
         if (session?.user?.id) {
           await loadUserData(session.user)
+          
+          try {
+            await syncGuestWorkoutsToAccount(session.user)
+          } catch (syncErr) {
+            console.error('Failed to sync guest workouts:', syncErr)
+            setErrorMessage(getActionableErrorMessage(
+              syncErr,
+              isEnglish
+                ? 'Local workouts are still waiting to sync. Sign in again or refresh and try once more.'
+                : '로컬 운동 기록이 아직 동기화되지 않았어요. 다시 로그인하거나 새로고침 후 다시 시도해주세요.',
+              isEnglish,
+            ))
+          }
+
         } else {
           await loadPublicData()
           navigateToView(VIEW.HOME, { replace: true })
@@ -330,7 +398,7 @@ export default function App() {
       clearTimeout(failSafe)
       subscription.unsubscribe()
     }
-  }, [initializeApp, isEnglish, loadPublicData, loadUserData, navigateToView])
+  }, [initializeApp, isEnglish, loadPublicData, loadUserData, navigateToView, setErrorMessage, syncGuestWorkoutsToAccount])
 
   useEffect(() => {
     if (!successState) return undefined
@@ -681,12 +749,45 @@ export default function App() {
   }, [])
 
   const handleWorkoutComplete = async (details = {}) => {
+    const workoutPayload = {
+      ...details,
+      weightKg: bodyMetrics.latestWeightKg,
+      loggedDate: getTodayDateString(),
+    }
+
+    if (!isAuthenticated) {
+      try {
+        setErrorMessage('')
+        await saveGuestWorkout(workoutPayload)
+        showSuccess(
+          isEnglish
+            ? 'Saved locally. Log in later to sync it to your account.'
+            : '기기에 임시 저장했어요. 나중에 로그인하면 계정으로 동기화됩니다.',
+          'info',
+        )
+        setShowWorkoutPanel(false)
+        setWorkoutPreset(null)
+        navigateToView(VIEW.HOME)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return true
+      } catch (error) {
+        console.error('Failed to save guest log', error)
+        setErrorMessage(getActionableErrorMessage(
+          error,
+          isEnglish
+            ? 'Local storage is unavailable. Log in to save this workout.'
+            : '로컬 저장을 사용할 수 없어요. 로그인해서 운동 기록을 저장해주세요.',
+          isEnglish,
+        ))
+      }
+    }
+
     if (guardAuthAction('save_workout', {
       type: 'complete_workout',
       reason: 'save_workout',
       view: VIEW.HOME,
-      payload: details,
-    })) return
+      payload: workoutPayload,
+    })) return false
 
     const previousWeeklyCount = workoutStats.weeklyCount
     const previousTotalXp = activitySummary.totalXp
@@ -694,10 +795,7 @@ export default function App() {
     setErrorMessage('')
 
     try {
-      await completeWorkout(user.id, getTodayDateString(), {
-        ...details,
-        weightKg: bodyMetrics.latestWeightKg,
-      })
+      await completeWorkout(user.id, workoutPayload.loggedDate, workoutPayload)
       setTodayDone(true)
       const [, summary] = await Promise.all([refreshFeed(user.id), refreshUserSummary(user.id), refreshLeaderboard()])
 
@@ -709,11 +807,15 @@ export default function App() {
       const gainedXp = Math.max((Number(summary.profile?.total_xp) || 0) - previousTotalXp, 0)
       showSuccess(
         gainedXp > 0
-          ? (isEnglish ? `${details.workoutType || 'Workout'} +${gainedXp} XP` : `${details.workoutType || '운동'} +${gainedXp} XP`)
-          : (isEnglish ? `${details.workoutType || 'Workout'} saved` : `${details.workoutType || '운동'} 저장`),
+          ? (isEnglish ? `${workoutPayload.workoutType || 'Workout'} +${gainedXp} XP` : `${workoutPayload.workoutType || '운동'} +${gainedXp} XP`)
+          : (isEnglish ? `${workoutPayload.workoutType || 'Workout'} saved` : `${workoutPayload.workoutType || '운동'} 저장`),
         'success',
       )
-      setCelebration({ workoutType: details.workoutType || '운동', durationMinutes: Number(details.durationMinutes) || 0, nextWeeklyCount: summary.stats.weeklyCount })
+      setCelebration({
+        workoutType: workoutPayload.workoutType || '운동',
+        durationMinutes: Number(workoutPayload.durationMinutes) || 0,
+        nextWeeklyCount: summary.stats.weeklyCount,
+      })
       setShowWorkoutPanel(false)
       setWorkoutPreset(null)
       navigateToView(VIEW.HOME)

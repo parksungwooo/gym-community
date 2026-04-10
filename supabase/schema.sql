@@ -395,6 +395,21 @@ begin
   if not exists (
     select 1
     from pg_policies
+    where schemaname = 'public' and tablename = 'mate_posts' and policyname = 'anyone can read mate posts'
+  ) then
+    create policy "anyone can read mate posts"
+    on public.mate_posts
+    for select
+    using (true);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
     where schemaname = 'public' and tablename = 'mate_posts' and policyname = 'users can insert own mate posts'
   ) then
     create policy "users can insert own mate posts"
@@ -733,6 +748,20 @@ begin
     on public.weight_logs
     for delete
     using (auth.uid() = user_id);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'users' and policyname = 'anyone can read profiles'
+  ) then
+    create policy "anyone can read profiles"
+    on public.users
+    for select
+    using (true);
   end if;
 end
 $$;
@@ -1664,12 +1693,80 @@ end
 $$;
 
 drop function if exists public.get_public_leaderboard(integer);
+drop function if exists public.get_public_feed_posts(uuid, integer);
 drop function if exists public.get_public_mate_posts(uuid, integer);
 drop function if exists public.get_public_profile(uuid);
 drop function if exists public.get_notification_inbox(integer);
 drop function if exists public.get_moderation_reports(text, integer);
 drop function if exists public.resolve_report(uuid, text, text);
 drop function if exists public.search_public_users(text, integer);
+
+create or replace function public.get_public_feed_posts(viewer_user_id uuid default null, limit_count int default 50)
+returns table (
+  id uuid,
+  user_id uuid,
+  content text,
+  type text,
+  metadata jsonb,
+  created_at timestamptz,
+  visibility_status text,
+  author_display_name text,
+  author_avatar_emoji text,
+  author_avatar_url text,
+  author_level text,
+  author_score int,
+  like_count bigint,
+  liked_by_me boolean
+)
+language sql
+security definer
+set search_path = public
+as $$
+  with viewer_context as (
+    select auth.uid() as viewer_id
+  ),
+  latest_tests as (
+    select distinct on (tr.user_id)
+      tr.user_id,
+      tr.score,
+      tr.level
+    from public.test_results tr
+    order by tr.user_id, tr.created_at desc
+  ),
+  like_stats as (
+    select
+      l.post_id,
+      count(*)::bigint as like_count,
+      bool_or(l.user_id = vc.viewer_id) as liked_by_me
+    from public.likes l
+    cross join viewer_context vc
+    group by l.post_id
+  )
+  select
+    fp.id,
+    fp.user_id,
+    fp.content,
+    fp.type,
+    coalesce(fp.metadata, '{}'::jsonb) as metadata,
+    fp.created_at,
+    fp.visibility_status,
+    nullif(u.display_name, '') as author_display_name,
+    coalesce(u.avatar_emoji, 'RUN') as author_avatar_emoji,
+    u.avatar_url as author_avatar_url,
+    lt.level as author_level,
+    lt.score as author_score,
+    coalesce(ls.like_count, 0) as like_count,
+    coalesce(ls.liked_by_me, false) as liked_by_me
+  from public.feed_posts fp
+  join public.users u on u.id = fp.user_id
+  left join latest_tests lt on lt.user_id = fp.user_id
+  left join like_stats ls on ls.post_id = fp.id
+  where fp.visibility_status = 'visible'
+  order by fp.created_at desc
+  limit greatest(least(limit_count, 50), 1);
+$$;
+
+grant execute on function public.get_public_feed_posts(uuid, integer) to anon, authenticated;
 
 create or replace function public.get_public_mate_posts(viewer_user_id uuid default null, limit_count int default 24)
 returns table (
@@ -1698,7 +1795,7 @@ security definer
 set search_path = public
 as $$
   with viewer_context as (
-    select coalesce(viewer_user_id, auth.uid()) as viewer_id
+    select auth.uid() as viewer_id
   ),
   interest_counts as (
     select

@@ -140,6 +140,10 @@ export async function updateUserProfile(userId, profile) {
 }
 
 export async function fetchWeightLogs(userId) {
+  if (!userId) {
+    return []
+  }
+
   const { data, error } = await supabase
     .from('weight_logs')
     .select('id,weight_kg,recorded_at,created_at')
@@ -155,6 +159,10 @@ export async function fetchWeightLogs(userId) {
 }
 
 export async function fetchRecentActivityEvents(userId, limit = 12) {
+  if (!userId) {
+    return []
+  }
+
   const safeLimit = Math.min(40, Math.max(1, Number(limit) || 12))
 
   const { data, error } = await supabase
@@ -172,6 +180,10 @@ export async function fetchRecentActivityEvents(userId, limit = 12) {
 }
 
 export async function fetchAchievementBadges(userId) {
+  if (!userId) {
+    return []
+  }
+
   const { data, error } = await supabase
     .from('user_badges')
     .select('id,badge_key,metadata,awarded_at')
@@ -240,6 +252,10 @@ export async function unfollowUser(userId, targetUserId) {
 }
 
 export async function fetchFollowingIds(userId) {
+  if (!userId) {
+    return []
+  }
+
   const { data, error } = await supabase
     .from('follows')
     .select('following_id')
@@ -253,6 +269,10 @@ export async function fetchFollowingIds(userId) {
 }
 
 export async function fetchBlockedIds(userId) {
+  if (!userId) {
+    return []
+  }
+
   const { data, error } = await supabase
     .from('blocks')
     .select('blocked_id')
@@ -464,6 +484,13 @@ export async function setFeedPostVisibility(postId, nextVisibility = 'hidden_by_
 }
 
 export async function fetchFollowStats(userId) {
+  if (!userId) {
+    return {
+      followerCount: 0,
+      followingCount: 0,
+    }
+  }
+
   const [{ count: followerCount, error: followerError }, { count: followingCount, error: followingError }] = await Promise.all([
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', userId),
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', userId),
@@ -607,6 +634,10 @@ export async function fetchNotifications(userId, limit = 30) {
 }
 
 export async function fetchUnreadNotificationCount(userId) {
+  if (!userId) {
+    return 0
+  }
+
   const { count, error } = await supabase
     .from('notifications')
     .select('*', { count: 'exact', head: true })
@@ -621,6 +652,10 @@ export async function fetchUnreadNotificationCount(userId) {
 }
 
 export async function markNotificationRead(userId, notificationId) {
+  if (!userId || !notificationId) {
+    return null
+  }
+
   const { data, error } = await supabase
     .from('notifications')
     .update({ read_at: new Date().toISOString() })
@@ -638,6 +673,10 @@ export async function markNotificationRead(userId, notificationId) {
 }
 
 export async function markAllNotificationsRead(userId) {
+  if (!userId) {
+    return
+  }
+
   const { error } = await supabase
     .from('notifications')
     .update({ read_at: new Date().toISOString() })
@@ -650,6 +689,10 @@ export async function markAllNotificationsRead(userId) {
 }
 
 export async function getLatestTestResult(userId) {
+  if (!userId) {
+    return null
+  }
+
   const { data, error } = await supabase
     .from('test_results')
     .select('*')
@@ -665,6 +708,10 @@ export async function getLatestTestResult(userId) {
 }
 
 export async function fetchWorkoutHistory(userId) {
+  if (!userId) {
+    return []
+  }
+
   const { data, error } = await supabase
     .from('workout_logs')
     .select('id,date,workout_type,duration_minutes,estimated_calories,note,photo_url,photo_urls,share_to_feed,created_at')
@@ -708,6 +755,10 @@ export async function fetchWorkoutHistory(userId) {
 }
 
 export async function fetchWorkoutTemplates(userId) {
+  if (!userId) {
+    return []
+  }
+
   const { data, error } = await supabase
     .from('workout_templates')
     .select('id,name,workout_type,duration_minutes,note,updated_at,created_at')
@@ -827,6 +878,10 @@ export async function getWorkoutStats(userId) {
 }
 
 export async function hasWorkoutCompleted(userId, date) {
+  if (!userId || !date) {
+    return false
+  }
+
   const { data, error } = await supabase
     .from('workout_logs')
     .select('id,completed')
@@ -1144,12 +1199,10 @@ export async function addComment(userId, postId, content) {
 }
 
 export async function fetchFeedWithRelations(currentUserId, blockedUserIds = []) {
-  const { data: posts, error: postError } = await supabase
-    .from('feed_posts')
-    .select('id,user_id,content,type,metadata,created_at,visibility_status')
-    .eq('visibility_status', 'visible')
-    .order('created_at', { ascending: false })
-    .limit(50)
+  const { data: posts, error: postError } = await supabase.rpc('get_public_feed_posts', {
+    viewer_user_id: currentUserId ?? null,
+    limit_count: 50,
+  })
 
   if (postError) {
     throw postError
@@ -1162,92 +1215,64 @@ export async function fetchFeedWithRelations(currentUserId, blockedUserIds = [])
   }
 
   const postIds = visiblePosts.map((post) => post.id)
-  const userIds = [...new Set(visiblePosts.map((post) => post.user_id).filter(Boolean))]
 
-  const [
-    { data: likes, error: likeError },
-    { data: comments, error: commentError },
-    { data: profiles, error: profileError },
-    { data: results, error: resultError },
-  ] = await Promise.all([
-    supabase.from('likes').select('post_id,user_id').in('post_id', postIds),
-    supabase
-      .from('comments')
-      .select('id,post_id,user_id,content,created_at')
-      .in('post_id', postIds)
-      .order('created_at', { ascending: true }),
-    supabase
-      .from('users')
-      .select('id,display_name,avatar_emoji,avatar_url')
-      .in('id', userIds),
-    supabase
-      .from('test_results')
-      .select('user_id,level,score,created_at')
-      .in('user_id', userIds)
-      .order('created_at', { ascending: false }),
-  ])
-
-  if (likeError) {
-    throw likeError
-  }
+  const { data: comments, error: commentError } = await supabase
+    .from('comments')
+    .select('id,post_id,user_id,content,created_at')
+    .in('post_id', postIds)
+    .order('created_at', { ascending: true })
 
   if (commentError) {
     throw commentError
   }
 
-  if (profileError) {
-    throw profileError
-  }
+  const commentRows = comments ?? []
+  const commentUserIds = [...new Set(commentRows.map((comment) => comment.user_id).filter(Boolean))]
+  let commentProfileMap = {}
 
-  if (resultError) {
-    throw resultError
-  }
+  if (commentUserIds.length > 0) {
+    const { data: commentProfiles, error: commentProfileError } = await supabase
+      .from('users')
+      .select('id,display_name')
+      .in('id', commentUserIds)
 
-  const likeMap = likes.reduce((acc, like) => {
-    if (!acc[like.post_id]) {
-      acc[like.post_id] = { count: 0, likedByMe: false }
+    if (commentProfileError) {
+      throw commentProfileError
     }
 
-    acc[like.post_id].count += 1
+    commentProfileMap = (commentProfiles ?? []).reduce((acc, profile) => {
+      acc[profile.id] = profile
+      return acc
+    }, {})
+  }
 
-    if (like.user_id === currentUserId) {
-      acc[like.post_id].likedByMe = true
-    }
-
-    return acc
-  }, {})
-
-  const commentMap = comments.reduce((acc, comment) => {
+  const commentMap = commentRows.reduce((acc, comment) => {
     if (!acc[comment.post_id]) {
       acc[comment.post_id] = []
     }
 
-    acc[comment.post_id].push(comment)
-    return acc
-  }, {})
-
-  const profileMap = (profiles ?? []).reduce((acc, profile) => {
-    acc[profile.id] = profile
-    return acc
-  }, {})
-
-  const latestResultMap = (results ?? []).reduce((acc, result) => {
-    if (!acc[result.user_id]) {
-      acc[result.user_id] = result
-    }
-
+    acc[comment.post_id].push({
+      ...comment,
+      authorDisplayName: commentProfileMap[comment.user_id]?.display_name ?? null,
+    })
     return acc
   }, {})
 
   return visiblePosts.map((post) => ({
-    ...post,
-    authorDisplayName: profileMap[post.user_id]?.display_name ?? null,
-    authorAvatarEmoji: profileMap[post.user_id]?.avatar_emoji ?? null,
-    authorAvatarUrl: profileMap[post.user_id]?.avatar_url ?? null,
-    authorLevel: latestResultMap[post.user_id]?.level ?? null,
-    authorScore: latestResultMap[post.user_id]?.score ?? null,
-    likeCount: likeMap[post.id]?.count ?? 0,
-    likedByMe: likeMap[post.id]?.likedByMe ?? false,
+    id: post.id,
+    user_id: post.user_id,
+    content: post.content,
+    type: post.type,
+    metadata: post.metadata ?? {},
+    created_at: post.created_at,
+    visibility_status: post.visibility_status,
+    authorDisplayName: post.author_display_name ?? null,
+    authorAvatarEmoji: post.author_avatar_emoji ?? null,
+    authorAvatarUrl: post.author_avatar_url ?? null,
+    authorLevel: post.author_level ?? null,
+    authorScore: post.author_score ?? null,
+    likeCount: Number(post.like_count) || 0,
+    likedByMe: post.liked_by_me === true,
     comments: commentMap[post.id] ?? [],
   }))
 }

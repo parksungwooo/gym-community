@@ -10,13 +10,6 @@ export function buildSuggestedUsers({ leaderboard, blockedIds, currentUserId, cu
 }
 
 export function buildCommunityAccessResult(nextView, hasCommunityNickname, communityView) {
-  if (nextView === communityView && !hasCommunityNickname) {
-    return {
-      allowed: false,
-      redirectView: 'profile',
-    }
-  }
-
   return {
     allowed: true,
     redirectView: nextView,

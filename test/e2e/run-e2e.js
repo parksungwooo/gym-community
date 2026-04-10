@@ -10,6 +10,8 @@ const PROJECT_ROOT = path.resolve(import.meta.dirname, '..', '..')
 const DIST_DIR = path.join(PROJECT_ROOT, 'dist')
 const DEVTOOLS_PORT = 9228
 const APP_PORT = 4173
+const GUEST_DB_NAME = 'GymCommunityGuestDB'
+const GUEST_STORE_NAME = 'guest_workouts'
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -209,6 +211,33 @@ async function click(session, selector) {
   assert.equal(clicked, true, `Could not click ${selector}`)
 }
 
+async function readGuestWorkoutRecords(session) {
+  return session.evaluate(`(async () => {
+    const openDb = () => new Promise((resolve, reject) => {
+      const request = indexedDB.open(${JSON.stringify(GUEST_DB_NAME)})
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+
+    const db = await openDb()
+
+    try {
+      return await new Promise((resolve, reject) => {
+        const tx = db.transaction(${JSON.stringify(GUEST_STORE_NAME)}, 'readonly')
+        const store = tx.objectStore(${JSON.stringify(GUEST_STORE_NAME)})
+        const request = store.getAll()
+
+        request.onsuccess = () => resolve(request.result ?? [])
+        request.onerror = () => reject(request.error)
+        tx.onerror = () => reject(tx.error)
+        tx.onabort = () => reject(tx.error)
+      })
+    } finally {
+      db.close()
+    }
+  })()`)
+}
+
 async function assertElementInViewport(session, selector, label) {
   const metrics = await session.evaluate(`(() => {
     const node = document.querySelector(${JSON.stringify(selector)})
@@ -282,11 +311,49 @@ async function run() {
 
     await click(session, '[data-testid="home-log-workout"]')
     await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"workout-sheet\"]'))", 'workout sheet')
-    await click(session, '[data-testid="workout-sheet-backdrop"]')
-    await waitForCondition(session, "!document.querySelector('[data-testid=\"workout-sheet\"]')", 'closed workout sheet')
+    await click(session, '.capture-submit-btn')
+    await waitForCondition(session, "!document.querySelector('[data-testid=\"workout-sheet\"]')", 'saved guest workout sheet')
+    await waitForCondition(
+      session,
+      "!document.querySelector('.auth-modal-card')",
+      'guest workout save without auth prompt',
+    )
+
+    const guestRecords = await readGuestWorkoutRecords(session)
+    assert.equal(guestRecords.length, 1, 'Guest workout should be stored locally')
+    assert.equal(guestRecords[0]?.workoutType?.length > 0, true, 'Stored workout should include a workout type')
+    assert.equal(Number(guestRecords[0]?.durationMinutes), 30, 'Stored workout should preserve duration')
+    assert.equal(typeof guestRecords[0]?.loggedDate, 'string', 'Stored workout should include a logged date')
+    assert.equal(Number(guestRecords[0]?.weightKg) > 0, true, 'Stored workout should include the derived weight')
+
+    await session.send('Page.reload')
+    await waitForCondition(
+      session,
+      "Boolean(document.querySelector('[data-testid=\"bottom-tab-nav\"]')) && Boolean(document.querySelector('[data-testid=\"home-log-workout\"]'))",
+      'home screen after reload',
+    )
+    const persistedGuestRecords = await readGuestWorkoutRecords(session)
+    assert.equal(persistedGuestRecords.length, 1, 'Guest workout should persist after reload')
 
     await click(session, '[data-testid="tab-community"]')
     await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"community-tablist\"]'))", 'community screen')
+    await waitForCondition(
+      session,
+      "Boolean(document.querySelector('.feed-card .like-btn'))",
+      'community feed like action',
+    )
+    await click(session, '.feed-card .like-btn')
+    await waitForCondition(
+      session,
+      "Boolean(document.querySelector('.auth-modal-card')) && Boolean(document.querySelector('.auth-modal-card .social-btn.google'))",
+      'auth required modal',
+    )
+    await click(session, '.auth-modal-close')
+    await waitForCondition(
+      session,
+      "!document.querySelector('.auth-modal-card')",
+      'closed auth required modal',
+    )
     await click(session, '[data-testid="community-tab-mate"]')
     await waitForCondition(
       session,

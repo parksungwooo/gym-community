@@ -43,6 +43,7 @@ export default function PaywallModal({
   return (
     <div className="auth-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
       <section className="auth-modal-card paywall-modal-card" onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="modal-close-x" onClick={onClose} aria-label={isEnglish ? 'Close' : '닫기'}>&times;</button>
         <div className="paywall-hero">
           <div className="paywall-hero-copy">
             <span className="auth-modal-kicker">{copy.kicker}</span>

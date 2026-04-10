@@ -147,7 +147,7 @@ export default function WorkoutPanel({
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    await onComplete({
+    const result = await onComplete({
       workoutType,
       durationMinutes: Number(durationMinutes) || 0,
       note: note.trim(),
@@ -155,7 +155,9 @@ export default function WorkoutPanel({
       shareToFeed,
     })
 
-    resetForm()
+    if (result !== false) {
+      resetForm()
+    }
   }
 
   const handleReuseRecent = () => {

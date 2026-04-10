@@ -13,11 +13,37 @@
 }
 
 .auth-modal-card {
+  position: relative;
   width: min(100%, 420px);
   padding: 24px;
   border-radius: 24px;
   background: #fffaf2;
   box-shadow: 0 26px 80px rgba(14, 24, 43, 0.24);
+}
+
+.modal-close-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #8291b1;
+  font-size: 1.8rem;
+  line-height: 1;
+  border-radius: 999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms, color 150ms;
+}
+
+.modal-close-x:hover {
+  background: rgba(14, 24, 43, 0.05);
+  color: #122033;
 }
 
 .report-modal-card {

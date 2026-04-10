@@ -91,47 +91,7 @@ export default function CommunityRoute({
     onEnsureLeaderboard?.().catch(() => {})
   }, [activeUtility, loadingLeaderboard, onEnsureLeaderboard, visibleLeaderboard.length])
 
-  if (!canUseCommunity) {
-    return (
-      <div className="view-stage community-locked-stage">
-        <section className="card community-overview-card community-locked-hero">
-          <span className="app-section-kicker">{t('커뮤니티 준비', 'Community setup')}</span>
-          <h2>{t('커뮤니티 잠금', 'Community locked')}</h2>
-          <p className="subtext">
-            {t(
-              '닉네임만 저장하면 바로 열려요.',
-              'Save a nickname to unlock it.',
-            )}
-          </p>
-          <div className="community-locked-step-grid">
-            <article className="community-locked-step">
-              <span>{t('지금 할 일', 'Next step')}</span>
-              <strong>{t('닉네임 저장하기', 'Save your nickname')}</strong>
-              <p>{t('프로필에서 닉네임만 저장하면 돼요.', 'Just save a nickname in profile.')}</p>
-            </article>
-            <article className="community-locked-step">
-              <span>{t('열리면 가능', 'Once unlocked')}</span>
-              <strong>{t('피드, 메이트, 랭킹 보기', 'Feed, mates, and ranking')}</strong>
-              <p>{t('피드와 메이트를 바로 볼 수 있어요.', 'You can open feed and mates right away.')}</p>
-            </article>
-          </div>
-          <button type="button" className="primary-btn community-locked-action" onClick={onGoProfile}>
-            {t('프로필로 가기', 'Go to profile')}
-          </button>
-        </section>
-        <section className="card community-locked-support">
-          <span className="empty-state-badge">{t('빠른 안내', 'Quick note')}</span>
-          <strong>{t('닉네임만 있으면 바로 들어갈 수 있어요.', 'A nickname is enough to enter.')}</strong>
-          <p className="subtext">
-            {t(
-              '사진이나 소개는 나중에 채워도 됩니다.',
-              'Photo and bio can wait until later.',
-            )}
-          </p>
-        </section>
-      </div>
-    )
-  }
+
 
   return (
     <div className="view-stage community-stage-clean">

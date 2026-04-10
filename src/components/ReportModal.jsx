@@ -34,6 +34,7 @@ export default function ReportModal({
   return (
     <div className="auth-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
       <section className="auth-modal-card report-modal-card" onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="modal-close-x" onClick={onClose} aria-label={isEnglish ? 'Close' : '닫기'}>&times;</button>
         <span className="auth-modal-kicker">{isEnglish ? 'Safety' : '안전 센터'}</span>
         <h2>{isEnglish ? 'Report' : '신고'}</h2>
         <p>
