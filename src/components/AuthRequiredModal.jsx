@@ -46,6 +46,10 @@ function getCopy(reason, isEnglish) {
       title: isEnglish ? 'Keep going with an account.' : '계정으로 이어서 써볼까요?',
       body: isEnglish ? 'Logs and profile save after login.' : '기록과 프로필은 로그인 후 저장돼요.',
     },
+    guest_sync: {
+      title: isEnglish ? 'Log in to sync saved workouts.' : '\uC800\uC7A5\uD55C \uC6B4\uB3D9 \uAE30\uB85D\uC744 \uB3D9\uAE30\uD654\uD558\uB824\uBA74 \uB85C\uADF8\uC778\uD558\uC138\uC694.',
+      body: isEnglish ? 'Local workouts stay on this device until you sign in.' : '\uB85C\uADF8\uC778\uD558\uAE30 \uC804\uAE4C\uC9C0 \uB85C\uCEEC \uC6B4\uB3D9 \uAE30\uB85D\uC740 \uC774 \uAE30\uAE30\uC5D0 \uBA38\uBB34\uB985\uB2C8\uB2E4.',
+    },
     premium_upgrade: {
       title: isEnglish ? 'Log in to start Pro' : 'Pro를 시작하려면 로그인해주세요',
       body: isEnglish ? 'Upgrades are tied to your account.' : '업그레이드는 계정과 연결돼요.',

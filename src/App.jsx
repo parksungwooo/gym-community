@@ -91,6 +91,8 @@ export default function App() {
   const initInProgressRef = useRef(false)
   const notificationRefreshTimeoutRef = useRef(null)
   const pendingReplayHandlersRef = useRef({})
+  const guestSyncPromiseRef = useRef(null)
+  const guestSyncAttemptedUserRef = useRef('')
   const [user, setUser] = useState(null)
   const [authPrompt, setAuthPrompt] = useState(null)
   const [view, setView] = useState(() => (
@@ -142,6 +144,11 @@ export default function App() {
   const [loadingAuth, setLoadingAuth] = useState(false)
   const [todayDone, setTodayDone] = useState(false)
   const [successState, setSuccessState] = useState(null)
+  const [guestSyncState, setGuestSyncState] = useState({
+    phase: 'idle',
+    pendingCount: 0,
+    failedCount: 0,
+  })
   const [celebration, setCelebration] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [reportTarget, setReportTarget] = useState(null)
@@ -277,14 +284,77 @@ export default function App() {
     setSuccessState({ message, accent })
   }, [])
 
+  const refreshGuestSyncState = useCallback(async (nextIsAuthenticated = isAuthenticated) => {
+    try {
+      const pendingGuestLogs = await getGuestWorkouts()
+      const pendingCount = pendingGuestLogs.length
+
+      setGuestSyncState((current) => {
+        if (current.phase === 'syncing') return current
+        if (!pendingCount) {
+          return {
+            phase: 'idle',
+            pendingCount: 0,
+            failedCount: 0,
+          }
+        }
+
+        return nextIsAuthenticated
+          ? current.phase === 'failed'
+            ? {
+                phase: 'failed',
+                pendingCount,
+                failedCount: pendingCount,
+              }
+            : current
+          : {
+              phase: 'guest_pending',
+              pendingCount,
+              failedCount: 0,
+            }
+      })
+
+      return pendingCount
+    } catch {
+      return 0
+    }
+  }, [isAuthenticated])
+
+  /*
   const syncGuestWorkoutsToAccount = useCallback(async (nextUser) => {
-    if (!nextUser?.id) return
+    if (!nextUser?.id) {
+      setGuestSyncState({
+        phase: 'idle',
+        pendingCount: 0,
+        failedCount: 0,
+      })
+      return { syncedCount: 0, failedCount: 0 }
+    }
 
-    const pendingGuestLogs = await getGuestWorkouts()
+    if (guestSyncPromiseRef.current) {
+      return guestSyncPromiseRef.current
+    }
 
-    if (!pendingGuestLogs.length) return
+    const syncTask = (async () => {
+      const pendingGuestLogs = await getGuestWorkouts()
+      const pendingCount = pendingGuestLogs.length
 
-    const syncResults = await Promise.allSettled(
+      if (!pendingCount) {
+        setGuestSyncState({
+          phase: 'idle',
+          pendingCount: 0,
+          failedCount: 0,
+        })
+        return { syncedCount: 0, failedCount: 0 }
+      }
+
+      setGuestSyncState({
+        phase: 'syncing',
+        pendingCount,
+        failedCount: 0,
+      })
+
+      const syncResults = await Promise.allSettled(
       pendingGuestLogs.map(async (log) => {
         const {
           id,
@@ -330,6 +400,141 @@ export default function App() {
     }
   }, [isEnglish, refreshFeed, refreshUserSummary, setErrorMessage, showSuccess])
 
+  */
+  const syncGuestWorkoutsToAccount = useCallback(async (nextUser) => {
+    if (!nextUser?.id) {
+      setGuestSyncState({
+        phase: 'idle',
+        pendingCount: 0,
+        failedCount: 0,
+      })
+      return { syncedCount: 0, failedCount: 0 }
+    }
+
+    if (guestSyncPromiseRef.current) {
+      return guestSyncPromiseRef.current
+    }
+
+    const syncTask = (async () => {
+      let pendingCount = 0
+
+      try {
+        const pendingGuestLogs = await getGuestWorkouts()
+        pendingCount = pendingGuestLogs.length
+
+        if (!pendingCount) {
+          setGuestSyncState({
+            phase: 'idle',
+            pendingCount: 0,
+            failedCount: 0,
+          })
+          return { syncedCount: 0, failedCount: 0 }
+        }
+
+        setGuestSyncState({
+          phase: 'syncing',
+          pendingCount,
+          failedCount: 0,
+        })
+
+        const syncResults = await Promise.allSettled(
+          pendingGuestLogs.map(async (log) => {
+            const {
+              id,
+              created_at: _createdAt,
+              loggedDate,
+              ...workoutDetails
+            } = log
+
+            await completeWorkout(
+              nextUser.id,
+              loggedDate || getTodayDateString(),
+              workoutDetails,
+            )
+
+            return id
+          }),
+        )
+
+        const syncedIds = syncResults
+          .filter((result) => result.status === 'fulfilled')
+          .map((result) => result.value)
+          .filter(Boolean)
+
+        const failedCount = syncResults.length - syncedIds.length
+
+        if (syncedIds.length > 0) {
+          await deleteGuestWorkouts(syncedIds)
+
+          try {
+            await Promise.all([refreshFeed(nextUser.id), refreshUserSummary(nextUser.id)])
+          } catch (refreshError) {
+            console.error('Failed to refresh after guest sync:', refreshError)
+          }
+
+          showSuccess(
+            isEnglish
+              ? `Synced ${syncedIds.length} local workout${syncedIds.length === 1 ? '' : 's'}.`
+              : `로컬 운동 기록 ${syncedIds.length}개를 계정으로 옮겼어요.`,
+            'info',
+          )
+        }
+
+        if (failedCount > 0) {
+          setGuestSyncState({
+            phase: 'failed',
+            pendingCount: failedCount,
+            failedCount,
+          })
+        } else {
+          setGuestSyncState({
+            phase: 'idle',
+            pendingCount: 0,
+            failedCount: 0,
+          })
+        }
+
+        return {
+          syncedCount: syncedIds.length,
+          failedCount,
+        }
+      } catch (error) {
+        setGuestSyncState({
+          phase: 'failed',
+          pendingCount,
+          failedCount: pendingCount,
+        })
+        throw error
+      }
+    })()
+
+    guestSyncPromiseRef.current = syncTask
+    return syncTask.finally(() => {
+      guestSyncPromiseRef.current = null
+    })
+  }, [isEnglish, refreshFeed, refreshUserSummary, showSuccess])
+
+  const handleRetryGuestSync = useCallback(async () => {
+    if (!user?.id) {
+      openAuthPrompt('guest_sync')
+      return
+    }
+
+    setErrorMessage('')
+
+    try {
+      await syncGuestWorkoutsToAccount(user)
+    } catch (error) {
+      setErrorMessage(getActionableErrorMessage(
+        error,
+        isEnglish
+          ? 'Could not sync local workouts. Try again in a moment.'
+          : '로컬 운동 기록을 동기화하지 못했어요. 잠시 후 다시 시도해 주세요.',
+        isEnglish,
+      ))
+    }
+  }, [isEnglish, openAuthPrompt, syncGuestWorkoutsToAccount, user])
+
   const handleUpgradePlan = useCallback((planId) => {
     if (isPro) {
       showSuccess(
@@ -369,7 +574,8 @@ export default function App() {
       try {
         if (session?.user?.id) {
           await loadUserData(session.user)
-          
+
+          /*
           try {
             await syncGuestWorkoutsToAccount(session.user)
           } catch (syncErr) {
@@ -382,6 +588,7 @@ export default function App() {
               isEnglish,
             ))
           }
+          */
 
         } else {
           await loadPublicData()
@@ -398,7 +605,7 @@ export default function App() {
       clearTimeout(failSafe)
       subscription.unsubscribe()
     }
-  }, [initializeApp, isEnglish, loadPublicData, loadUserData, navigateToView, setErrorMessage, syncGuestWorkoutsToAccount])
+  }, [initializeApp, isEnglish, loadPublicData, loadUserData, navigateToView, setErrorMessage])
 
   useEffect(() => {
     if (!successState) return undefined
@@ -417,6 +624,36 @@ export default function App() {
     const timer = setTimeout(() => setCelebration(null), 4200)
     return () => clearTimeout(timer)
   }, [celebration])
+
+  useEffect(() => {
+    if (loadingInit) return undefined
+
+    if (!isAuthenticated) {
+      guestSyncAttemptedUserRef.current = ''
+      void refreshGuestSyncState(false)
+    }
+
+    return undefined
+  }, [isAuthenticated, loadingInit, refreshGuestSyncState])
+
+  useEffect(() => {
+    if (loadingInit || !user?.id) return undefined
+    if (guestSyncAttemptedUserRef.current === user.id) return undefined
+
+    guestSyncAttemptedUserRef.current = user.id
+    void syncGuestWorkoutsToAccount(user).catch((error) => {
+      console.error('Failed to sync guest workouts:', error)
+      setErrorMessage(getActionableErrorMessage(
+        error,
+        isEnglish
+          ? 'Could not sync local workouts right now. You can retry below.'
+          : '로컬 운동 기록을 지금 동기화하지 못했어요. 아래에서 다시 시도해 주세요.',
+        isEnglish,
+      ))
+    })
+
+    return undefined
+  }, [isEnglish, loadingInit, setErrorMessage, syncGuestWorkoutsToAccount, user])
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('Notification' in window)) {
@@ -759,6 +996,7 @@ export default function App() {
       try {
         setErrorMessage('')
         await saveGuestWorkout(workoutPayload)
+        await refreshGuestSyncState(false)
         showSuccess(
           isEnglish
             ? 'Saved locally. Log in later to sync it to your account.'
@@ -1627,6 +1865,114 @@ export default function App() {
     { key: VIEW.PROGRESS, label: isEnglish ? 'Records' : '기록' },
     { key: VIEW.PROFILE, label: isEnglish ? 'Profile' : '프로필' },
   ]
+  /*
+  const guestSyncNotice = (() => {
+    if (!guestSyncState.pendingCount) return null
+
+    if (guestSyncState.phase === 'guest_pending' && !isAuthenticated) {
+      return {
+        tone: 'pending',
+        kicker: isEnglish ? 'Local Save' : '로컬 저장',
+        title: isEnglish ? 'Your workouts are safe on this device.' : '운동 기록이 이 기기에 안전하게 저장되어 있어요.',
+        body: isEnglish
+          ? 'Log in whenever you are ready and we will move them to your account.'
+          : '원할 때 로그인하면 이 기록들을 계정으로 옮겨드릴게요.',
+        meta: isEnglish
+          ? `${guestSyncState.pendingCount} workout${guestSyncState.pendingCount === 1 ? '' : 's'} waiting on this device`
+          : `${guestSyncState.pendingCount}개의 운동 기록이 이 기기에 대기 중이에요`,
+        actionLabel: isEnglish ? 'Log in to sync' : '로그인하고 동기화',
+        actionKind: 'auth',
+      }
+    }
+
+    if (guestSyncState.phase === 'syncing') {
+      return {
+        tone: 'syncing',
+        kicker: isEnglish ? 'Syncing' : '동기화 중',
+        title: isEnglish ? 'Moving local workouts to your account.' : '로컬 운동 기록을 계정으로 옮기고 있어요.',
+        body: isEnglish
+          ? 'You can keep using the app while this finishes.'
+          : '끝날 때까지 앱을 계속 사용해도 괜찮아요.',
+        meta: isEnglish
+          ? `${guestSyncState.pendingCount} workout${guestSyncState.pendingCount === 1 ? '' : 's'} syncing now`
+          : `${guestSyncState.pendingCount}개의 운동 기록을 동기화하고 있어요`,
+        actionLabel: '',
+        actionKind: 'none',
+      }
+    }
+
+    if (guestSyncState.phase === 'failed') {
+      const pendingCount = guestSyncState.failedCount || guestSyncState.pendingCount
+
+      return {
+        tone: 'failed',
+        kicker: isEnglish ? 'Sync Paused' : '동기화 대기',
+        title: isEnglish ? 'Some local workouts still need another try.' : '일부 로컬 운동 기록은 한 번 더 동기화가 필요해요.',
+        body: isEnglish
+          ? 'Nothing was lost. Retry sync when your connection feels stable.'
+          : '기록이 사라진 건 아니에요. 연결이 안정적일 때 다시 동기화해 주세요.',
+        meta: isEnglish
+          ? `${pendingCount} workout${pendingCount === 1 ? '' : 's'} still waiting`
+          : `${pendingCount}개의 운동 기록이 아직 대기 중이에요`,
+        actionLabel: isAuthenticated ? (isEnglish ? 'Retry sync' : '다시 동기화') : (isEnglish ? 'Log in to sync' : '로그인하고 동기화'),
+        actionKind: isAuthenticated ? 'retry' : 'auth',
+      }
+    }
+
+    return null
+  })()
+  */
+  const guestSyncNotice = (() => {
+    if (!guestSyncState.pendingCount) return null
+
+    if (guestSyncState.phase === 'guest_pending' && !isAuthenticated) {
+      return {
+        tone: 'pending',
+        kicker: isEnglish ? 'Local Save' : '\uB85C\uCEEC \uC800\uC7A5',
+        title: isEnglish ? 'Your workouts are safe on this device.' : '\uC6B4\uB3D9 \uAE30\uB85D\uC774 \uC774 \uAE30\uAE30\uC5D0 \uC548\uC804\uD558\uAC8C \uC800\uC7A5\uB418\uC5B4 \uC788\uC5B4\uC694.',
+        body: isEnglish ? 'Log in whenever you are ready and we will move them to your account.' : '\uC6D0\uD560 \uB54C \uB85C\uADF8\uC778\uD558\uBA74 \uC774 \uAE30\uB85D\uB4E4\uC744 \uACC4\uC815\uC73C\uB85C \uC62E\uACA8\uB4DC\uB9B4\uAC8C\uC694.',
+        meta: isEnglish
+          ? `${guestSyncState.pendingCount} workout${guestSyncState.pendingCount === 1 ? '' : 's'} waiting on this device`
+          : `${guestSyncState.pendingCount}\uAC1C\uC758 \uC6B4\uB3D9 \uAE30\uB85D\uC774 \uC774 \uAE30\uAE30\uC5D0 \uB300\uAE30 \uC911\uC774\uC5D0\uC694`,
+        actionLabel: isEnglish ? 'Log in to sync' : '\uB85C\uADF8\uC778\uD558\uACE0 \uB3D9\uAE30\uD654',
+        actionKind: 'auth',
+      }
+    }
+
+    if (guestSyncState.phase === 'syncing') {
+      return {
+        tone: 'syncing',
+        kicker: isEnglish ? 'Syncing' : '\uB3D9\uAE30\uD654 \uC911',
+        title: isEnglish ? 'Moving local workouts to your account.' : '\uB85C\uCEEC \uC6B4\uB3D9 \uAE30\uB85D\uC744 \uACC4\uC815\uC73C\uB85C \uC62E\uAE30\uACE0 \uC788\uC5B4\uC694.',
+        body: isEnglish ? 'You can keep using the app while this finishes.' : '\uB05D\uB0A0 \uB54C\uAE4C\uC9C0 \uC571\uC744 \uACC4\uC18D \uC0AC\uC6A9\uD574\uB3C4 \uAD1C\uCC2E\uC544\uC694.',
+        meta: isEnglish
+          ? `${guestSyncState.pendingCount} workout${guestSyncState.pendingCount === 1 ? '' : 's'} syncing now`
+          : `${guestSyncState.pendingCount}\uAC1C\uC758 \uC6B4\uB3D9 \uAE30\uB85D\uC744 \uB3D9\uAE30\uD654\uD558\uACE0 \uC788\uC5B4\uC694`,
+        actionLabel: '',
+        actionKind: 'none',
+      }
+    }
+
+    if (guestSyncState.phase === 'failed') {
+      const pendingCount = guestSyncState.failedCount || guestSyncState.pendingCount
+
+      return {
+        tone: 'failed',
+        kicker: isEnglish ? 'Sync Paused' : '\uB3D9\uAE30\uD654 \uB300\uAE30',
+        title: isEnglish ? 'Some local workouts still need another try.' : '\uC77C\uBD80 \uB85C\uCEEC \uC6B4\uB3D9 \uAE30\uB85D\uC740 \uD55C \uBC88 \uB354 \uB3D9\uAE30\uD654\uAC00 \uD544\uC694\uD574\uC694.',
+        body: isEnglish ? 'Nothing was lost. Retry sync when your connection feels stable.' : '\uAE30\uB85D\uC774 \uC0AC\uB77C\uC9C4 \uAC74 \uC544\uB2C8\uC5D0\uC694. \uC5F0\uACB0\uC774 \uC548\uC815\uC801\uC77C \uB54C \uB2E4\uC2DC \uB3D9\uAE30\uD654\uD574 \uC8FC\uC138\uC694.',
+        meta: isEnglish
+          ? `${pendingCount} workout${pendingCount === 1 ? '' : 's'} still waiting`
+          : `${pendingCount}\uAC1C\uC758 \uC6B4\uB3D9 \uAE30\uB85D\uC774 \uC544\uC9C1 \uB300\uAE30 \uC911\uC774\uC5D0\uC694`,
+        actionLabel: isAuthenticated
+          ? (isEnglish ? 'Retry sync' : '\uB2E4\uC2DC \uB3D9\uAE30\uD654')
+          : (isEnglish ? 'Log in to sync' : '\uB85C\uADF8\uC778\uD558\uACE0 \uB3D9\uAE30\uD654'),
+        actionKind: isAuthenticated ? 'retry' : 'auth',
+      }
+    }
+
+    return null
+  })()
   const visibleErrorMessage = isTransientInitDelayMessage(errorMessage) ? '' : errorMessage
   const errorState = (() => {
     if (!visibleErrorMessage) return null
@@ -1667,6 +2013,30 @@ export default function App() {
 
   return (
     <main className="app-shell">
+      {guestSyncNotice && (
+        <section
+          className={`app-sync-card ${guestSyncNotice.tone}`}
+          role="status"
+          aria-live="polite"
+        >
+          <span className="app-sync-kicker">{guestSyncNotice.kicker}</span>
+          <strong>{guestSyncNotice.title}</strong>
+          <p>{guestSyncNotice.body}</p>
+          <span className="app-sync-meta">{guestSyncNotice.meta}</span>
+          {guestSyncNotice.actionKind !== 'none' && (
+            <div className="state-action-row app-sync-actions">
+              <button
+                type="button"
+                className={guestSyncNotice.actionKind === 'auth' ? 'primary-btn' : 'secondary-btn'}
+                onClick={guestSyncNotice.actionKind === 'auth' ? () => openAuthPrompt('guest_sync') : handleRetryGuestSync}
+                disabled={guestSyncState.phase === 'syncing' || loadingAuth}
+              >
+                {guestSyncNotice.actionLabel}
+              </button>
+            </div>
+          )}
+        </section>
+      )}
       {errorState && (
         <section className="error-box app-error-card" role="status" aria-live="polite">
           <span className="app-error-kicker">{errorState.label}</span>

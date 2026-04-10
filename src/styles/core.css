@@ -365,6 +365,70 @@ button:active {
   line-height: 1.52;
 }
 
+.app-sync-card {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 14px 15px;
+  border-radius: 18px;
+  border: 1px solid rgba(59, 130, 246, 0.16);
+  background:
+    radial-gradient(circle at top right, rgba(147, 197, 253, 0.22), transparent 34%),
+    linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%);
+  box-shadow: 0 14px 32px rgba(59, 130, 246, 0.1);
+}
+
+.app-sync-card.syncing {
+  border-color: rgba(59, 130, 246, 0.2);
+  background:
+    radial-gradient(circle at top right, rgba(125, 211, 252, 0.22), transparent 32%),
+    linear-gradient(180deg, #f4fbff 0%, #eaf5ff 100%);
+}
+
+.app-sync-card.failed {
+  border-color: rgba(245, 158, 11, 0.22);
+  background:
+    radial-gradient(circle at top right, rgba(253, 224, 71, 0.22), transparent 34%),
+    linear-gradient(180deg, #fffaf0 0%, #fff4df 100%);
+  box-shadow: 0 14px 32px rgba(245, 158, 11, 0.1);
+}
+
+.app-sync-kicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #1d4ed8;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.app-sync-card.failed .app-sync-kicker {
+  color: #b45309;
+}
+
+.app-sync-card strong {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.app-sync-card p,
+.app-sync-meta {
+  margin: 0;
+  color: rgba(30, 41, 59, 0.82);
+  line-height: 1.52;
+}
+
+.app-sync-meta {
+  font-size: 0.85rem;
+}
+
 .state-action-row {
   display: flex;
   flex-wrap: wrap;

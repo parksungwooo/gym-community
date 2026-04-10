@@ -524,6 +524,12 @@ async function run() {
     await waitForCondition(session, "Boolean(document.querySelector('.app-toast'))", 'guest save toast')
     await delay(320)
     await assertElementInViewport(session, '.app-toast', 'guest save toast')
+    await waitForCondition(session, "Boolean(document.querySelector('.app-sync-card.pending'))", 'guest sync notice')
+    await waitForCondition(
+      session,
+      "Boolean(document.querySelector('.app-sync-card .primary-btn, .app-sync-card .secondary-btn'))",
+      'guest sync call to action',
+    )
 
     const guestRecords = await readGuestWorkoutRecords(session)
     assert.equal(guestRecords.length, 1, 'Guest workout should be stored locally')
@@ -543,6 +549,7 @@ async function run() {
       "Boolean(document.querySelector('[data-testid=\"bottom-tab-nav\"]')) && Boolean(document.querySelector('[data-testid=\"home-log-workout\"]'))",
       'home screen after reload',
     )
+    await waitForCondition(session, "Boolean(document.querySelector('.app-sync-card.pending'))", 'guest sync notice after reload')
     const persistedGuestRecords = await readGuestWorkoutRecords(session)
     assert.equal(persistedGuestRecords.length, 1, 'Guest workout should persist after reload')
 

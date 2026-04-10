@@ -2288,6 +2288,43 @@
   color: var(--text-sub);
 }
 
+:root[data-theme='dark'] .app-sync-card {
+  border-color: rgba(90, 169, 255, 0.18);
+  background:
+    radial-gradient(circle at top right, rgba(90, 169, 255, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(13, 24, 40, 0.96) 0%, rgba(10, 19, 32, 0.98) 100%);
+  box-shadow: var(--shadow-soft);
+}
+
+:root[data-theme='dark'] .app-sync-card.syncing {
+  border-color: rgba(125, 211, 252, 0.22);
+}
+
+:root[data-theme='dark'] .app-sync-card.failed {
+  border-color: rgba(251, 191, 36, 0.24);
+  background:
+    radial-gradient(circle at top right, rgba(251, 191, 36, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(33, 24, 10, 0.96) 0%, rgba(24, 18, 9, 0.98) 100%);
+}
+
+:root[data-theme='dark'] .app-sync-kicker {
+  background: rgba(255, 255, 255, 0.08);
+  color: #bfdbfe;
+}
+
+:root[data-theme='dark'] .app-sync-card.failed .app-sync-kicker {
+  color: #fde68a;
+}
+
+:root[data-theme='dark'] .app-sync-card strong {
+  color: var(--text-main);
+}
+
+:root[data-theme='dark'] .app-sync-card p,
+:root[data-theme='dark'] .app-sync-meta {
+  color: var(--text-sub);
+}
+
 :root[data-theme='dark'] .profile-menu-button,
 :root[data-theme='dark'] .profile-menu-note-card,
 :root[data-theme='dark'] .profile-next-step-card,
