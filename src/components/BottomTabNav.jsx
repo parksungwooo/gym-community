@@ -47,6 +47,8 @@ export default function BottomTabNav({ tabs, currentView, onChangeView }) {
           className={`tab-btn ${currentView === tab.key ? 'active' : ''}`}
           onClick={() => onChangeView(tab.key)}
           data-testid={`tab-${tab.key}`}
+          aria-label={tab.label}
+          aria-current={currentView === tab.key ? 'page' : undefined}
         >
           <span className="tab-icon"><TabIcon type={tab.key} /></span>
           <span className="tab-text">{tab.label}</span>

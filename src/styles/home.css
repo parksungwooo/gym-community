@@ -600,11 +600,11 @@
 @keyframes slide-up-sheet {
   from {
     opacity: 0;
-    transform: translateY(28px);
+    transform: scale(0.985);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
   }
 }
 
@@ -1617,6 +1617,7 @@
     inset 0 0 0 2px rgba(125, 211, 252, 0.18),
     inset 0 0 34px rgba(20, 200, 255, 0.24),
     0 0 34px rgba(20, 200, 255, 0.18);
+  animation: home-goal-ring-in 0.68s cubic-bezier(0.2, 0.82, 0.2, 1) both;
 }
 
 .home-daily-goal-core {
@@ -1706,6 +1707,7 @@
   transform-origin: bottom center;
   transform: translateX(-50%) rotate(var(--level-needle));
   box-shadow: 0 0 14px rgba(255, 255, 255, 0.5);
+  animation: home-level-needle-in 0.82s cubic-bezier(0.2, 0.82, 0.2, 1) both;
 }
 
 .home-level-pivot {
@@ -1785,6 +1787,12 @@
   cursor: pointer;
 }
 
+.home-quick-workout-card:hover,
+.home-quick-workout-card:focus-visible {
+  border-color: rgba(0, 212, 170, 0.44);
+  box-shadow: 0 18px 34px rgba(0, 212, 170, 0.16);
+}
+
 .home-quick-workout-card.lime {
   border-color: rgba(190, 242, 100, 0.24);
   background:
@@ -1827,6 +1835,23 @@
   color: #7dd3fc;
   font-weight: 1000;
   box-shadow: 0 0 20px rgba(56, 189, 248, 0.16);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+}
+
+.home-quick-workout-card:hover .home-quick-workout-icon,
+.home-quick-workout-card:focus-visible .home-quick-workout-icon {
+  transform: translateY(-2px) scale(1.07);
+  box-shadow: 0 0 24px rgba(0, 212, 170, 0.24);
+}
+
+.home-quick-workout-icon svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
 }
 
 .home-quick-workout-card.lime .home-quick-workout-icon {
@@ -1836,6 +1861,30 @@
 
 .home-quick-workout-duration {
   color: rgba(226, 232, 240, 0.78);
+}
+
+@keyframes home-goal-ring-in {
+  from {
+    opacity: 0;
+    filter: saturate(0.65);
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    filter: saturate(1);
+    transform: scale(1);
+  }
+}
+
+@keyframes home-level-needle-in {
+  from {
+    transform: translateX(-50%) rotate(-62deg);
+  }
+
+  to {
+    transform: translateX(-50%) rotate(var(--level-needle));
+  }
 }
 
 @media (max-width: 520px) {

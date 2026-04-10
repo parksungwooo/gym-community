@@ -26,6 +26,62 @@ function clampPercent(value) {
   return Math.max(0, Math.min(parsed, 100))
 }
 
+function QuickWorkoutIcon({ type }) {
+  const commonProps = {
+    viewBox: '0 0 24 24',
+    'aria-hidden': 'true',
+    focusable: 'false',
+  }
+
+  switch (type) {
+    case 'hiit':
+      return (
+        <svg {...commonProps}>
+          <path d="m13 2-7 11h5l-1 9 8-13h-5l1-7Z" />
+        </svg>
+      )
+    case 'yoga':
+      return (
+        <svg {...commonProps}>
+          <path d="M12 6.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+          <path d="M12 8v5" />
+          <path d="m7 11 5 2 5-2" />
+          <path d="M5 20c2.6-3 4.7-4.5 7-4.5S16.4 17 19 20" />
+        </svg>
+      )
+    case 'core':
+      return (
+        <svg {...commonProps}>
+          <path d="M8 5h8" />
+          <path d="M7 19h10" />
+          <path d="M9 5c-.8 2.2-1.2 4.5-1.2 7s.4 4.8 1.2 7" />
+          <path d="M15 5c.8 2.2 1.2 4.5 1.2 7s-.4 4.8-1.2 7" />
+          <path d="M10 10h4" />
+          <path d="M10 14h4" />
+        </svg>
+      )
+    case 'strength':
+      return (
+        <svg {...commonProps}>
+          <path d="M4 10v4" />
+          <path d="M8 8v8" />
+          <path d="M16 8v8" />
+          <path d="M20 10v4" />
+          <path d="M8 12h8" />
+        </svg>
+      )
+    default:
+      return (
+        <svg {...commonProps}>
+          <path d="M12 3v18" />
+          <path d="M5 12h14" />
+          <path d="m8 7 4-4 4 4" />
+          <path d="m16 17-4 4-4-4" />
+        </svg>
+      )
+  }
+}
+
 function QuickWorkoutCard({ item, isEnglish, onStart }) {
   const title = item.name || (isEnglish ? item.en : item.ko)
   const duration = item.duration_minutes ?? item.durationMinutes ?? 15
@@ -35,9 +91,16 @@ function QuickWorkoutCard({ item, isEnglish, onStart }) {
       type="button"
       className={`home-quick-workout-card ${item.tone ?? 'blue'}`}
       onClick={() => onStart?.(item)}
+      aria-label={
+        isEnglish
+          ? `Start ${title} workout for ${duration} minutes`
+          : `${title} ${duration}분 운동 시작`
+      }
     >
       <span className="home-quick-workout-title">{title}</span>
-      <span className="home-quick-workout-icon">{item.icon ?? title.slice(0, 2).toUpperCase()}</span>
+      <span className="home-quick-workout-icon">
+        <QuickWorkoutIcon type={item.iconType ?? item.key} />
+      </span>
       <span className="home-quick-workout-duration">
         {isEnglish ? `${duration} min` : `${duration}분`}
       </span>

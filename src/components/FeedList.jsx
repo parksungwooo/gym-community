@@ -255,8 +255,16 @@ function FeedCard({
             type="button"
             className={`like-btn ${post.likedByMe ? 'liked' : ''}`}
             onClick={() => onToggleLike(post.id, post.likedByMe)}
+            aria-pressed={post.likedByMe}
+            aria-label={
+              isEnglish
+                ? `${post.likedByMe ? 'Unlike' : 'Like'} post. ${post.likeCount} likes`
+                : `게시물 ${post.likedByMe ? '좋아요 취소' : '좋아요'}. 좋아요 ${post.likeCount}개`
+            }
           >
-            <span className="like-btn-mark" />
+            <svg className="like-btn-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 20.2s-7.2-4.3-9.1-8.5C1.4 8.4 3.4 5 6.8 5c1.9 0 3.4 1 4.2 2.4C11.8 6 13.3 5 15.2 5c3.4 0 5.4 3.4 3.9 6.7-1.9 4.2-7.1 8.5-7.1 8.5Z" />
+            </svg>
             {isEnglish ? `Likes ${post.likeCount}` : `좋아요 ${post.likeCount}`}
           </button>
           <button
@@ -266,6 +274,7 @@ function FeedCard({
               setCommentOpen((prev) => !prev)
               setMenuOpen(false)
             }}
+            aria-expanded={commentOpen}
           >
             {commentOpen
               ? (isEnglish ? `Hide ${post.comments.length}` : `접기 ${post.comments.length}`)
@@ -365,6 +374,12 @@ export default function FeedList({
     if (filter === 'same_level') return Boolean(currentLevel) && post.authorLevel === currentLevel
     return post.type === filter
   })
+  const emptyTitle = filter === 'following'
+    ? (isEnglish ? 'No following posts yet.' : '팔로우한 사람의 글이 아직 없어요.')
+    : (isEnglish ? 'Start the community with your first workout.' : '첫 운동을 기록하고 커뮤니티를 시작해보세요!')
+  const emptyBody = filter === 'following'
+    ? (isEnglish ? 'Follow more people to build your crew feed.' : '관심 있는 운동 메이트를 팔로우하면 피드가 채워져요.')
+    : (isEnglish ? 'Save a workout, add a photo, or cheer on a teammate from here.' : '운동을 저장하거나 사진을 올리면 이곳에서 응원과 댓글이 시작돼요.')
 
   return (
     <section className="card community-feed-surface compact community-feed-redesign">
@@ -396,6 +411,7 @@ export default function FeedList({
             type="button"
             className={`feed-filter-chip ${filter === item.key ? 'active' : ''}`}
             onClick={() => setFilter(item.key)}
+            aria-pressed={filter === item.key}
           >
             {item.label}
           </button>
@@ -425,12 +441,14 @@ export default function FeedList({
       )}
 
       {!loading && !visiblePosts.length && (
-        <div className="empty-state-card cool">
+        <div className="empty-state-card cool feed-empty-illustrated">
           <span className="empty-state-badge">
             {filter === 'following'
               ? (isEnglish ? 'Following' : '팔로잉')
               : (isEnglish ? 'Feed' : '피드')}
           </span>
+          <strong className="feed-empty-title">{emptyTitle}</strong>
+          <p className="feed-empty-body">{emptyBody}</p>
           <strong>
             {filter === 'following'
               ? (isEnglish ? 'No following posts.' : '팔로우 글이 없어요.')

@@ -29,11 +29,19 @@
   --surface-blue: linear-gradient(180deg, rgba(239, 246, 255, 0.96) 0%, rgba(219, 234, 254, 0.94) 100%);
   --surface-warm: linear-gradient(180deg, rgba(255, 247, 237, 0.96) 0%, rgba(255, 236, 213, 0.94) 100%);
   --surface-neutral: linear-gradient(180deg, rgba(248, 250, 252, 0.96) 0%, rgba(241, 245, 249, 0.94) 100%);
-  --accent-action: #ff8a3d;
-  --accent-record: #5aa9ff;
-  --accent-growth: #34d399;
+  --brand-primary: #00d4aa;
+  --brand-primary-strong: #009879;
+  --brand-primary-deep: #055c4b;
+  --brand-primary-soft: rgba(0, 212, 170, 0.14);
+  --brand-primary-border: rgba(0, 212, 170, 0.24);
+  --brand-primary-glow: rgba(0, 212, 170, 0.28);
+  --brand-coral: #ff5e5e;
+  --brand-ink: #07111f;
+  --accent-action: var(--brand-primary);
+  --accent-record: var(--brand-primary);
+  --accent-growth: var(--brand-primary);
   --accent-xp: #fbbf24;
-  --accent-danger: #fb7185;
+  --accent-danger: var(--brand-coral);
 }
 
 * {
@@ -50,6 +58,9 @@ body {
   min-height: 100vh;
   background: var(--bg-app);
   color: var(--text-main);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -67,6 +78,15 @@ button {
 
 button:active {
   transform: translateY(1px) scale(0.985);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(0, 212, 170, 0.34);
+  outline-offset: 3px;
 }
 
 .app-shell {
@@ -311,8 +331,10 @@ button:active {
 
 .card h2 {
   margin: 0;
-  font-size: 1.12rem;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.14rem, 2vw, 1.32rem);
+  font-weight: 950;
+  line-height: 1.18;
+  letter-spacing: -0.045em;
 }
 
 .subtext {

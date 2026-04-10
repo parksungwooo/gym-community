@@ -278,6 +278,44 @@
   line-height: 1.5;
 }
 
+.feed-empty-illustrated {
+  position: relative;
+  overflow: hidden;
+  padding: 72px 16px 17px;
+}
+
+.feed-empty-illustrated::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(0, 212, 170, 0.92), rgba(56, 189, 248, 0.72)),
+    var(--brand-primary);
+  box-shadow: 0 14px 28px rgba(0, 212, 170, 0.22);
+}
+
+.feed-empty-illustrated::after {
+  content: '';
+  position: absolute;
+  top: 29px;
+  left: 31px;
+  width: 13px;
+  height: 18px;
+  border-right: 3px solid #ffffff;
+  border-bottom: 3px solid #ffffff;
+  transform: rotate(36deg);
+  opacity: 0.92;
+}
+
+.feed-empty-illustrated > strong:not(.feed-empty-title),
+.feed-empty-illustrated > p:not(.feed-empty-body) {
+  display: none;
+}
+
 .skeleton-screen-card,
 .skeleton-stack,
 .skeleton-copy {
@@ -1562,22 +1600,41 @@
 }
 
 .like-btn-mark {
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
-  background: #94a3b8;
-  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.12);
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+  transition: fill 0.16s ease, transform 0.16s ease, filter 0.16s ease;
 }
 
 .like-btn.liked {
   border-color: rgba(244, 63, 94, 0.2);
   background: linear-gradient(180deg, #ffe4e8 0%, #fff1f2 100%);
+  color: #be123c;
   box-shadow: 0 12px 22px rgba(244, 63, 94, 0.14);
 }
 
 .like-btn.liked .like-btn-mark {
-  background: #f43f5e;
-  box-shadow: 0 0 0 5px rgba(244, 63, 94, 0.14), 0 0 18px rgba(244, 63, 94, 0.3);
+  fill: currentColor;
+  filter: drop-shadow(0 0 10px rgba(244, 63, 94, 0.38));
+  animation: like-heart-pop 0.28s cubic-bezier(0.2, 0.9, 0.25, 1.45);
+}
+
+@keyframes like-heart-pop {
+  0% {
+    transform: scale(0.72) rotate(-8deg);
+  }
+
+  70% {
+    transform: scale(1.2) rotate(5deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 @media (max-width: 390px) {

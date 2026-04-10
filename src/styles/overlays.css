@@ -2869,3 +2869,119 @@
 :root[data-theme='dark'] .weight-trend-bar {
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* Brand polish pass: unify primary actions, accents, and interaction feedback. */
+.primary-btn {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #7cffd5 100%);
+  color: #041411;
+  box-shadow: 0 16px 30px rgba(0, 212, 170, 0.24);
+}
+
+.primary-btn:hover {
+  box-shadow: 0 20px 36px rgba(0, 212, 170, 0.3);
+}
+
+.secondary-btn {
+  border: 1px solid rgba(0, 212, 170, 0.18);
+  background: linear-gradient(180deg, rgba(0, 212, 170, 0.14) 0%, rgba(0, 212, 170, 0.08) 100%);
+  color: var(--brand-primary-strong);
+}
+
+.ghost-btn,
+.ghost-chip,
+.mini-btn,
+.feed-filter-chip,
+.comment-toggle-btn,
+.like-btn {
+  border-color: rgba(0, 212, 170, 0.14);
+}
+
+.feed-filter-chip.active,
+.quick-choice-chip.active,
+.goal-chip.active,
+.avatar-btn.active,
+.option-btn.selected,
+.community-tab-btn.active,
+.segmented-language-switcher .lang-btn.active {
+  background: linear-gradient(180deg, rgba(0, 212, 170, 0.2), rgba(0, 212, 170, 0.1));
+  color: var(--brand-primary-deep);
+  border-color: rgba(0, 212, 170, 0.3);
+  box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+}
+
+.theme-toggle-icon,
+.notification-trigger-icon,
+.tab-icon {
+  background: linear-gradient(135deg, rgba(0, 212, 170, 0.18), rgba(56, 189, 248, 0.16));
+  color: var(--brand-primary-strong);
+}
+
+.notification-trigger.active {
+  border-color: rgba(0, 212, 170, 0.3);
+  box-shadow: 0 12px 28px rgba(0, 212, 170, 0.16);
+}
+
+.tab-btn.active {
+  background: rgba(0, 212, 170, 0.12);
+  color: var(--brand-primary-deep);
+}
+
+.tab-btn.active .tab-icon {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #38bdf8 100%);
+}
+
+.level-pill,
+.feed-level-chip,
+.community-mini-pill.accent,
+.home-dashboard-eyebrow,
+.app-sync-kicker {
+  color: var(--brand-primary-deep);
+}
+
+.app-section-kicker,
+.home-dashboard-eyebrow,
+.feed-type-chip,
+.empty-state-badge {
+  font-weight: 950;
+  letter-spacing: 0.075em;
+}
+
+:root[data-theme='dark'] .primary-btn {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, #6fffe2 100%);
+  color: #031412;
+  box-shadow: 0 16px 30px rgba(0, 212, 170, 0.22);
+}
+
+:root[data-theme='dark'] .secondary-btn {
+  background: linear-gradient(180deg, rgba(0, 212, 170, 0.2), rgba(10, 28, 43, 0.94));
+  color: #b8fff0;
+  border-color: rgba(0, 212, 170, 0.22);
+}
+
+:root[data-theme='dark'] .tab-btn.active {
+  background: rgba(0, 212, 170, 0.16);
+  color: #c7fff4;
+}
+
+:root[data-theme='dark'] .tab-btn.active .tab-icon {
+  background: linear-gradient(135deg, rgba(0, 212, 170, 0.94), rgba(56, 189, 248, 0.82));
+}
+
+:root[data-theme='dark'] .feed-filter-chip.active,
+:root[data-theme='dark'] .quick-choice-chip.active,
+:root[data-theme='dark'] .goal-chip.active,
+:root[data-theme='dark'] .avatar-btn.active,
+:root[data-theme='dark'] .option-btn.selected,
+:root[data-theme='dark'] .community-tab-btn.active,
+:root[data-theme='dark'] .segmented-language-switcher .lang-btn.active {
+  background: linear-gradient(180deg, rgba(0, 212, 170, 0.24), rgba(23, 37, 61, 0.98));
+  color: #c7fff4;
+  border-color: rgba(0, 212, 170, 0.28);
+  box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+}
+
+:root[data-theme='dark'] .theme-toggle-icon,
+:root[data-theme='dark'] .notification-trigger-icon {
+  background: linear-gradient(135deg, rgba(0, 212, 170, 0.24), rgba(56, 189, 248, 0.16));
+  color: #c7fff4;
+}
