@@ -14,7 +14,7 @@ function FollowButton({ isFollowing, disabled, onClick, isEnglish }) {
   return (
     <button
       type="button"
-      className={`follow-chip ${isFollowing ? 'active' : ''}`}
+      className={`follow-chip rounded-full px-4 py-2 text-sm font-black transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${isFollowing ? 'active bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}
       onClick={onClick}
       disabled={disabled}
     >
@@ -39,7 +39,7 @@ export default function RankingBoard({
   const visibleRows = useMemo(() => (expanded ? rows : rows.slice(0, 3)), [expanded, rows])
 
   return (
-    <section className="card community-block-card ranking-surface compact community-ranking-redesign">
+    <section className="card community-block-card ranking-surface compact community-ranking-redesign rounded-3xl">
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{t('랭킹', 'Ranking')}</span>
@@ -93,7 +93,7 @@ export default function RankingBoard({
           return (
             <article
               key={item.user_id}
-              className={`ranking-card compact community-ranking-card ${getRankTone(index)} ${
+              className={`ranking-card compact community-ranking-card rounded-3xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 ${getRankTone(index)} ${
                 selectedUserId === item.user_id ? 'active' : ''
               }`}
             >

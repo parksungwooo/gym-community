@@ -158,7 +158,9 @@ function FeedCard({
   }
 
   return (
-    <article className={`feed-card compact feed-story-card feed-card-${post.type}`}>
+    <article
+      className={`feed-card compact feed-story-card feed-card-${post.type} rounded-3xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10`}
+    >
       <div className="feed-story-header">
         <button
           type="button"
@@ -253,7 +255,7 @@ function FeedCard({
         <div className="feed-actions compact">
           <button
             type="button"
-            className={`like-btn ${post.likedByMe ? 'liked' : ''}`}
+            className={`like-btn inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-extrabold transition-all duration-200 active:scale-125 ${post.likedByMe ? 'liked text-rose-600 animate-heartBeat' : 'text-slate-500 hover:text-rose-500'}`}
             onClick={() => onToggleLike(post.id, post.likedByMe)}
             aria-pressed={post.likedByMe}
             aria-label={
@@ -262,7 +264,7 @@ function FeedCard({
                 : `게시물 ${post.likedByMe ? '좋아요 취소' : '좋아요'}. 좋아요 ${post.likeCount}개`
             }
           >
-            <svg className="like-btn-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <svg className="like-btn-mark h-4 w-4 transition-colors" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M12 20.2s-7.2-4.3-9.1-8.5C1.4 8.4 3.4 5 6.8 5c1.9 0 3.4 1 4.2 2.4C11.8 6 13.3 5 15.2 5c3.4 0 5.4 3.4 3.9 6.7-1.9 4.2-7.1 8.5-7.1 8.5Z" />
             </svg>
             {isEnglish ? `Likes ${post.likeCount}` : `좋아요 ${post.likeCount}`}
@@ -409,7 +411,7 @@ export default function FeedList({
           <button
             key={item.key}
             type="button"
-            className={`feed-filter-chip ${filter === item.key ? 'active' : ''}`}
+            className={`feed-filter-chip rounded-full transition-all duration-200 hover:-translate-y-0.5 ${filter === item.key ? 'active shadow-md shadow-emerald-500/10' : ''}`}
             onClick={() => setFilter(item.key)}
             aria-pressed={filter === item.key}
           >

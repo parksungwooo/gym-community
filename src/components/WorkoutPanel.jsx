@@ -334,7 +334,7 @@ export default function WorkoutPanel({
   }
 
   return (
-    <section className="card workout-capture-card compact rounded-[2rem] border border-white/70 bg-white/95 shadow-2xl shadow-slate-950/10 backdrop-blur-xl">
+    <section className="card workout-capture-card compact rounded-[2rem] border border-white/70 bg-white/95 shadow-2xl shadow-slate-950/10 backdrop-blur-xl animate-pop">
       <div className="sheet-handle" />
 
       <div className="workout-capture-header compact">
@@ -404,7 +404,7 @@ export default function WorkoutPanel({
               <button
                 key={option}
                 type="button"
-                className={`quick-choice-chip compact touch-manipulation rounded-2xl transition-all duration-200 ${workoutType === option ? 'active scale-[1.02] border-emerald-400 bg-emerald-50 text-emerald-800 shadow-md shadow-emerald-500/15' : 'hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50/50'}`}
+                className={`quick-choice-chip compact touch-manipulation rounded-2xl transition-all duration-200 ${workoutType === option ? 'active scale-[1.02] border-emerald-400 bg-emerald-50 text-emerald-800 shadow-md shadow-emerald-500/15 animate-pop' : 'hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50/50'}`}
                 onClick={() => handleQuickWorkoutTypePick(option)}
                 disabled={loading}
               >
@@ -422,7 +422,7 @@ export default function WorkoutPanel({
               <button
                 key={value}
                 type="button"
-                className={`quick-choice-chip compact touch-manipulation rounded-2xl transition-all duration-200 ${Number(durationMinutes) === value ? 'active scale-[1.02] border-emerald-400 bg-emerald-50 text-emerald-800 shadow-md shadow-emerald-500/15' : 'hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50/50'}`}
+                className={`quick-choice-chip compact touch-manipulation rounded-2xl transition-all duration-200 ${Number(durationMinutes) === value ? 'active scale-[1.02] border-emerald-400 bg-emerald-50 text-emerald-800 shadow-md shadow-emerald-500/15 animate-pop' : 'hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50/50'}`}
                 onClick={() => handleQuickDurationPick(value)}
                 disabled={loading}
               >
