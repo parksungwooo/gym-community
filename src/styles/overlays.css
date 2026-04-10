@@ -1433,18 +1433,22 @@
 
 @media (max-width: 720px) {
   .auth-modal-backdrop.home-workout-sheet-overlay {
-    padding: 0;
+    padding: max(12px, env(safe-area-inset-top, 0px)) 0 0;
   }
 
-  .auth-modal-backdrop.home-workout-sheet-overlay .home-workout-sheet-panel,
+  .auth-modal-backdrop.home-workout-sheet-overlay .home-workout-sheet-panel {
+    height: min(86dvh, 760px);
+    max-height: calc(100dvh - 12px);
+  }
+
   .home-workout-panel-shell {
-    height: 100dvh;
-    max-height: 100dvh;
+    height: 100%;
+    max-height: 100%;
   }
 
   .auth-modal-backdrop.home-workout-sheet-overlay .home-workout-sheet-panel,
   .home-workout-panel-shell .workout-capture-card {
-    border-radius: 0;
+    border-radius: 26px 26px 0 0;
   }
 
   .home-growth-side-grid,

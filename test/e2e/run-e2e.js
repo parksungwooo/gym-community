@@ -263,6 +263,30 @@ async function assertElementInViewport(session, selector, label) {
   assert.ok(metrics.bottom <= metrics.viewportHeight, `${label} is clipped on the bottom (${metrics.bottom} > ${metrics.viewportHeight})`)
 }
 
+async function assertBottomSheetPresentation(session, selector, label) {
+  const metrics = await session.evaluate(`(() => {
+    const node = document.querySelector(${JSON.stringify(selector)})
+    if (!node) return null
+    const rect = node.getBoundingClientRect()
+    const styles = getComputedStyle(node)
+    return {
+      top: rect.top,
+      bottom: rect.bottom,
+      height: rect.height,
+      viewportHeight: window.innerHeight,
+      position: styles.position,
+      borderTopLeftRadius: Number.parseFloat(styles.borderTopLeftRadius) || 0,
+    }
+  })()`)
+
+  assert.ok(metrics, `Could not find ${label}`)
+  assert.ok(metrics.top >= 8, `${label} should leave space above the sheet (${metrics.top})`)
+  assert.ok(metrics.height < metrics.viewportHeight, `${label} should not consume the full viewport (${metrics.height} >= ${metrics.viewportHeight})`)
+  assert.notEqual(metrics.position, 'fixed', `${label} should not be locked as a fullscreen fixed panel`)
+  assert.ok(metrics.borderTopLeftRadius >= 20, `${label} should keep a rounded top edge (${metrics.borderTopLeftRadius})`)
+  assert.ok(metrics.bottom <= metrics.viewportHeight, `${label} should stay within the viewport (${metrics.bottom} > ${metrics.viewportHeight})`)
+}
+
 async function run() {
   assert.equal(fs.existsSync(path.join(DIST_DIR, 'index.html')), true, 'Build output is missing. Run npm run build first.')
 
@@ -311,6 +335,8 @@ async function run() {
 
     await click(session, '[data-testid="home-log-workout"]')
     await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"workout-sheet\"]'))", 'workout sheet')
+    await delay(280)
+    await assertBottomSheetPresentation(session, '[data-testid="workout-sheet"]', 'workout sheet')
     await click(session, '.capture-submit-btn')
     await waitForCondition(session, "!document.querySelector('[data-testid=\"workout-sheet\"]')", 'saved guest workout sheet')
     await waitForCondition(
