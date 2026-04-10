@@ -24,6 +24,19 @@ function DumbbellIcon() {
   )
 }
 
+function TrophyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-12 w-12 fill-none stroke-current stroke-2">
+      <path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8 6H5a3 3 0 0 0 3 3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16 6h3a3 3 0 0 1-3 3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 12v5" strokeLinecap="round" />
+      <path d="M9 20h6" strokeLinecap="round" />
+      <path d="M10 17h4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 export default function ResultView({ score, level, onStartWorkout }) {
   const { language, isEnglish } = useI18n()
   const levelValue = Number(String(level).match(/Lv(\d)/)?.[1] ?? 1)
@@ -33,13 +46,13 @@ export default function ResultView({ score, level, onStartWorkout }) {
   const handleShare = async () => {
     const shareText = isEnglish
       ? `My result: ${score} points, ${displayLevel}.`
-      : `내 결과: ${score}점, ${displayLevel}.`
+      : `\uB0B4 \uACB0\uACFC: ${score}\uC810, ${displayLevel}.`
 
     try {
       await navigator.clipboard.writeText(`${shareText} ${window.location.href}`)
-      alert(isEnglish ? 'Link copied.' : '링크 복사됨')
+      alert(isEnglish ? 'Link copied.' : '\uB9C1\uD06C \uBCF5\uC0AC\uB428')
     } catch {
-      alert(isEnglish ? 'Copy failed.' : '복사 실패.')
+      alert(isEnglish ? 'Copy failed.' : '\uBCF5\uC0AC \uC2E4\uD328.')
     }
   }
 
@@ -49,8 +62,8 @@ export default function ResultView({ score, level, onStartWorkout }) {
         <div className="relative grid h-32 w-32 place-items-center">
           <span className="absolute inset-0 rounded-full bg-emerald-400/20 animate-burst" aria-hidden="true" />
           <span className="absolute inset-3 rounded-full bg-cyan-400/20 animate-burst [animation-delay:90ms]" aria-hidden="true" />
-          <span className="relative grid h-24 w-24 place-items-center rounded-[1.75rem] bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 text-5xl shadow-2xl shadow-emerald-500/25 motion-safe:animate-levelUp">
-            <span aria-hidden="true">🏆</span>
+          <span className="relative grid h-24 w-24 place-items-center rounded-[1.75rem] bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 text-white shadow-2xl shadow-emerald-500/25 motion-safe:animate-levelUp">
+            <TrophyIcon />
           </span>
           <span className="absolute -right-2 top-1 rounded-full bg-yellow-300 px-3 py-1 text-xs font-black text-slate-950 shadow-lg shadow-yellow-400/25 rotate-12 motion-safe:animate-float">
             LV.{levelValue}
@@ -59,13 +72,13 @@ export default function ResultView({ score, level, onStartWorkout }) {
 
         <div className="grid gap-2">
           <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-emerald-700">
-            {isEnglish ? 'Fitness Result' : '체력 결과'}
+            {isEnglish ? 'Fitness Result' : '\uCCB4\uB825 \uACB0\uACFC'}
           </span>
           <h2 className="m-0 text-3xl font-black tracking-[-0.05em] text-slate-950 sm:text-4xl">
             {displayLevel}
           </h2>
           <p className="m-0 text-5xl font-black tracking-[-0.06em] text-emerald-600 sm:text-6xl">
-            {isEnglish ? `${score} pts` : `${score}점`}
+            {isEnglish ? `${score} pts` : `${score}\uC810`}
           </p>
         </div>
       </div>
@@ -75,7 +88,9 @@ export default function ResultView({ score, level, onStartWorkout }) {
           {message}
         </p>
         <p className="mt-3 mb-0 text-sm font-semibold leading-6 text-slate-500">
-          {isEnglish ? 'Now turn this level into today’s workout log.' : '이제 이 레벨을 오늘의 운동 기록으로 이어가보세요.'}
+          {isEnglish
+            ? "Now turn this level into today's workout log."
+            : '\uC774\uC81C \uC774 \uB808\uBCA8\uC744 \uC624\uB298\uC758 \uC6B4\uB3D9 \uAE30\uB85D\uC73C\uB85C \uC774\uC5B4\uAC00\uBCF4\uC138\uC694.'}
         </p>
       </div>
 
@@ -86,7 +101,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
           onClick={handleShare}
         >
           <ShareIcon />
-          {isEnglish ? 'Share' : '공유'}
+          {isEnglish ? 'Share' : '\uACF5\uC720'}
         </button>
         <button
           type="button"
@@ -94,7 +109,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
           onClick={onStartWorkout}
         >
           <DumbbellIcon />
-          {isEnglish ? 'Log workout' : '운동 기록'}
+          {isEnglish ? 'Log workout' : '\uC6B4\uB3D9 \uAE30\uB85D'}
         </button>
       </div>
     </section>
