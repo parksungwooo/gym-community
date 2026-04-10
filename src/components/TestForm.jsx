@@ -53,7 +53,7 @@ function OptionButton({ isSelected, testId, text, onClick, optionIndex }) {
         'min-h-[72px] touch-manipulation transition-all duration-200',
         'focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-emerald-300',
         isSelected
-          ? 'scale-[1.01] border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-500/15 motion-safe:animate-[option-pop_180ms_ease-out]'
+          ? 'scale-[1.01] border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-500/15 motion-safe:animate-option-pop'
           : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50/40 hover:shadow-md',
       ].join(' ')}
     >
@@ -161,7 +161,7 @@ export default function TestForm({ onSubmit, loading }) {
             key={currentQuestion.id}
             data-testid={`test-question-${currentQuestion.id}`}
             aria-labelledby={`test-question-title-${currentQuestion.id}`}
-            className="rounded-[1.75rem] border border-slate-200/80 bg-gradient-to-b from-white to-slate-50 p-5 shadow-inner shadow-white motion-safe:animate-[test-card-in_260ms_ease-out] sm:p-7"
+            className="rounded-3xl border border-slate-200/80 bg-gradient-to-b from-white to-slate-50 p-5 shadow-inner shadow-white motion-safe:animate-test-card-in sm:p-7"
           >
             <div className="mb-7 grid gap-3">
               <span className="w-fit rounded-full bg-slate-100 px-3 py-1 text-sm font-black text-slate-500">

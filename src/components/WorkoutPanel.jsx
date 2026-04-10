@@ -334,7 +334,7 @@ export default function WorkoutPanel({
   }
 
   return (
-    <section className="card workout-capture-card compact">
+    <section className="card workout-capture-card compact rounded-[2rem] border border-white/70 bg-white/95 shadow-2xl shadow-slate-950/10 backdrop-blur-xl">
       <div className="sheet-handle" />
 
       <div className="workout-capture-header compact">
@@ -364,7 +364,7 @@ export default function WorkoutPanel({
         <section className="sheet-tool-row compact">
           <button
             type="button"
-            className={`sheet-tool-toggle detail ${showOptionalFields ? 'active' : ''}`}
+            className={`sheet-tool-toggle detail rounded-3xl border-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${showOptionalFields ? 'active border-emerald-400 bg-emerald-50 shadow-emerald-500/15' : 'border-slate-200 bg-white hover:border-emerald-300'}`}
             onClick={() => setShowOptionalFields((prev) => !prev)}
             disabled={loading}
             data-testid="workout-toggle-extras"
@@ -381,7 +381,7 @@ export default function WorkoutPanel({
 
           <button
             type="button"
-            className={`sheet-tool-toggle detail ${showRoutineTools ? 'active' : ''}`}
+            className={`sheet-tool-toggle detail rounded-3xl border-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${showRoutineTools ? 'active border-emerald-400 bg-emerald-50 shadow-emerald-500/15' : 'border-slate-200 bg-white hover:border-emerald-300'}`}
             onClick={() => setShowRoutineTools((prev) => !prev)}
             disabled={loading}
             data-testid="workout-toggle-routines"
@@ -404,7 +404,7 @@ export default function WorkoutPanel({
               <button
                 key={option}
                 type="button"
-                className={`quick-choice-chip compact ${workoutType === option ? 'active' : ''}`}
+                className={`quick-choice-chip compact touch-manipulation rounded-2xl transition-all duration-200 ${workoutType === option ? 'active scale-[1.02] border-emerald-400 bg-emerald-50 text-emerald-800 shadow-md shadow-emerald-500/15' : 'hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50/50'}`}
                 onClick={() => handleQuickWorkoutTypePick(option)}
                 disabled={loading}
               >
@@ -422,7 +422,7 @@ export default function WorkoutPanel({
               <button
                 key={value}
                 type="button"
-                className={`quick-choice-chip compact ${Number(durationMinutes) === value ? 'active' : ''}`}
+                className={`quick-choice-chip compact touch-manipulation rounded-2xl transition-all duration-200 ${Number(durationMinutes) === value ? 'active scale-[1.02] border-emerald-400 bg-emerald-50 text-emerald-800 shadow-md shadow-emerald-500/15' : 'hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50/50'}`}
                 onClick={() => handleQuickDurationPick(value)}
                 disabled={loading}
               >
@@ -599,7 +599,11 @@ export default function WorkoutPanel({
         )}
 
         <div className="sheet-submit-bar compact">
-          <button type="submit" className="primary-btn capture-submit-btn compact" disabled={loading}>
+          <button
+            type="submit"
+            className="capture-submit-btn compact flex min-h-[56px] items-center justify-center rounded-2xl bg-emerald-500 px-5 text-base font-black text-white shadow-xl shadow-emerald-500/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            disabled={loading}
+          >
             {loading ? (isEnglish ? 'Saving...' : '저장 중...') : todayDone ? (isEnglish ? 'Save more' : '추가 저장') : (isEnglish ? 'Save' : '저장')}
           </button>
         </div>
