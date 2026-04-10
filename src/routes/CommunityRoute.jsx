@@ -5,13 +5,63 @@ import ModerationPanel from '../components/ModerationPanel'
 import PublicProfileCard from '../components/PublicProfileCard'
 import RankingBoard from '../components/RankingBoard'
 import SuggestedUsers from '../components/SuggestedUsers'
+import UserAvatar from '../components/UserAvatar'
 import UserSearchPanel from '../components/UserSearchPanel'
 import { buildCommunityInsight } from '../features/app/surfaceInsights'
 
+function CommunityRankingPreview({ rows, loading, isEnglish, onOpenRanking, onSelectUser }) {
+  const topRows = rows.slice(0, 3)
+
+  return (
+    <div className="community-ranking-preview">
+      <div className="community-ranking-preview-head">
+        <div>
+          <span>{isEnglish ? 'Weekly leaders' : '주간 리더'}</span>
+          <strong>{isEnglish ? 'Move with the crew' : '함께 움직이는 순위'}</strong>
+        </div>
+        <button type="button" className="community-ranking-preview-link" onClick={onOpenRanking}>
+          {isEnglish ? 'Full rank' : '전체 랭킹'}
+        </button>
+      </div>
+
+      {loading && !topRows.length ? (
+        <div className="community-ranking-preview-list skeleton">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <span key={index} className="community-ranking-preview-skeleton" />
+          ))}
+        </div>
+      ) : (
+        <div className="community-ranking-preview-list">
+          {topRows.length ? topRows.map((item, index) => (
+            <button
+              key={item.user_id}
+              type="button"
+              className={`community-ranking-preview-user rank-${index + 1}`}
+              onClick={() => onSelectUser?.(item)}
+            >
+              <span className="community-ranking-preview-rank">{`#${index + 1}`}</span>
+              <UserAvatar
+                className="community-ranking-preview-avatar"
+                imageUrl={item.avatar_url}
+                fallback={item.avatar_emoji || 'RUN'}
+                alt={item.display_name || (isEnglish ? 'Ranked user' : '랭킹 사용자')}
+              />
+              <strong>{item.display_name || (isEnglish ? 'Member' : '멤버')}</strong>
+              <small>{isEnglish ? `${item.weekly_points ?? 0} pts` : `${item.weekly_points ?? 0}P`}</small>
+            </button>
+          )) : (
+            <div className="community-ranking-preview-empty">
+              {isEnglish ? 'First workout claims the board.' : '첫 운동 기록이 랭킹을 채워요.'}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function CommunityRoute({
   isEnglish,
-  canUseCommunity,
-  onGoProfile,
   selectedCommunityUser,
   loadingSelectedCommunityProfile,
   activeCommunityProfile,
@@ -100,6 +150,11 @@ export default function CommunityRoute({
     onEnsureLeaderboard?.().catch(() => {})
   }, [activeUtility, loadingLeaderboard, onEnsureLeaderboard, visibleLeaderboard.length])
 
+  useEffect(() => {
+    if (visibleLeaderboard.length > 0 || loadingLeaderboard) return
+    onEnsureLeaderboard?.().catch(() => {})
+  }, [loadingLeaderboard, onEnsureLeaderboard, visibleLeaderboard.length])
+
   return (
     <div className="view-stage community-stage-clean">
       <section className="card community-tab-shell community-screen-shell compact-community-shell">
@@ -168,6 +223,14 @@ export default function CommunityRoute({
             </div>
           )}
         </div>
+
+        <CommunityRankingPreview
+          rows={visibleLeaderboard}
+          loading={loadingLeaderboard}
+          isEnglish={isEnglish}
+          onOpenRanking={() => setActiveUtility('ranking')}
+          onSelectUser={onSelectCommunityUser}
+        />
       </section>
 
       {activeUtility === 'discover' && (

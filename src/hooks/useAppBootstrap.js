@@ -21,7 +21,7 @@ import {
   upsertUser,
 } from '../services/communityService'
 import { getE2EAppSnapshot } from '../features/app/e2eFixtures'
-import { delay, getActionableErrorMessage, getTodayDateString, isTransientInitDelayMessage, withTimeout } from '../features/app/appFlowUtils'
+import { delay, getTodayDateString, isTransientInitDelayMessage, withTimeout } from '../features/app/appFlowUtils'
 import { INITIAL_STATS } from '../features/profile/profileFlow'
 
 export function useAppBootstrap({
@@ -61,6 +61,7 @@ export function useAppBootstrap({
   setLoadingModeration,
   setLoadingInit,
   setInitStatus,
+  captureError,
   setErrorMessage,
 }) {
   const blockedIdsRef = useRef(blockedIds ?? [])
@@ -416,18 +417,13 @@ export function useAppBootstrap({
         await loadPublicData()
       }
     } catch (error) {
-      setErrorMessage(
-        getActionableErrorMessage(
-          error,
-          isEnglish ? 'Something went wrong during initialization.' : '초기화 중 문제가 발생했습니다.',
-          isEnglish,
-        ),
-      )
+      captureError(error, isEnglish ? 'Something went wrong during initialization.' : '초기화 중 문제가 발생했습니다.')
     } finally {
       initInProgressRef.current = false
       setLoadingInit(false)
     }
   }, [
+    captureError,
     initInProgressRef,
     isEnglish,
     loadPublicData,

@@ -11,10 +11,8 @@ import {
   persistPendingAction,
 } from './features/auth/authFlow'
 import {
-  getActionableErrorMessage,
   getCurrentWeekKey,
   getTodayDateString,
-  isTransientInitDelayMessage,
   withTimeout,
 } from './features/app/appFlowUtils'
 import { buildCommunityAccessResult } from './features/community/communityFlow'
@@ -27,6 +25,7 @@ import {
 } from './features/profile/profileFlow'
 import { useAppBootstrap } from './hooks/useAppBootstrap'
 import { useAppDerivedState } from './hooks/useAppDerivedState'
+import { useAppError } from './hooks/useAppError'
 import { useI18n } from './i18n.js'
 import { supabase } from './lib/supabaseClient'
 import RouteSuspenseFallback from './routes/RouteSuspenseFallback'
@@ -150,7 +149,12 @@ export default function App() {
     failedCount: 0,
   })
   const [celebration, setCelebration] = useState(null)
-  const [errorMessage, setErrorMessage] = useState('')
+  const {
+    errorState,
+    setErrorMessage,
+    visibleErrorMessage,
+    captureError,
+  } = useAppError(isEnglish)
   const [reportTarget, setReportTarget] = useState(null)
   const [paywallContext, setPaywallContext] = useState(null)
   const [initStatus, setInitStatus] = useState(isEnglish ? 'Checking session...' : '세션을 확인하는 중입니다...')
@@ -277,6 +281,7 @@ export default function App() {
     setLoadingModeration,
     setLoadingInit,
     setInitStatus,
+    captureError,
     setErrorMessage,
   })
 
@@ -525,15 +530,14 @@ export default function App() {
     try {
       await syncGuestWorkoutsToAccount(user)
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(
+      captureError(
         error,
         isEnglish
           ? 'Could not sync local workouts. Try again in a moment.'
           : '로컬 운동 기록을 동기화하지 못했어요. 잠시 후 다시 시도해 주세요.',
-        isEnglish,
-      ))
+      )
     }
-  }, [isEnglish, openAuthPrompt, syncGuestWorkoutsToAccount, user])
+  }, [captureError, isEnglish, openAuthPrompt, setErrorMessage, syncGuestWorkoutsToAccount, user])
 
   const handleUpgradePlan = useCallback((planId) => {
     if (isPro) {
@@ -595,7 +599,7 @@ export default function App() {
           navigateToView(VIEW.HOME, { replace: true })
         }
       } catch (error) {
-        setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to sync auth state.' : '인증 상태 동기화에 실패했습니다.', isEnglish))
+        captureError(error, isEnglish ? 'Failed to sync auth state.' : '인증 상태 동기화에 실패했습니다.')
       } finally {
         setLoadingAuth(false)
       }
@@ -605,19 +609,13 @@ export default function App() {
       clearTimeout(failSafe)
       subscription.unsubscribe()
     }
-  }, [initializeApp, isEnglish, loadPublicData, loadUserData, navigateToView, setErrorMessage])
+  }, [captureError, initializeApp, isEnglish, loadPublicData, loadUserData, navigateToView])
 
   useEffect(() => {
     if (!successState) return undefined
     const timer = setTimeout(() => setSuccessState(null), 2600)
     return () => clearTimeout(timer)
   }, [successState])
-
-  useEffect(() => {
-    if (!errorMessage || !isTransientInitDelayMessage(errorMessage)) return undefined
-    const timer = setTimeout(() => setErrorMessage(''), 1400)
-    return () => clearTimeout(timer)
-  }, [errorMessage])
 
   useEffect(() => {
     if (!celebration) return undefined
@@ -643,17 +641,16 @@ export default function App() {
     guestSyncAttemptedUserRef.current = user.id
     void syncGuestWorkoutsToAccount(user).catch((error) => {
       console.error('Failed to sync guest workouts:', error)
-      setErrorMessage(getActionableErrorMessage(
+      captureError(
         error,
         isEnglish
           ? 'Could not sync local workouts right now. You can retry below.'
           : '로컬 운동 기록을 지금 동기화하지 못했어요. 아래에서 다시 시도해 주세요.',
-        isEnglish,
-      ))
+      )
     })
 
     return undefined
-  }, [isEnglish, loadingInit, setErrorMessage, syncGuestWorkoutsToAccount, user])
+  }, [captureError, isEnglish, loadingInit, syncGuestWorkoutsToAccount, user])
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('Notification' in window)) {
@@ -789,9 +786,9 @@ export default function App() {
     try {
       await refreshNotifications(user.id)
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to load notifications.' : '알림을 불러오지 못했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to load notifications.' : '알림을 불러오지 못했습니다.')
     }
-  }, [isEnglish, refreshNotifications, user?.id])
+  }, [captureError, isEnglish, refreshNotifications, user?.id])
 
   const closeNotificationCenter = useCallback(() => {
     setShowNotificationCenter(false)
@@ -818,9 +815,9 @@ export default function App() {
         'info',
       )
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to request reminder permission.' : '리마인더 권한 요청에 실패했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to request reminder permission.' : '리마인더 권한 요청에 실패했습니다.')
     }
-  }, [isEnglish, showSuccess])
+  }, [captureError, isEnglish, showSuccess])
 
   const guardAuthAction = useCallback((reason, pendingAction = null) => {
     const authState = createAuthPromptState(isAuthenticated, reason, pendingAction)
@@ -850,14 +847,14 @@ export default function App() {
     try {
       return await task()
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, fallbackMessage, isEnglish))
+      captureError(error, fallbackMessage)
       return defaultValue
     } finally {
       if (useLoadingState) {
         setLoadingAction(false)
       }
     }
-  }, [isEnglish])
+  }, [captureError, setErrorMessage])
 
   const handleGoogleSignIn = async () => {
     setLoadingAuth(true)
@@ -866,7 +863,7 @@ export default function App() {
       persistPendingAction(authPrompt?.pendingAction ?? null)
       await signInWithOAuth('google')
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Google sign-in failed.' : 'Google 로그인에 실패했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Google sign-in failed.' : 'Google 로그인에 실패했습니다.')
       setLoadingAuth(false)
     }
   }
@@ -878,7 +875,7 @@ export default function App() {
       persistPendingAction(authPrompt?.pendingAction ?? null)
       await signInWithOAuth('kakao')
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Kakao sign-in failed.' : 'Kakao 로그인에 실패했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Kakao sign-in failed.' : 'Kakao 로그인에 실패했습니다.')
       setLoadingAuth(false)
     }
   }
@@ -892,7 +889,7 @@ export default function App() {
       await loadPublicData()
       navigateToView(VIEW.HOME, { replace: true })
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Sign-out failed.' : '로그아웃에 실패했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Sign-out failed.' : '로그아웃에 실패했습니다.')
     } finally {
       setLoadingAuth(false)
     }
@@ -930,7 +927,7 @@ export default function App() {
       }
     } catch (error) {
       console.error(error)
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'The result is shown, but saving to the database failed. Please check SQL/RLS settings.' : '결과는 표시됐지만 DB 저장에 실패했어요. SQL/RLS 설정을 확인해주세요.', isEnglish))
+      captureError(error, isEnglish ? 'The result is shown, but saving to the database failed. Please check SQL/RLS settings.' : '결과는 표시됐지만 DB 저장에 실패했어요. SQL/RLS 설정을 확인해주세요.')
     } finally {
       setLoadingAction(false)
     }
@@ -1010,13 +1007,12 @@ export default function App() {
         return true
       } catch (error) {
         console.error('Failed to save guest log', error)
-        setErrorMessage(getActionableErrorMessage(
+        captureError(
           error,
           isEnglish
             ? 'Local storage is unavailable. Log in to save this workout.'
             : '로컬 저장을 사용할 수 없어요. 로그인해서 운동 기록을 저장해주세요.',
-          isEnglish,
-        ))
+        )
       }
     }
 
@@ -1059,7 +1055,7 @@ export default function App() {
       navigateToView(VIEW.HOME)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to save workout.' : '운동 기록 저장에 실패했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to save workout.' : '운동 기록 저장에 실패했습니다.')
     } finally {
       setLoadingAction(false)
     }
@@ -1082,7 +1078,7 @@ export default function App() {
       setWorkoutTemplates(templates)
       showSuccess(isEnglish ? 'Routine saved' : '루틴 저장', 'routine')
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to save routine.' : '루틴 저장에 실패했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to save routine.' : '루틴 저장에 실패했습니다.')
     } finally {
       setLoadingAction(false)
     }
@@ -1190,7 +1186,7 @@ export default function App() {
       setReportTarget(null)
       showSuccess(isEnglish ? 'Report sent' : '신고 접수', 'info')
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to submit report.' : '신고 접수에 실패했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to submit report.' : '신고 접수에 실패했습니다.')
     } finally {
       setLoadingAction(false)
     }
@@ -1210,7 +1206,7 @@ export default function App() {
         'info',
       )
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to update moderation report.' : '신고 처리에 실패했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to update moderation report.' : '신고 처리에 실패했습니다.')
     } finally {
       setModerationActionLoading(false)
     }
@@ -1235,13 +1231,7 @@ export default function App() {
         nextVisibility === 'visible' ? 'info' : 'danger-soft',
       )
     } catch (error) {
-      setErrorMessage(
-        getActionableErrorMessage(
-          error,
-          isEnglish ? 'Failed to update post visibility.' : '게시글 노출 상태를 바꾸지 못했어요.',
-          isEnglish,
-        ),
-      )
+      captureError(error, isEnglish ? 'Failed to update post visibility.' : '게시글 노출 상태를 바꾸지 못했어요.')
     } finally {
       setModerationActionLoading(false)
     }
@@ -1282,7 +1272,7 @@ export default function App() {
         isBlocked ? 'info' : 'danger-soft',
       )
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to update block.' : '차단 상태 변경에 실패했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to update block.' : '차단 상태 변경에 실패했습니다.')
     } finally {
       setLoadingAction(false)
     }
@@ -1386,7 +1376,7 @@ export default function App() {
         'info',
       )
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to save profile.' : '프로필 저장에 실패했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to save profile.' : '프로필 저장에 실패했습니다.')
     } finally {
       setLoadingAction(false)
     }
@@ -1415,7 +1405,7 @@ export default function App() {
         'success',
       )
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to save weight.' : '몸무게 저장에 실패했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to save weight.' : '몸무게 저장에 실패했습니다.')
     } finally {
       setLoadingAction(false)
     }
@@ -1582,7 +1572,7 @@ export default function App() {
       } catch (error) {
         if (!cancelled) {
           setCommunitySearchResults([])
-          setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to search users.' : '사람 검색에 실패했습니다.', isEnglish))
+          captureError(error, isEnglish ? 'Failed to search users.' : '사람 검색에 실패했습니다.')
         }
       } finally {
         if (!cancelled) {
@@ -1595,7 +1585,7 @@ export default function App() {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [blockedIds, communitySearchQuery, isEnglish, user?.id])
+  }, [blockedIds, captureError, communitySearchQuery, isEnglish, user?.id])
 
   useEffect(() => {
     if (!isAuthenticated || !isAdmin) {
@@ -1604,21 +1594,21 @@ export default function App() {
     }
 
     refreshModeration(moderationStatus).catch((error) => {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to load moderation.' : '운영 목록을 불러오지 못했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to load moderation.' : '운영 목록을 불러오지 못했습니다.')
     })
 
     return undefined
-  }, [isAdmin, isAuthenticated, isEnglish, moderationStatus, refreshModeration])
+  }, [captureError, isAdmin, isAuthenticated, isEnglish, moderationStatus, refreshModeration])
 
   useEffect(() => {
     if (view !== VIEW.COMMUNITY || !hasCommunityNickname) return undefined
 
     refreshMatePosts(user?.id).catch((error) => {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to load mate board.' : '메이트 게시판을 불러오지 못했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to load mate board.' : '메이트 게시판을 불러오지 못했습니다.')
     })
 
     return undefined
-  }, [hasCommunityNickname, isEnglish, refreshMatePosts, user?.id, view])
+  }, [captureError, hasCommunityNickname, isEnglish, refreshMatePosts, user?.id, view])
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
@@ -1706,9 +1696,9 @@ export default function App() {
       setUnreadNotificationCount(0)
       showSuccess(isEnglish ? 'All read' : '모두 읽음', 'info')
     } catch (error) {
-      setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to update notifications.' : '알림 상태를 바꾸지 못했습니다.', isEnglish))
+      captureError(error, isEnglish ? 'Failed to update notifications.' : '알림 상태를 바꾸지 못했습니다.')
     }
-  }, [isEnglish, showSuccess, unreadNotificationCount, user?.id])
+  }, [captureError, isEnglish, showSuccess, unreadNotificationCount, user?.id])
 
   const handleToggleTheme = useCallback(() => {
     setThemeMode((current) => getNextThemeMode(current))
@@ -1727,7 +1717,7 @@ export default function App() {
         )))
         setUnreadNotificationCount((prev) => Math.max(0, prev - 1))
       } catch (error) {
-        setErrorMessage(getActionableErrorMessage(error, isEnglish ? 'Failed to open notification.' : '알림을 여는 중 문제가 생겼습니다.', isEnglish))
+        captureError(error, isEnglish ? 'Failed to open notification.' : '알림을 여는 중 문제가 생겼습니다.')
       }
     }
 
@@ -1744,6 +1734,7 @@ export default function App() {
     handleChangeView(navigation.nextView)
   }, [
     closeNotificationCenter,
+    captureError,
     handleChangeView,
     handleClearCommunityUser,
     handleSelectCommunityUser,
@@ -1973,44 +1964,6 @@ export default function App() {
 
     return null
   })()
-  const visibleErrorMessage = isTransientInitDelayMessage(errorMessage) ? '' : errorMessage
-  const errorState = (() => {
-    if (!visibleErrorMessage) return null
-
-    const normalized = visibleErrorMessage.toLowerCase()
-
-    if (normalized.includes('supabase') || normalized.includes('sql') || normalized.includes('rls')) {
-      return {
-        label: isEnglish ? 'Setup' : '설정',
-        title: isEnglish ? 'Supabase needs one more check.' : 'Supabase 설정을 한 번 더 확인해요.',
-      }
-    }
-
-    if (normalized.includes('network') || visibleErrorMessage.includes('네트워크')) {
-      return {
-        label: isEnglish ? 'Network' : '네트워크',
-        title: isEnglish ? 'Connection looks unstable.' : '연결 상태를 먼저 확인해요.',
-      }
-    }
-
-    if (
-      normalized.includes('sign') ||
-      normalized.includes('auth') ||
-      visibleErrorMessage.includes('로그인') ||
-      visibleErrorMessage.includes('인증')
-    ) {
-      return {
-        label: isEnglish ? 'Account' : '계정',
-        title: isEnglish ? 'The account flow needs another try.' : '계정 작업을 한 번 더 시도해요.',
-      }
-    }
-
-    return {
-      label: isEnglish ? 'Notice' : '안내',
-      title: isEnglish ? 'This view needs a quick check.' : '잠깐 확인이 필요한 상태예요.',
-    }
-  })()
-
   return (
     <main className="app-shell">
       {guestSyncNotice && (

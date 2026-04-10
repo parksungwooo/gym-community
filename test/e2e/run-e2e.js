@@ -4,6 +4,7 @@ import http from 'node:http'
 import process from 'node:process'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
+import { Buffer } from 'node:buffer'
 import os from 'node:os'
 
 const PROJECT_ROOT = path.resolve(import.meta.dirname, '..', '..')

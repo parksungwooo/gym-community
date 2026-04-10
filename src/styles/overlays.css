@@ -1437,8 +1437,8 @@
   }
 
   .auth-modal-backdrop.home-workout-sheet-overlay .home-workout-sheet-panel {
-    height: min(86dvh, 760px);
-    max-height: calc(100dvh - 12px);
+    height: min(80dvh, 720px);
+    max-height: calc(100dvh - 24px);
   }
 
   .home-workout-panel-shell {

@@ -97,6 +97,36 @@ function getWorkoutStoryMeta(post, language, isEnglish) {
   return parts.join(' · ')
 }
 
+function getWorkoutStatsForPost(post, isEnglish) {
+  if (post.type !== 'workout_complete') return []
+
+  const stats = []
+
+  if (post.metadata?.durationMinutes) {
+    stats.push({
+      label: isEnglish ? 'Time' : '시간',
+      value: isEnglish ? `${post.metadata.durationMinutes} min` : `${post.metadata.durationMinutes}분`,
+    })
+  }
+
+  if (post.metadata?.estimatedCalories || post.metadata?.calories) {
+    const calories = post.metadata.estimatedCalories ?? post.metadata.calories
+    stats.push({
+      label: isEnglish ? 'Burn' : '소모',
+      value: `${calories} kcal`,
+    })
+  }
+
+  if (post.metadata?.date) {
+    stats.push({
+      label: isEnglish ? 'Date' : '날짜',
+      value: post.metadata.date,
+    })
+  }
+
+  return stats.slice(0, 3)
+}
+
 function FeedCard({
   post,
   onToggleLike,
@@ -113,6 +143,7 @@ function FeedCard({
   const [menuOpen, setMenuOpen] = useState(false)
   const photoUrls = getPostPhotoUrls(post)
   const storyMeta = getWorkoutStoryMeta(post, language, isEnglish)
+  const workoutStats = getWorkoutStatsForPost(post, isEnglish)
   const authorName = shortUser(post.user_id, post.authorDisplayName, isEnglish)
   const authorLevel = post.authorLevel
     ? localizeLevelText(post.authorLevel, language)
@@ -177,6 +208,17 @@ function FeedCard({
 
       {storyMeta ? <div className="feed-story-highlight">{storyMeta}</div> : null}
 
+      {!!workoutStats.length && (
+        <div className="feed-workout-stat-row">
+          {workoutStats.map((item) => (
+            <span key={item.label} className="feed-workout-stat">
+              <small>{item.label}</small>
+              <strong>{item.value}</strong>
+            </span>
+          ))}
+        </div>
+      )}
+
       <p className="feed-content compact">{getPostContent(post, language)}</p>
 
       {!!photoUrls.length && (
@@ -214,6 +256,7 @@ function FeedCard({
             className={`like-btn ${post.likedByMe ? 'liked' : ''}`}
             onClick={() => onToggleLike(post.id, post.likedByMe)}
           >
+            <span className="like-btn-mark" />
             {isEnglish ? `Likes ${post.likeCount}` : `좋아요 ${post.likeCount}`}
           </button>
           <button

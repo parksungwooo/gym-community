@@ -176,7 +176,7 @@ export default function ProfilePanel({
         title: t('로그인하면 기록이 이어져요.', 'Log in to keep your progress.'),
         body: t('운동, 체중, 프로필이 계정에 저장돼요.', 'Workouts, weight, and profile save to your account.'),
         actionLabel: t('로그인', 'Log in'),
-        action: onRequestAuth,
+        actionKey: 'auth',
       }
     }
 
@@ -185,7 +185,7 @@ export default function ProfilePanel({
         title: t('닉네임 저장하면 커뮤니티가 열려요.', 'Save a nickname to open community.'),
         body: t('이름만 저장하면 피드와 메이트를 바로 볼 수 있어요.', 'A nickname is enough for feed and mates.'),
         actionLabel: t('닉네임 입력', 'Add nickname'),
-        action: focusNicknameField,
+        actionKey: 'nickname',
       }
     }
 
@@ -194,7 +194,7 @@ export default function ProfilePanel({
         title: t('레벨 테스트부터 해보세요.', 'Start with the level test.'),
         body: t('기록 탭에서 한 번만 하면 요약이 더 잘 맞아요.', 'One quick check makes the summaries fit better.'),
         actionLabel: t('기록 탭 가기', 'Go to Records'),
-        action: onGoProgress,
+        actionKey: 'progress',
       }
     }
 
@@ -203,12 +203,28 @@ export default function ProfilePanel({
         title: t('첫 운동 기록부터 시작해요.', 'Start with your first workout log.'),
         body: t('기록 탭 한 번이면 홈과 달력이 채워져요.', 'One log starts filling Home and the calendar.'),
         actionLabel: t('기록 탭 가기', 'Go to Records'),
-        action: onGoProgress,
+        actionKey: 'progress',
       }
     }
 
     return null
   })()
+
+  const handleSetupAction = () => {
+    if (!setupCard) return
+
+    if (setupCard.actionKey === 'auth') {
+      onRequestAuth()
+      return
+    }
+
+    if (setupCard.actionKey === 'nickname') {
+      focusNicknameField()
+      return
+    }
+
+    onGoProgress()
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -313,7 +329,7 @@ export default function ProfilePanel({
             <button
               type="button"
               className="primary-btn"
-              onClick={setupCard.action}
+              onClick={handleSetupAction}
               disabled={loading || authLoading}
             >
               {setupCard.actionLabel}
@@ -341,7 +357,7 @@ export default function ProfilePanel({
               <button
                 type="button"
                 className="secondary-btn profile-setup-inline-btn"
-                onClick={setupCard.action}
+                onClick={handleSetupAction}
                 disabled={loading || authLoading}
               >
                 {setupCard.actionLabel}

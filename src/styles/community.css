@@ -1376,3 +1376,226 @@
     grid-template-columns: 1fr;
   }
 }
+
+.community-ranking-preview {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 13px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top right, rgba(190, 242, 100, 0.2), transparent 30%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(20, 38, 66, 0.94) 100%);
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16);
+}
+
+.community-ranking-preview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.community-ranking-preview-head div {
+  display: grid;
+  gap: 3px;
+}
+
+.community-ranking-preview-head span {
+  color: rgba(191, 219, 254, 0.8);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.community-ranking-preview-head strong {
+  color: #ffffff;
+  font-size: 0.98rem;
+}
+
+.community-ranking-preview-link {
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  border-radius: 999px;
+  min-height: 34px;
+  padding: 7px 11px;
+  background: rgba(56, 189, 248, 0.1);
+  color: #7dd3fc;
+  font-size: 0.76rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.community-ranking-preview-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.community-ranking-preview-user {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px 8px;
+  border: 1px solid rgba(226, 232, 240, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #f8fafc;
+  cursor: pointer;
+}
+
+.community-ranking-preview-user.rank-1 {
+  background:
+    radial-gradient(circle at top, rgba(251, 191, 36, 0.28), transparent 54%),
+    rgba(255, 255, 255, 0.08);
+}
+
+.community-ranking-preview-rank {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.5);
+  color: #bef264;
+  font-size: 0.72rem;
+  font-weight: 1000;
+}
+
+.community-ranking-preview-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 18px;
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+}
+
+.community-ranking-preview-user strong {
+  width: 100%;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 0.82rem;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.community-ranking-preview-user small {
+  color: rgba(226, 232, 240, 0.74);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.community-ranking-preview-empty {
+  grid-column: 1 / -1;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(226, 232, 240, 0.8);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.community-ranking-preview-skeleton {
+  min-height: 112px;
+  border-radius: 18px;
+  background: linear-gradient(90deg, rgba(30, 41, 59, 0.82), rgba(51, 65, 85, 0.82), rgba(30, 41, 59, 0.82));
+  animation: card-rise 0.45s ease both;
+}
+
+.feed-story-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.feed-story-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, #38bdf8, #a3e635);
+  opacity: 0.72;
+}
+
+.feed-workout-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin: 9px 0 2px;
+}
+
+.feed-workout-stat {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px 10px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.05);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.feed-workout-stat small {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.feed-workout-stat strong {
+  overflow: hidden;
+  color: #122033;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.like-btn-mark {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #94a3b8;
+  box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.12);
+}
+
+.like-btn.liked {
+  border-color: rgba(244, 63, 94, 0.2);
+  background: linear-gradient(180deg, #ffe4e8 0%, #fff1f2 100%);
+  box-shadow: 0 12px 22px rgba(244, 63, 94, 0.14);
+}
+
+.like-btn.liked .like-btn-mark {
+  background: #f43f5e;
+  box-shadow: 0 0 0 5px rgba(244, 63, 94, 0.14), 0 0 18px rgba(244, 63, 94, 0.3);
+}
+
+@media (max-width: 390px) {
+  .community-ranking-preview-list {
+    grid-template-columns: 1fr;
+  }
+
+  .community-ranking-preview-user {
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+    justify-items: start;
+  }
+
+  .community-ranking-preview-rank {
+    position: static;
+  }
+
+  .community-ranking-preview-user strong {
+    text-align: left;
+  }
+}

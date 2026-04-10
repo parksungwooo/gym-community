@@ -9,7 +9,7 @@ export function buildSuggestedUsers({ leaderboard, blockedIds, currentUserId, cu
   return visibleRows.slice(0, 2)
 }
 
-export function buildCommunityAccessResult(nextView, hasCommunityNickname, communityView) {
+export function buildCommunityAccessResult(nextView) {
   return {
     allowed: true,
     redirectView: nextView,

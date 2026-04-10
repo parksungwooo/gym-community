@@ -1,11 +1,10 @@
-﻿import { supabase } from '../lib/supabaseClient'
+import { supabase } from '../lib/supabaseClient'
+import { assertServiceSuccess } from './serviceErrors'
 
 export async function getCurrentUser() {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
 
-  if (sessionError) {
-    throw sessionError
-  }
+  assertServiceSuccess(sessionError, 'auth.get_session')
 
   return sessionData.session?.user ?? null
 }
@@ -19,15 +18,11 @@ export async function signInWithOAuth(provider) {
     },
   })
 
-  if (error) {
-    throw error
-  }
+  assertServiceSuccess(error, `auth.sign_in.${provider}`)
 }
 
 export async function signOutUser() {
   const { error } = await supabase.auth.signOut()
 
-  if (error) {
-    throw error
-  }
+  assertServiceSuccess(error, 'auth.sign_out')
 }

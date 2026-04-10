@@ -13,6 +13,38 @@ function MetricPill({ eyebrow, value, detail }) {
   )
 }
 
+const QUICK_WORKOUT_PRESETS = [
+  { key: 'hiit', ko: 'HIIT', en: 'HIIT', workoutType: '운동', durationMinutes: 15, icon: 'HI', tone: 'blue' },
+  { key: 'yoga', ko: '요가', en: 'Yoga', workoutType: '요가', durationMinutes: 20, icon: 'YO', tone: 'cyan' },
+  { key: 'core', ko: '코어', en: 'Core', workoutType: '필라테스', durationMinutes: 12, icon: 'CO', tone: 'lime' },
+  { key: 'strength', ko: '근력', en: 'Strength', workoutType: '웨이트', durationMinutes: 18, icon: 'ST', tone: 'steel' },
+]
+
+function clampPercent(value) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return 0
+  return Math.max(0, Math.min(parsed, 100))
+}
+
+function QuickWorkoutCard({ item, isEnglish, onStart }) {
+  const title = item.name || (isEnglish ? item.en : item.ko)
+  const duration = item.duration_minutes ?? item.durationMinutes ?? 15
+
+  return (
+    <button
+      type="button"
+      className={`home-quick-workout-card ${item.tone ?? 'blue'}`}
+      onClick={() => onStart?.(item)}
+    >
+      <span className="home-quick-workout-title">{title}</span>
+      <span className="home-quick-workout-icon">{item.icon ?? title.slice(0, 2).toUpperCase()}</span>
+      <span className="home-quick-workout-duration">
+        {isEnglish ? `${duration} min` : `${duration}분`}
+      </span>
+    </button>
+  )
+}
+
 function formatCalories(value, isEnglish) {
   if (!value) return isEnglish ? 'No data yet' : '아직 데이터 없음'
   return isEnglish ? `~${value} kcal` : `약 ${value}kcal`
@@ -176,10 +208,31 @@ export default function HomeDashboard({
 
   const nickname = profile?.display_name?.trim()
   const topRoutine = routineTemplates[0] ?? null
-  const activityLevelValue = activitySummary?.levelValue ?? 1
   const goalCurrent = challenge?.current ?? 0
   const goalTarget = challenge?.goal ?? 0
   const goalProgress = Math.max(0, Math.min(challenge?.progress ?? 0, 100))
+  const todayCalories = Number(stats.todayCalories) || 0
+  const dailyGoalCalories = Math.max(440, (goalTarget || 4) * 220)
+  const dailyGoalProgress = clampPercent((todayCalories / dailyGoalCalories) * 100)
+  const dailyGoalAngle = `${dailyGoalProgress * 3.6}deg`
+  const activityLevelValue = Number(activitySummary?.levelValue) || 1
+  const activityLevelProgress = clampPercent(activitySummary?.progressPercent ?? goalProgress)
+  const levelNeedleAngle = `${-72 + (activityLevelProgress * 1.44)}deg`
+  const currentLevelLabel = currentLevel
+    ? localizeLevelText(currentLevel, language)
+    : t('레벨 준비 중', 'Level pending')
+  const quickWorkouts = [
+    ...routineTemplates.slice(0, 2).map((routine, index) => ({
+      ...routine,
+      key: `routine-${routine.id ?? routine.name ?? index}`,
+      name: routine.name,
+      durationMinutes: routine.duration_minutes ?? routine.durationMinutes ?? 20,
+      workoutType: routine.workout_type ?? routine.workoutType ?? '운동',
+      icon: routine.name?.slice(0, 2).toUpperCase() || 'RT',
+      tone: index === 0 ? 'routine' : 'steel',
+    })),
+    ...QUICK_WORKOUT_PRESETS,
+  ].slice(0, 4)
 
   const heroTitle = todayDone
     ? t('오늘 기록 완료', 'Saved for today')
@@ -268,7 +321,58 @@ export default function HomeDashboard({
 
   return (
     <section className="home-dashboard-app streamlined-home home-dashboard-redesign home-dashboard-clean">
-      <section className="card home-focus-card home-growth-hero home-growth-hero-strong">
+      <section className="card home-focus-card home-growth-hero home-growth-hero-strong home-neon-command-card">
+        <div className="home-neon-overview" aria-label={t('오늘 목표와 레벨 요약', 'Today goal and level summary')}>
+          <div
+            className="home-daily-goal-ring"
+            style={{ '--goal-angle': dailyGoalAngle }}
+          >
+            <div className="home-daily-goal-core">
+              <span>{t('일일 목표', 'Daily Goal')}</span>
+              <strong>{`${Math.round(todayCalories)} / ${dailyGoalCalories}`}</strong>
+              <small>{t('kcal', 'kcal')}</small>
+              <em>{`${Math.round(dailyGoalProgress)}% ${isEnglish ? 'Completed' : '완료'}`}</em>
+            </div>
+          </div>
+
+          <div className="home-level-gauge-card">
+            <span className="home-level-kicker">{t('피트니스 레벨', 'Fitness Level')}</span>
+            <div className="home-level-gauge">
+              <div className="home-level-arc" />
+              <div
+                className="home-level-needle"
+                style={{ '--level-needle': levelNeedleAngle }}
+              />
+              <span className="home-level-pivot" />
+            </div>
+            <strong>{`Lv.${activityLevelValue} ${currentLevelLabel}`}</strong>
+            <small>
+              {activitySummary?.remainingXp
+                ? t(`다음 레벨까지 ${activitySummary.remainingXp} XP`, `${activitySummary.remainingXp} XP to next level`)
+                : t('오늘도 성장 중', 'Growing today')}
+            </small>
+          </div>
+        </div>
+
+        <div className="home-quick-workout-shell">
+          <div className="home-quick-workout-heading">
+            <strong>{t('빠른 운동 시작', 'Quick Workout')}</strong>
+            <button type="button" className="home-quick-workout-see-all" onClick={onOpenWorkoutComposer}>
+              {t('직접 기록', 'Custom')}
+            </button>
+          </div>
+          <div className="home-quick-workout-grid">
+            {quickWorkouts.map((item) => (
+              <QuickWorkoutCard
+                key={item.key}
+                item={item}
+                isEnglish={isEnglish}
+                onStart={(preset) => onStartRoutine?.(preset)}
+              />
+            ))}
+          </div>
+        </div>
+
         <div className="home-growth-hero-main">
           <div className="home-focus-copy">
             <span className="app-section-kicker">{t('오늘의 액션', 'Today')}</span>
@@ -343,6 +447,7 @@ export default function HomeDashboard({
             </div>
           )}
         </div>
+
       </section>
 
       <section className="card home-feed-preview-shell compact-home-feed minimal-home-feed">
