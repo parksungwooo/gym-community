@@ -439,10 +439,10 @@ async function run() {
       await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"workout-sheet\"]'))", `workout sheet ${viewport.label}`)
       await delay(280)
       await assertBottomSheetPresentation(session, '[data-testid="workout-sheet"]', `workout sheet ${viewport.label}`)
-      await assertElementInViewport(session, '.sheet-close-btn', `close button ${viewport.label}`)
+      await assertElementInViewport(session, '[data-testid="workout-sheet-close"]', `close button ${viewport.label}`)
       const compactScrollMetrics = await session.evaluate(`(() => {
-        const card = document.querySelector('.home-workout-panel-shell .workout-capture-card')
-        const submit = document.querySelector('.capture-submit-btn')
+        const card = document.querySelector('[data-testid="workout-panel-surface"]')
+        const submit = document.querySelector('[data-testid="workout-submit"]')
         if (!card || !submit) return null
         card.scrollTop = card.scrollHeight
         const rect = submit.getBoundingClientRect()
@@ -467,7 +467,7 @@ async function run() {
       if (E2E_CAPTURE) {
         await captureScreenshot(session, `qa-mobile-${viewport.label}-workout-check.png`)
       }
-      await click(session, '.sheet-close-btn')
+      await click(session, '[data-testid="workout-sheet-close"]')
       await waitForCondition(session, "!document.querySelector('[data-testid=\"workout-sheet\"]')", `closed sheet ${viewport.label}`)
     }
 
@@ -488,21 +488,21 @@ async function run() {
     await delay(280)
     await assertBottomSheetPresentation(session, '[data-testid="workout-sheet"]', 'workout sheet')
     await captureScreenshot(session, 'qa-mobile-workout-open-user-check.png')
-    const manualEditorInitiallyCollapsed = await session.evaluate("Boolean(document.querySelector('.manual-edit-fields'))")
+    const manualEditorInitiallyCollapsed = await session.evaluate("Boolean(document.querySelector('[data-testid=\"manual-edit-fields\"]'))")
     assert.equal(manualEditorInitiallyCollapsed, false, 'Manual editor should stay collapsed for the default quick selection')
-    await click(session, '.manual-edit-toggle')
-    await waitForCondition(session, "Boolean(document.querySelector('.manual-edit-fields'))", 'manual editor opened')
-    await click(session, '.manual-edit-toggle')
-    await waitForCondition(session, "!document.querySelector('.manual-edit-fields')", 'manual editor collapsed')
+    await click(session, '[data-testid="manual-edit-toggle"]')
+    await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"manual-edit-fields\"]'))", 'manual editor opened')
+    await click(session, '[data-testid="manual-edit-toggle"]')
+    await waitForCondition(session, "!document.querySelector('[data-testid=\"manual-edit-fields\"]')", 'manual editor collapsed')
     await click(session, '[data-testid="workout-toggle-extras"]')
-    await waitForCondition(session, "Boolean(document.querySelector('.workout-textarea'))", 'optional fields')
-    await setTextValue(session, '.workout-textarea', E2E_NOTE)
-    await uploadSyntheticPhoto(session, '.hidden-file-input')
-    await waitForCondition(session, "document.querySelectorAll('.photo-proof-preview').length === 1", 'photo preview')
-    await click(session, '.toggle-chip')
-    await waitForCondition(session, "document.querySelector('.toggle-chip')?.textContent?.includes('비공개') === true || document.querySelector('.toggle-chip')?.textContent?.includes('Private') === true", 'private share toggle')
+    await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"workout-note\"]'))", 'optional fields')
+    await setTextValue(session, '[data-testid="workout-note"]', E2E_NOTE)
+    await uploadSyntheticPhoto(session, '[data-testid="workout-gallery-input"]')
+    await waitForCondition(session, "document.querySelectorAll('[data-testid=\"photo-proof-preview\"]').length === 1", 'photo preview')
+    await click(session, '[data-testid="share-toggle"]')
+    await waitForCondition(session, "document.querySelector('[data-testid=\"share-toggle\"]')?.textContent?.includes('비공개') === true || document.querySelector('[data-testid=\"share-toggle\"]')?.textContent?.includes('Private') === true", 'private share toggle')
     const scrollMetrics = await session.evaluate(`(() => {
-      const card = document.querySelector('.home-workout-panel-shell .workout-capture-card')
+      const card = document.querySelector('[data-testid="workout-panel-surface"]')
       if (!card) return null
       card.scrollTop = card.scrollHeight
       return {
@@ -515,7 +515,7 @@ async function run() {
     assert.ok(scrollMetrics.scrollHeight >= scrollMetrics.clientHeight, 'Workout sheet card should expose scroll geometry')
     await delay(160)
     await captureScreenshot(session, 'qa-mobile-workout-scrolled-user-check.png')
-    await click(session, '.capture-submit-btn')
+    await click(session, '[data-testid="workout-submit"]')
     await waitForCondition(session, "!document.querySelector('[data-testid=\"workout-sheet\"]')", 'saved guest workout sheet')
     await waitForCondition(
       session,
@@ -525,10 +525,10 @@ async function run() {
     await waitForCondition(session, "Boolean(document.querySelector('.app-toast'))", 'guest save toast')
     await delay(320)
     await assertElementInViewport(session, '.app-toast', 'guest save toast')
-    await waitForCondition(session, "Boolean(document.querySelector('.app-sync-card.pending'))", 'guest sync notice')
+    await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"guest-sync-pending\"]'))", 'guest sync notice')
     await waitForCondition(
       session,
-      "Boolean(document.querySelector('.app-sync-card .primary-btn, .app-sync-card .secondary-btn'))",
+      "Boolean(document.querySelector('[data-testid=\"guest-sync-action\"]'))",
       'guest sync call to action',
     )
 
@@ -550,7 +550,7 @@ async function run() {
       "Boolean(document.querySelector('[data-testid=\"bottom-tab-nav\"]')) && Boolean(document.querySelector('[data-testid=\"home-log-workout\"]'))",
       'home screen after reload',
     )
-    await waitForCondition(session, "Boolean(document.querySelector('.app-sync-card.pending'))", 'guest sync notice after reload')
+    await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"guest-sync-pending\"]'))", 'guest sync notice after reload')
     const persistedGuestRecords = await readGuestWorkoutRecords(session)
     assert.equal(persistedGuestRecords.length, 1, 'Guest workout should persist after reload')
 
@@ -558,10 +558,10 @@ async function run() {
     await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"community-tablist\"]'))", 'community screen')
     await waitForCondition(
       session,
-      "Boolean(document.querySelector('.feed-card .like-btn'))",
+      "Boolean(document.querySelector('[data-testid^=\"feed-like-\"]'))",
       'community feed like action',
     )
-    await click(session, '.feed-card .like-btn')
+    await click(session, '[data-testid^="feed-like-"]')
     await waitForCondition(
       session,
       "Boolean(document.querySelector('.auth-modal-card')) && Boolean(document.querySelector('.auth-modal-card .social-btn.google'))",

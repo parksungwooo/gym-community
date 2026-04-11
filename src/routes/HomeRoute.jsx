@@ -61,26 +61,26 @@ export default function HomeRoute({
   }, [onCloseWorkoutComposer, showWorkoutPanel])
 
   return (
-    <div className="view-stage">
+    <div className="grid gap-6">
       {celebration && (
-        <section className="card celebration-card product-glass-card animate-pop">
-          <div className="product-xp-burst mb-3 inline-grid h-16 w-16 place-items-center rounded-3xl bg-emerald-400 text-2xl font-black text-slate-950 shadow-xl shadow-emerald-500/25">
+        <section className="grid gap-4 rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm dark:border-emerald-400/20 dark:bg-neutral-900 sm:p-6">
+          <div className="inline-grid h-16 w-16 place-items-center rounded-3xl bg-emerald-500 text-2xl font-black text-white shadow-sm">
             {celebration.gainedXp ? `+${celebration.gainedXp}` : 'OK'}
           </div>
-          <span className="celebration-eyebrow">Nice Work</span>
-          <h2>{isEnglish ? `${celebration.workoutType} saved` : `${celebration.workoutType} 기록 완료`}</h2>
-          <p className="subtext">
+          <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">Nice Work</span>
+          <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{isEnglish ? `${celebration.workoutType} saved` : `${celebration.workoutType} 기록 완료`}</h2>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
             {celebration.durationMinutes
               ? isEnglish ? `${celebration.durationMinutes} minutes were saved.` : `${celebration.durationMinutes}분 운동이 저장됐어요.`
               : isEnglish ? 'Today\'s workout was saved.' : '오늘 운동 기록이 저장됐어요.'}{' '}
             {isEnglish ? `You are now at ${celebration.nextWeeklyCount} this week.` : `이번 주 누적 ${celebration.nextWeeklyCount}회입니다.`}
             {celebration.gainedXp ? ` ${isEnglish ? `You earned ${celebration.gainedXp} XP.` : `${celebration.gainedXp} XP를 얻었어요.`}` : ''}
           </p>
-          <div className="celebration-actions">
-            <button type="button" className="secondary-btn" onClick={onOpenWorkoutComposer}>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button type="button" className="min-h-12 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10" onClick={onOpenWorkoutComposer}>
               {isEnglish ? 'Log Another' : '하나 더 기록'}
             </button>
-            <button type="button" className="ghost-btn" onClick={onSeeCommunity}>
+            <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onSeeCommunity}>
               {isEnglish ? 'See Community' : '커뮤니티 보기'}
             </button>
           </div>
@@ -122,7 +122,7 @@ export default function HomeRoute({
             aria-label={isEnglish ? 'Workout logging sheet' : '운동 기록 바텀시트'}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="home-workout-panel-shell">
+            <div className="home-workout-panel-shell w-full">
               <WorkoutPanel
                 key={[
                   workoutPreset?.name || '',

@@ -2006,22 +2006,30 @@ export default function App() {
     return null
   })()
   return (
-    <div className="app-shell">
+    <div className="min-h-dvh bg-gradient-to-b from-gray-50 via-white to-emerald-50/40 text-gray-950 dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-900 dark:text-white">
       {guestSyncNotice && (
         <section
-          className={`app-sync-card ${guestSyncNotice.tone}`}
+          className={`fixed left-1/2 top-[calc(env(safe-area-inset-top)+4.75rem)] z-50 grid w-[min(92vw,42rem)] -translate-x-1/2 gap-2 rounded-3xl border bg-white p-4 text-gray-950 shadow-sm dark:bg-neutral-900 dark:text-white ${
+            guestSyncNotice.tone === 'failed'
+              ? 'border-rose-100 dark:border-rose-400/20'
+              : 'border-emerald-100 dark:border-emerald-400/20'
+          }`}
           role="status"
           aria-live="polite"
+          data-testid={`guest-sync-${guestSyncNotice.tone}`}
         >
-          <span className="app-sync-kicker">{guestSyncNotice.kicker}</span>
-          <strong>{guestSyncNotice.title}</strong>
-          <p>{guestSyncNotice.body}</p>
-          <span className="app-sync-meta">{guestSyncNotice.meta}</span>
+          <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">{guestSyncNotice.kicker}</span>
+          <strong className="text-base font-black leading-6">{guestSyncNotice.title}</strong>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-300">{guestSyncNotice.body}</p>
+          <span className="text-xs font-black text-gray-400">{guestSyncNotice.meta}</span>
           {guestSyncNotice.actionKind !== 'none' && (
-            <div className="state-action-row app-sync-actions">
+            <div className="mt-1">
               <button
                 type="button"
-                className={guestSyncNotice.actionKind === 'auth' ? 'primary-btn' : 'secondary-btn'}
+                className={guestSyncNotice.actionKind === 'auth'
+                  ? 'min-h-10 rounded-lg bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:opacity-50'
+                  : 'min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10'}
+                data-testid="guest-sync-action"
                 onClick={guestSyncNotice.actionKind === 'auth' ? () => openAuthPrompt('guest_sync') : handleRetryGuestSync}
                 disabled={guestSyncState.phase === 'syncing' || loadingAuth}
               >
@@ -2032,15 +2040,15 @@ export default function App() {
         </section>
       )}
       {errorState && (
-        <section className="error-box app-error-card" role="status" aria-live="polite">
-          <span className="app-error-kicker">{errorState.label}</span>
-          <strong>{errorState.title}</strong>
-          <p>{visibleErrorMessage}</p>
-          <div className="state-action-row app-error-actions">
-            <button type="button" className="secondary-btn" onClick={() => window.location.reload()}>
+        <section className="fixed left-1/2 top-[calc(env(safe-area-inset-top)+4.75rem)] z-50 grid w-[min(92vw,42rem)] -translate-x-1/2 gap-3 rounded-3xl border border-rose-100 bg-white p-4 text-gray-950 shadow-sm dark:border-rose-400/20 dark:bg-neutral-900 dark:text-white" role="status" aria-live="polite">
+          <span className="text-xs font-black uppercase text-rose-600 dark:text-rose-300">{errorState.label}</span>
+          <strong className="text-base font-black leading-6">{errorState.title}</strong>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-300">{visibleErrorMessage}</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button type="button" className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10" onClick={() => window.location.reload()}>
               {isEnglish ? 'Refresh app' : '앱 새로고침'}
             </button>
-            <button type="button" className="ghost-btn" onClick={() => setErrorMessage('')}>
+            <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={() => setErrorMessage('')}>
               {isEnglish ? 'Hide' : '닫기'}
             </button>
           </div>
@@ -2128,18 +2136,18 @@ export default function App() {
         navigationLabel={isEnglish ? 'Primary navigation' : '주요 화면 이동'}
       >
         {loadingInit ? (
-          <section className="card skeleton-screen-card">
-            <div className="skeleton-copy">
-              <span className="skeleton-line short" />
-              <span className="skeleton-line long" />
+          <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900">
+            <div className="grid gap-3">
+              <span className="h-3 w-24 animate-pulse rounded-full bg-gray-100 dark:bg-white/10" />
+              <span className="h-5 w-2/3 animate-pulse rounded-full bg-gray-100 dark:bg-white/10" />
             </div>
-            <div className="skeleton-hero-block" />
-            <div className="skeleton-grid">
-              <span className="skeleton-panel" />
-              <span className="skeleton-panel" />
-              <span className="skeleton-panel" />
+            <div className="h-48 animate-pulse rounded-3xl bg-gray-100 dark:bg-white/10" />
+            <div className="grid grid-cols-3 gap-3">
+              <span className="h-20 animate-pulse rounded-2xl bg-gray-100 dark:bg-white/10" />
+              <span className="h-20 animate-pulse rounded-2xl bg-gray-100 dark:bg-white/10" />
+              <span className="h-20 animate-pulse rounded-2xl bg-gray-100 dark:bg-white/10" />
             </div>
-            <p className="subtext skeleton-status-text">{initStatus}</p>
+            <p className="m-0 text-sm font-semibold text-gray-500 dark:text-gray-400">{initStatus}</p>
           </section>
         ) : (
             <Suspense fallback={<RouteSuspenseFallback label={isEnglish ? 'Loading route...' : '화면을 불러오는 중입니다...'} />}>

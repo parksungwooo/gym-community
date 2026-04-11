@@ -80,8 +80,8 @@ export default function ProgressRoute({
   }
 
   return (
-    <div className="view-stage">
-      <section className="card record-hub-card record-hub-card-simple">
+    <div className="grid gap-6">
+      <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
         <div className="record-hub-copy">
           <span className="app-section-kicker">{isEnglish ? 'Records' : '기록'}</span>
           <h2>{isEnglish ? 'This week' : '이번 주'}</h2>
@@ -93,10 +93,10 @@ export default function ProgressRoute({
         </div>
 
         <div className="record-hub-actions">
-          <button type="button" className="primary-btn" onClick={onGoHome}>
+          <button type="button" className="min-h-12 rounded-lg bg-emerald-500 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600" onClick={onGoHome}>
             {isEnglish ? 'Log workout now' : '지금 운동 기록하기'}
           </button>
-          <button type="button" className="ghost-btn" onClick={onToggleTestFlow} data-testid="progress-open-level-test">
+          <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-5 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onToggleTestFlow} data-testid="progress-open-level-test">
             {levelTestActionLabel}
           </button>
         </div>
@@ -120,7 +120,7 @@ export default function ProgressRoute({
         </div>
       </section>
 
-      <section className="card record-module-card compact record-weight-log-card">
+      <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 record-weight-log-card">
         <div className="app-section-heading compact">
           <div>
             <span className="app-section-kicker">{isEnglish ? 'Weight' : '체중'}</span>
@@ -143,7 +143,7 @@ export default function ProgressRoute({
               placeholder="kg"
               disabled={loadingAction}
             />
-            <button type="submit" className="secondary-btn weight-log-btn" disabled={loadingAction}>
+            <button type="submit" className="min-h-12 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10" disabled={loadingAction}>
               {loadingAction ? (isEnglish ? 'Saving...' : '저장 중...') : (isEnglish ? 'Save' : '저장')}
             </button>
           </div>

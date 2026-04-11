@@ -156,8 +156,8 @@ export default function CommunityRoute({
   }, [loadingLeaderboard, onEnsureLeaderboard, visibleLeaderboard.length])
 
   return (
-    <div className="view-stage community-stage-clean">
-      <section className="card community-tab-shell community-screen-shell compact-community-shell">
+    <div className="grid gap-6">
+      <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
         <div className="community-screen-head compact">
           <div>
             <span className="app-section-kicker">{t('커뮤니티', 'Community')}</span>

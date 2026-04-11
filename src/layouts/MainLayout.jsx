@@ -9,29 +9,43 @@ export default function MainLayout({
 }) {
   return (
     <>
-      {topNav ? <header className="app-header main-layout-header">{topNav}</header> : null}
+      {topNav ? (
+        <header className="pointer-events-none fixed inset-x-0 top-0 z-40">
+          <div className="pointer-events-auto mx-auto flex w-full max-w-3xl justify-end px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
+            {topNav}
+          </div>
+        </header>
+      ) : null}
 
       <main
-        className="app-main main-layout-main"
+        className="mx-auto grid min-h-dvh w-full max-w-3xl content-start gap-6 px-4 pb-[calc(env(safe-area-inset-bottom)+7rem)] pt-[calc(env(safe-area-inset-top)+5.25rem)]"
         id={contentId}
         aria-busy={busy || undefined}
       >
-        <div className="app-container main-layout-container">
-          {pageHeader ? (
-            <section className="app-page-heading main-layout-page-heading" aria-label={pageHeader.title}>
-              <span>{pageHeader.eyebrow}</span>
-              <h1>{pageHeader.title}</h1>
-              <p>{pageHeader.body}</p>
-            </section>
-          ) : null}
+        {pageHeader ? (
+          <section className="grid gap-2 pr-24" aria-label={pageHeader.title}>
+            <span className="text-xs font-black uppercase text-emerald-600">
+              {pageHeader.eyebrow}
+            </span>
+            <h1 className="m-0 text-3xl font-black leading-tight text-gray-950 dark:text-white">
+              {pageHeader.title}
+            </h1>
+            {pageHeader.body ? (
+              <p className="m-0 max-w-2xl text-sm font-semibold leading-6 text-gray-500 dark:text-gray-300">
+                {pageHeader.body}
+              </p>
+            ) : null}
+          </section>
+        ) : null}
 
-          <div className="main-layout-content">{children}</div>
-        </div>
+        <div className="grid gap-6">{children}</div>
       </main>
 
       {bottomNav ? (
-        <footer className="app-bottom-nav-slot main-layout-bottom-nav" aria-label={navigationLabel}>
-          {bottomNav}
+        <footer className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]" aria-label={navigationLabel}>
+          <div className="mx-auto w-full max-w-3xl">
+            {bottomNav}
+          </div>
         </footer>
       ) : null}
     </>

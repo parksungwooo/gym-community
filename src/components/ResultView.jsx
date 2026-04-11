@@ -27,7 +27,7 @@ function DumbbellIcon() {
 
 function TrophyIcon() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-12 w-12 fill-none stroke-current stroke-2">
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-11 w-11 fill-none stroke-current stroke-2">
       <path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M8 6H5a3 3 0 0 0 3 3" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M16 6h3a3 3 0 0 1-3 3" strokeLinecap="round" strokeLinejoin="round" />
@@ -47,7 +47,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
   const handleShare = async () => {
     const shareText = isEnglish
       ? `My result: ${score} points, ${displayLevel}.`
-      : `\uB0B4 \uACB0\uACFC: ${score}\uC810, ${displayLevel}.`
+      : `내 결과: ${score}점, ${displayLevel}.`
 
     try {
       await navigator.clipboard.writeText(`${shareText} ${window.location.href}`)
@@ -59,42 +59,38 @@ export default function ResultView({ score, level, onStartWorkout }) {
         footer: isEnglish ? 'Level test complete' : '레벨 체크 완료',
       }, 'fitness-result-card.svg')
     } catch {
-      alert(isEnglish ? 'Copy failed.' : '\uBCF5\uC0AC \uC2E4\uD328.')
+      alert(isEnglish ? 'Copy failed.' : '복사 실패.')
     }
   }
 
   return (
-    <section className="product-glass-card app-clean-card result-screen result-screen-clean mx-auto grid w-full max-w-xl gap-5 rounded-[2rem] border border-white/70 bg-white/95 p-5 text-center text-slate-950 shadow-2xl shadow-slate-950/10 backdrop-blur-xl sm:p-7">
+    <section className="mx-auto grid w-full max-w-xl gap-6 rounded-3xl border border-gray-100 bg-white p-5 text-center shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
       <div className="mx-auto grid justify-items-center gap-4">
-        <div className="relative grid h-32 w-32 place-items-center">
-          <span className="absolute inset-0 rounded-full bg-emerald-400/20 animate-burst" aria-hidden="true" />
-          <span className="absolute inset-3 rounded-full bg-cyan-400/20 animate-burst [animation-delay:90ms]" aria-hidden="true" />
-          <span className="relative grid h-24 w-24 place-items-center rounded-[1.75rem] bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 text-white shadow-2xl shadow-emerald-500/25 motion-safe:animate-levelUp">
-            <TrophyIcon />
-          </span>
-          <span className="absolute -right-2 top-1 rounded-full bg-yellow-300 px-3 py-1 text-xs font-black text-slate-950 shadow-lg shadow-yellow-400/25 rotate-12 motion-safe:animate-float">
+        <div className="relative grid h-28 w-28 place-items-center rounded-3xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20">
+          <TrophyIcon />
+          <span className="absolute -right-2 -top-2 rounded-lg bg-yellow-300 px-3 py-1 text-xs font-black text-gray-950 shadow-sm">
             LV.{levelValue}
           </span>
         </div>
 
         <div className="grid gap-2">
-          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-emerald-700">
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
             {isEnglish ? 'Fitness Result' : '내 레벨'}
           </span>
-          <h2 className="m-0 text-3xl font-black tracking-[-0.05em] text-slate-950 sm:text-4xl">
+          <h2 className="m-0 text-3xl font-black leading-tight text-gray-950 dark:text-white sm:text-4xl">
             {displayLevel}
           </h2>
-          <p className="m-0 text-5xl font-black tracking-[-0.06em] text-emerald-600 sm:text-6xl">
-            {isEnglish ? `${score} pts` : `${score}\uC810`}
+          <p className="m-0 text-5xl font-black leading-none text-emerald-600 dark:text-emerald-400 sm:text-6xl">
+            {isEnglish ? `${score} pts` : `${score}점`}
           </p>
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200/80 bg-gradient-to-b from-slate-50 to-white p-5">
-        <p className="m-0 text-base font-extrabold leading-7 text-slate-700">
+      <div className="grid gap-3 border-y border-gray-100 py-5 dark:border-white/10">
+        <p className="m-0 text-base font-extrabold leading-7 text-gray-700 dark:text-gray-200">
           {message}
         </p>
-        <p className="mt-3 mb-0 text-sm font-semibold leading-6 text-slate-500">
+        <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
           {isEnglish
             ? "Now turn this level into today's workout log."
             : '이제 오늘 운동 하나만 남겨볼까요?'}
@@ -104,7 +100,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
       <div className="grid gap-3 sm:grid-cols-[0.9fr_1.1fr]">
         <button
           type="button"
-          className="secondary-btn result-action-btn flex min-h-[56px] items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-5 text-base font-black text-slate-700 shadow-sm transition-all hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10"
           onClick={handleShare}
         >
           <ShareIcon />
@@ -112,7 +108,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
         </button>
         <button
           type="button"
-          className="primary-btn result-action-btn flex min-h-[56px] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 text-base font-black text-white shadow-xl shadow-emerald-500/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-600"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600"
           onClick={onStartWorkout}
         >
           <DumbbellIcon />

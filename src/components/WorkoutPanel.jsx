@@ -54,9 +54,9 @@ function moveItem(items, fromIndex, toIndex) {
 function PhotoProofList({ items, isEnglish, onRemove, onMove }) {
   if (!items.length) {
     return (
-      <div className="photo-proof-empty">
-        <strong>{isEnglish ? 'No photos' : '사진 선택 안 함'}</strong>
-        <p>
+      <div className="grid gap-1 rounded-2xl border border-dashed border-gray-200 p-4 text-center dark:border-white/10">
+        <strong className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'No photos' : '사진 선택 안 함'}</strong>
+        <p className="m-0 text-sm font-semibold text-gray-500 dark:text-gray-400">
           {isEnglish
             ? 'Camera asks on tap.'
             : '인증 사진은 선택이에요.'}
@@ -66,10 +66,15 @@ function PhotoProofList({ items, isEnglish, onRemove, onMove }) {
   }
 
   return (
-    <div className="photo-proof-grid">
+    <div className="grid grid-cols-2 gap-3">
       {items.map((item, index) => (
-        <article key={item.id} className="photo-proof-preview multi">
+        <article
+          key={item.id}
+          className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-neutral-950"
+          data-testid="photo-proof-preview"
+        >
           <OptimizedImage
+            className="aspect-square w-full object-cover"
             imageUrl={item.previewUrl}
             preset="panelThumbnail"
             alt={isEnglish ? 'Workout proof preview' : '운동 인증 사진 미리보기'}
@@ -78,16 +83,16 @@ function PhotoProofList({ items, isEnglish, onRemove, onMove }) {
             fetchPriority="low"
             sizes="(max-width: 640px) 40vw, 160px"
           />
-          <div className="photo-proof-meta">
-            <span>{item.label}</span>
-            <div className="photo-proof-meta-actions">
-              <button type="button" className="mini-btn" onClick={() => onMove(index, index - 1)} disabled={index === 0}>
+          <div className="grid gap-2 p-3">
+            <span className="truncate text-xs font-bold text-gray-500 dark:text-gray-400">{item.label}</span>
+            <div className="grid grid-cols-3 gap-1">
+              <button type="button" className="rounded-lg bg-gray-100 px-2 py-1 text-xs font-black text-gray-600 disabled:opacity-40 dark:bg-white/10 dark:text-gray-300" onClick={() => onMove(index, index - 1)} disabled={index === 0}>
                 {isEnglish ? 'Up' : '앞'}
               </button>
-              <button type="button" className="mini-btn" onClick={() => onMove(index, index + 1)} disabled={index === items.length - 1}>
+              <button type="button" className="rounded-lg bg-gray-100 px-2 py-1 text-xs font-black text-gray-600 disabled:opacity-40 dark:bg-white/10 dark:text-gray-300" onClick={() => onMove(index, index + 1)} disabled={index === items.length - 1}>
                 {isEnglish ? 'Down' : '뒤'}
               </button>
-              <button type="button" className="mini-btn danger" onClick={() => onRemove(index)}>
+              <button type="button" className="rounded-lg bg-rose-50 px-2 py-1 text-xs font-black text-rose-600 dark:bg-rose-500/15 dark:text-rose-300" onClick={() => onRemove(index)}>
                 {isEnglish ? 'Remove' : '제거'}
               </button>
             </div>
@@ -339,95 +344,104 @@ export default function WorkoutPanel({
   }
 
   return (
-    <section className="card app-clean-card workout-capture-card workout-panel-clean compact product-glass-card rounded-[2rem] border border-white/70 bg-white/95 shadow-2xl shadow-slate-950/10 backdrop-blur-xl animate-pop">
-      <div className="sheet-handle" />
+    <section
+      className="h-full min-h-0 w-full max-h-full overflow-y-auto rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6"
+      data-testid="workout-panel-surface"
+    >
+      <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-gray-200 dark:bg-white/20" aria-hidden="true" />
 
-      <div className="workout-capture-header compact">
+      <div className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <span className="app-section-kicker">{isEnglish ? 'Workout Sheet' : '오늘 운동'}</span>
-          <h2>{isEnglish ? 'Workout Log' : '기록하기'}</h2>
-          <p className="subtext compact">
+          <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">{isEnglish ? 'Workout Sheet' : '오늘 운동'}</span>
+          <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{isEnglish ? 'Workout Log' : '기록하기'}</h2>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
             {isEnglish
               ? 'Type and time are enough.'
               : '종류와 시간만 남기면 끝.'}
           </p>
         </div>
 
-        <div className="capture-header-actions">
-          <span className={`capture-status subtle ${todayDone ? 'done' : ''}`}>
+        <div className="grid justify-items-end gap-2">
+          <span className={`rounded-full px-3 py-1 text-xs font-black ${todayDone ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-300'}`}>
             {todayDone ? (isEnglish ? 'More available' : '추가 가능') : (isEnglish ? 'Ready' : '준비 완료')}
           </span>
           {onClose ? (
-            <button type="button" className="sheet-close-btn" onClick={onClose} disabled={loading}>
+            <button
+              type="button"
+              className="min-h-9 rounded-lg border border-gray-200 bg-white px-3 text-xs font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10"
+              onClick={onClose}
+              disabled={loading}
+              data-testid="workout-sheet-close"
+            >
               {isEnglish ? 'Close' : '닫기'}
             </button>
           ) : null}
         </div>
       </div>
 
-      <form className="workout-form" onSubmit={handleSubmit}>
-        <section className="sheet-tool-row compact">
+      <form className="grid gap-5" onSubmit={handleSubmit}>
+        <section className="grid gap-3 sm:grid-cols-2">
           <button
             type="button"
-            className={`sheet-tool-toggle app-control-card detail rounded-3xl border-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${showOptionalFields ? 'active border-emerald-400 bg-emerald-50 shadow-emerald-500/15' : 'border-slate-200 bg-white hover:border-emerald-300'}`}
+            className={`grid min-h-20 gap-1 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 disabled:opacity-50 ${showOptionalFields ? 'border-emerald-400 bg-emerald-50 text-emerald-950 shadow-sm dark:bg-emerald-500/15 dark:text-emerald-50' : 'border-gray-100 bg-white text-gray-950 shadow-sm dark:border-white/10 dark:bg-neutral-950 dark:text-white'}`}
             onClick={() => setShowOptionalFields((prev) => !prev)}
             disabled={loading}
             data-testid="workout-toggle-extras"
             aria-label={isEnglish ? `Notes and photos, ${optionalActionLabel}` : `\uBA54\uBAA8\uC640 \uC0AC\uC9C4, ${optionalActionLabel}`}
           >
-            <span className="sheet-tool-copy">
-              <strong>{isEnglish ? 'Notes & Photos' : '메모/사진'}</strong>
-              <span>{optionalSummary}</span>
+            <span className="grid gap-1">
+              <strong className="text-sm font-black">{isEnglish ? 'Notes & Photos' : '메모/사진'}</strong>
+              <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">{optionalSummary}</span>
             </span>
-            <span className="sheet-tool-state" aria-hidden="true" data-label={optionalActionLabel}>
+            <span className="mt-1 w-fit rounded-lg bg-white px-2.5 py-1 text-xs font-black text-emerald-700 shadow-sm dark:bg-neutral-900 dark:text-emerald-300" aria-hidden="true" data-label={optionalActionLabel}>
               {showOptionalFields ? (isEnglish ? 'Open' : '열림') : (isEnglish ? 'Add' : '추가')}
             </span>
           </button>
 
           <button
             type="button"
-            className={`sheet-tool-toggle app-control-card detail rounded-3xl border-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${showRoutineTools ? 'active border-emerald-400 bg-emerald-50 shadow-emerald-500/15' : 'border-slate-200 bg-white hover:border-emerald-300'}`}
+            className={`grid min-h-20 gap-1 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 disabled:opacity-50 ${showRoutineTools ? 'border-emerald-400 bg-emerald-50 text-emerald-950 shadow-sm dark:bg-emerald-500/15 dark:text-emerald-50' : 'border-gray-100 bg-white text-gray-950 shadow-sm dark:border-white/10 dark:bg-neutral-950 dark:text-white'}`}
             onClick={() => setShowRoutineTools((prev) => !prev)}
             disabled={loading}
             data-testid="workout-toggle-routines"
             aria-label={isEnglish ? `Saved routines, ${routineActionLabel}` : `\uC800\uC7A5 \uB8E8\uD2F4, ${routineActionLabel}`}
           >
-            <span className="sheet-tool-copy">
-              <strong>{isEnglish ? 'Saved Routines' : '내 루틴'}</strong>
-              <span>{routineSummary}</span>
+            <span className="grid gap-1">
+              <strong className="text-sm font-black">{isEnglish ? 'Saved Routines' : '내 루틴'}</strong>
+              <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">{routineSummary}</span>
             </span>
-            <span className="sheet-tool-state" aria-hidden="true" data-label={routineActionLabel}>
+            <span className="mt-1 w-fit rounded-lg bg-white px-2.5 py-1 text-xs font-black text-emerald-700 shadow-sm dark:bg-neutral-900 dark:text-emerald-300" aria-hidden="true" data-label={routineActionLabel}>
               {showRoutineTools ? (isEnglish ? 'Open' : '열림') : (isEnglish ? 'View' : '보기')}
             </span>
           </button>
         </section>
 
-        <section className="sheet-section quick-choice-section compact">
-          <span className="field-label-text">{isEnglish ? 'Quick Picks' : '빠른 선택'}</span>
-          <div className="quick-chip-row compact">
+        <section className="grid gap-3">
+          <span className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Quick Picks' : '빠른 선택'}</span>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {WORKOUT_OPTIONS.map((option) => (
               <button
                 key={option}
                 type="button"
-                className={`quick-choice-chip compact touch-manipulation rounded-2xl transition-all duration-200 ${workoutType === option ? 'active scale-[1.02] border-emerald-400 bg-emerald-50 text-emerald-800 shadow-md shadow-emerald-500/15 animate-pop' : 'hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50/50'}`}
+                className={`min-h-12 rounded-lg border px-3 text-sm font-black transition disabled:opacity-50 ${workoutType === option ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm dark:bg-emerald-500/15 dark:text-emerald-200' : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-300 hover:text-gray-950 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-300 dark:hover:text-white'}`}
                 onClick={() => handleQuickWorkoutTypePick(option)}
                 disabled={loading}
               >
-                <span className="quick-chip-mark">{getWorkoutMark(option)}</span>
+                <span className="mr-1 text-xs text-gray-400">{getWorkoutMark(option)}</span>
                 {getWorkoutTypeLabel(option, language)}
               </button>
             ))}
           </div>
         </section>
 
-        <section className="sheet-section quick-choice-section compact">
-          <span className="field-label-text">{isEnglish ? 'Duration' : '시간'}</span>
-          <div className="quick-chip-row compact">
+        <section className="grid gap-3">
+          <span className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Duration' : '시간'}</span>
+          <div className="grid grid-cols-4 gap-2">
             {QUICK_DURATION_OPTIONS.map((value) => (
               <button
                 key={value}
                 type="button"
-                className={`quick-choice-chip compact touch-manipulation rounded-2xl transition-all duration-200 ${Number(durationMinutes) === value ? 'active scale-[1.02] border-emerald-400 bg-emerald-50 text-emerald-800 shadow-md shadow-emerald-500/15 animate-pop' : 'hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50/50'}`}
+                className={`min-h-12 rounded-lg border px-3 text-sm font-black transition disabled:opacity-50 ${Number(durationMinutes) === value ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm dark:bg-emerald-500/15 dark:text-emerald-200' : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-300 hover:text-gray-950 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-300 dark:hover:text-white'}`}
                 onClick={() => handleQuickDurationPick(value)}
                 disabled={loading}
               >
@@ -437,83 +451,84 @@ export default function WorkoutPanel({
           </div>
         </section>
 
-        <section className={`sheet-section manual-edit-section compact ${showManualEditor ? 'expanded' : ''} ${usesCustomSelection ? 'customized' : ''}`}>
+        <section className="grid gap-3 rounded-2xl border border-gray-100 p-4 dark:border-white/10">
           <button
             type="button"
-            className="manual-edit-toggle"
+            className="flex items-center justify-between gap-3 text-left"
             aria-expanded={showManualEditor}
             onClick={() => setShowManualEditor((prev) => !prev)}
             disabled={loading}
+            data-testid="manual-edit-toggle"
             aria-label={isEnglish ? `Fine tune, ${manualActionLabel}` : `\uC138\uBD80 \uC870\uC815, ${manualActionLabel}`}
           >
-            <span className="manual-edit-copy">
-              <span className="manual-edit-label">{isEnglish ? 'Fine Tune' : '직접 입력'}</span>
-              <strong className="manual-edit-value">{manualSummary}</strong>
-              <span className="manual-edit-helper">
+            <span className="grid gap-1">
+              <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">{isEnglish ? 'Fine Tune' : '직접 입력'}</span>
+              <strong className="text-base font-black text-gray-950 dark:text-white">{manualSummary}</strong>
+              <span className="text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
                 {usesCustomSelection
                   ? (isEnglish ? 'A custom time is active. Open this to adjust it.' : '직접 입력한 값이 적용됐어요.')
                   : (isEnglish ? 'Only open this when you need a custom time.' : '원하는 시간은 여기서 바꿔요.')}
               </span>
             </span>
-            <span className="manual-edit-action" aria-hidden="true" data-label={manualActionLabel}>
+            <span className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-black text-gray-600 dark:bg-white/10 dark:text-gray-300" aria-hidden="true" data-label={manualActionLabel}>
               {showManualEditor ? (isEnglish ? 'Hide' : '접기') : (isEnglish ? 'Open' : '열기')}
             </span>
           </button>
 
           {showManualEditor && (
-            <div className="capture-field-grid manual-edit-fields">
-              <label className="field-label">
-                <span className="field-label-text">{isEnglish ? 'Workout Type' : '직접 선택'}</span>
-                <select className="workout-select compact" value={workoutType} onChange={handleWorkoutTypeChange} disabled={loading}>
+            <div className="grid gap-3 sm:grid-cols-2" data-testid="manual-edit-fields">
+              <label className="grid gap-2">
+                <span className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Workout Type' : '직접 선택'}</span>
+                <select className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none focus:border-emerald-400 dark:border-white/10 dark:bg-neutral-950 dark:text-white" value={workoutType} onChange={handleWorkoutTypeChange} disabled={loading}>
                   {selectableWorkoutOptions.map((option) => (
                     <option key={option} value={option}>{getWorkoutTypeLabel(option, language)}</option>
                   ))}
                 </select>
               </label>
 
-              <label className="field-label">
-                <span className="field-label-text">{isEnglish ? 'Duration (min)' : '시간(분)'}</span>
-                <input className="workout-input compact" type="number" min="0" max="300" step="5" value={durationMinutes} onChange={handleDurationChange} disabled={loading} />
+              <label className="grid gap-2">
+                <span className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Duration (min)' : '시간(분)'}</span>
+                <input className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none focus:border-emerald-400 dark:border-white/10 dark:bg-neutral-950 dark:text-white" type="number" min="0" max="300" step="5" value={durationMinutes} onChange={handleDurationChange} disabled={loading} />
               </label>
             </div>
           )}
         </section>
 
-        <div className="sheet-summary-bar compact">
-          <div className="capture-helper-card compact">
-            <span className="capture-helper-label">{isEnglish ? "Today's Logs" : '오늘 기록'}</span>
-            <strong className="capture-helper-value">{todayCount}</strong>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-[1fr_1fr_1.5fr]">
+          <div className="rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+            <span className="block text-xs font-black text-gray-400">{isEnglish ? "Today's Logs" : '오늘 기록'}</span>
+            <strong className="mt-1 block text-2xl font-black text-gray-950 dark:text-white">{todayCount}</strong>
           </div>
 
-          <div className="capture-helper-card compact product-shimmer">
-            <span className="capture-helper-label">{isEnglish ? 'XP preview' : '예상 XP'}</span>
-            <strong className="capture-helper-value">{`+${estimatedXp}`}</strong>
+          <div className="rounded-2xl bg-emerald-50 p-4 dark:bg-emerald-500/15">
+            <span className="block text-xs font-black text-emerald-700 dark:text-emerald-300">{isEnglish ? 'XP preview' : '예상 XP'}</span>
+            <strong className="mt-1 block text-2xl font-black text-emerald-700 dark:text-emerald-300">{`+${estimatedXp}`}</strong>
           </div>
 
           {recentWorkout?.workoutType && (
-            <button type="button" className="reuse-workout-btn compact" onClick={handleReuseRecent} disabled={loading}>
-              {isEnglish ? 'Recent Log' : '최근 기록'}
-              <span>
-                <span className="reuse-inline-mark">{getWorkoutMark(recentWorkout.workoutType)}</span>
+            <button type="button" className="col-span-2 rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-950 dark:hover:bg-white/10 sm:col-span-1" onClick={handleReuseRecent} disabled={loading}>
+              <span className="block text-xs font-black text-gray-400">{isEnglish ? 'Recent Log' : '최근 기록'}</span>
+              <strong className="mt-1 block text-sm font-black text-gray-950 dark:text-white">
+                {getWorkoutMark(recentWorkout.workoutType)} · {' '}
                 {getWorkoutTypeLabel(recentWorkout.workoutType, language)}
                 {recentWorkout.durationMinutes ? (isEnglish ? ` · ${recentWorkout.durationMinutes} min` : ` · ${recentWorkout.durationMinutes}분`) : ''}
-              </span>
+              </strong>
             </button>
           )}
         </div>
 
         {showRoutineTools && (
-          <section className="sheet-section routine-section compact">
-            <div className="routine-header-row">
-              <span className="field-label-text">{isEnglish ? 'Routines' : '루틴'}</span>
-              <span className="routine-count-pill">{isEnglish ? `${routineTemplates.length}` : `${routineTemplates.length}개`}</span>
+          <section className="grid gap-4 rounded-2xl border border-gray-100 p-4 dark:border-white/10">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Routines' : '루틴'}</span>
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-black text-gray-600 dark:bg-white/10 dark:text-gray-300">{isEnglish ? `${routineTemplates.length}` : `${routineTemplates.length}개`}</span>
             </div>
 
-            <div className="routine-save-row compact">
-              <label className="field-label routine-name-field">
-                <span className="field-label-text">{isEnglish ? 'Name' : '이름'}</span>
+            <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+              <label className="grid gap-2">
+                <span className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Name' : '이름'}</span>
                 <input
-                  className="workout-input compact"
+                  className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none focus:border-emerald-400 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
                   type="text"
                   maxLength="20"
                   placeholder={isEnglish ? 'ex: Morning Run' : '예: 아침 러닝'}
@@ -523,39 +538,34 @@ export default function WorkoutPanel({
                 />
               </label>
 
-              <button type="button" className="secondary-btn routine-save-btn compact" onClick={handleSaveRoutine} disabled={loading || !routineName.trim()}>
+              <button type="button" className="min-h-12 self-end rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10" onClick={handleSaveRoutine} disabled={loading || !routineName.trim()}>
                 {isEnglish ? 'Save' : '저장'}
               </button>
             </div>
 
             {routineTemplates.length > 0 ? (
-              <div className="routine-template-list compact">
+              <div className="grid gap-2">
                 {routineTemplates.map((routine) => (
-                  <div key={routine.id} className="routine-template-shell">
-                    <button type="button" className="routine-template-card compact" onClick={() => handleApplyRoutine(routine)} disabled={loading}>
-                      <div className="routine-template-top">
-                        <span className="workout-mark quick">{getWorkoutMark(routine.workout_type || '기타')}</span>
-                        <div className="routine-template-copy">
-                          <strong>{routine.name}</strong>
-                          <span>
+                  <div key={routine.id} className="grid grid-cols-[1fr_auto] gap-2 rounded-2xl bg-gray-50 p-2 dark:bg-white/10">
+                    <button type="button" className="grid gap-1 rounded-lg p-2 text-left hover:bg-white dark:hover:bg-neutral-950" onClick={() => handleApplyRoutine(routine)} disabled={loading}>
+                      <strong className="text-sm font-black text-gray-950 dark:text-white">{routine.name}</strong>
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
                             {getWorkoutTypeLabel(routine.workout_type, language)}
                             {routine.duration_minutes ? (isEnglish ? ` · ${routine.duration_minutes} min` : ` · ${routine.duration_minutes}분`) : ''}
-                          </span>
-                        </div>
-                      </div>
-                      {routine.note && <p className="routine-template-note">{routine.note}</p>}
+                      </span>
+                      {routine.note && <p className="m-0 text-xs font-semibold text-gray-500 dark:text-gray-400">{routine.note}</p>}
                     </button>
 
-                    <button type="button" className="mini-btn danger routine-delete-btn" onClick={() => onDeleteRoutine(routine.id)} disabled={loading}>
+                    <button type="button" className="self-start rounded-lg bg-rose-50 px-3 py-2 text-xs font-black text-rose-600 disabled:opacity-50 dark:bg-rose-500/15 dark:text-rose-300" onClick={() => onDeleteRoutine(routine.id)} disabled={loading}>
                       {isEnglish ? 'Delete' : '삭제'}
                     </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="routine-empty-card compact">
-                <strong>{isEnglish ? 'Save a combo' : '루틴 저장'}</strong>
-                <p>{isEnglish ? 'Start faster next time.' : '자주 하는 운동을 저장해요.'}</p>
+              <div className="grid gap-1 rounded-2xl border border-dashed border-gray-200 p-4 text-center dark:border-white/10">
+                <strong className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Save a combo' : '루틴 저장'}</strong>
+                <p className="m-0 text-sm font-semibold text-gray-500 dark:text-gray-400">{isEnglish ? 'Start faster next time.' : '자주 하는 운동을 저장해요.'}</p>
               </div>
             )}
           </section>
@@ -563,60 +573,74 @@ export default function WorkoutPanel({
 
         {showOptionalFields && (
           <>
-            <label className="field-label sheet-section compact">
-              <span className="field-label-text">{isEnglish ? 'Note' : '메모'}</span>
-              <textarea className="workout-textarea compact" rows="3" maxLength="120" placeholder={noteHint} value={note} onChange={(event) => setNote(event.target.value)} disabled={loading} />
+            <label className="grid gap-2">
+              <span className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Note' : '메모'}</span>
+              <textarea
+                className="min-h-24 resize-none rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm font-semibold leading-6 text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-emerald-400 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
+                rows="3"
+                maxLength="120"
+                placeholder={noteHint}
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                disabled={loading}
+                data-testid="workout-note"
+              />
             </label>
 
-            <section className="sheet-section compact">
-              <div className="photo-proof-header">
-                <span className="field-label-text">{isEnglish ? 'Photos' : '사진'}</span>
-                <span className="photo-proof-helper">
+            <section className="grid gap-3">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Photos' : '사진'}</span>
+                <span className="text-xs font-black text-gray-400">
                   {isEnglish ? `Up to ${MAX_PHOTOS}.` : `최대 ${MAX_PHOTOS}장`}
                 </span>
               </div>
 
-              <div className="photo-proof-actions">
-                <button type="button" className="secondary-btn photo-proof-btn" onClick={() => galleryInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
+              <div className="flex flex-wrap items-center gap-2">
+                <button type="button" className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10" onClick={() => galleryInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
                   {isEnglish ? 'Photos' : '사진'}
                 </button>
-                <button type="button" className="ghost-btn photo-proof-btn" onClick={() => cameraInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
+                <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={() => cameraInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
                   {isEnglish ? 'Camera' : '카메라'}
                 </button>
-                <span className="photo-proof-count">{isEnglish ? `${photoItems.length}/${MAX_PHOTOS}` : `${photoItems.length}/${MAX_PHOTOS}장`}</span>
+                <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-black text-gray-500 dark:bg-white/10 dark:text-gray-300">{isEnglish ? `${photoItems.length}/${MAX_PHOTOS}` : `${photoItems.length}/${MAX_PHOTOS}장`}</span>
               </div>
 
-              <input ref={galleryInputRef} className="hidden-file-input" type="file" accept="image/*" multiple onChange={handleFileChange} />
-              <input ref={cameraInputRef} className="hidden-file-input" type="file" accept="image/*" capture="environment" multiple onChange={handleFileChange} />
+              <input ref={galleryInputRef} className="sr-only" type="file" accept="image/*" multiple onChange={handleFileChange} data-testid="workout-gallery-input" />
+              <input ref={cameraInputRef} className="sr-only" type="file" accept="image/*" capture="environment" multiple onChange={handleFileChange} data-testid="workout-camera-input" />
 
               <PhotoProofList items={photoItems} isEnglish={isEnglish} onRemove={handleRemovePhoto} onMove={handleMovePhoto} />
             </section>
 
-            <section className="sheet-section compact">
-              <div className="feed-share-row">
+            <section className="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 p-4 dark:border-white/10">
+              <div className="grid gap-1">
                 <div>
-                  <span className="field-label-text">{isEnglish ? 'Share to Feed' : '피드에 공유'}</span>
-                  <p className="photo-proof-helper">
+                  <span className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Share to Feed' : '피드에 공유'}</span>
+                  <p className="m-0 text-sm font-semibold text-gray-500 dark:text-gray-400">
                     {isEnglish ? 'Off for private.' : '끄면 나만 볼 수 있어요'}
                   </p>
                 </div>
-                <button type="button" className={`toggle-chip ${shareToFeed ? 'active' : ''}`} onClick={() => setShareToFeed((prev) => !prev)} disabled={loading}>
-                  {shareToFeed ? (isEnglish ? 'Public' : '공개') : (isEnglish ? 'Private' : '비공개')}
-                </button>
               </div>
+              <button
+                type="button"
+                className={`min-h-10 rounded-lg px-4 text-sm font-black transition disabled:opacity-50 ${shareToFeed ? 'bg-emerald-500 text-white shadow-sm' : 'bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-300'}`}
+                onClick={() => setShareToFeed((prev) => !prev)}
+                disabled={loading}
+                data-testid="share-toggle"
+              >
+                {shareToFeed ? (isEnglish ? 'Public' : '공개') : (isEnglish ? 'Private' : '비공개')}
+              </button>
             </section>
           </>
         )}
 
-        <div className="sheet-submit-bar compact">
-          <button
-            type="submit"
-            className="primary-btn capture-submit-btn compact flex min-h-[56px] items-center justify-center rounded-2xl bg-emerald-500 px-5 text-base font-black text-white shadow-xl shadow-emerald-500/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
-            disabled={loading}
-          >
-            {loading ? (isEnglish ? 'Saving...' : '저장 중') : todayDone ? (isEnglish ? 'Save more' : '하나 더 저장') : (isEnglish ? 'Save' : '기록 저장')}
-          </button>
-        </div>
+        <button
+          type="submit"
+          className="sticky bottom-0 z-10 min-h-14 rounded-lg bg-emerald-500 px-5 text-base font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={loading}
+          data-testid="workout-submit"
+        >
+          {loading ? (isEnglish ? 'Saving...' : '저장 중') : todayDone ? (isEnglish ? 'Save more' : '하나 더 저장') : (isEnglish ? 'Save' : '기록 저장')}
+        </button>
       </form>
     </section>
   )
