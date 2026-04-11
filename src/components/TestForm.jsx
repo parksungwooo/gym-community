@@ -60,13 +60,9 @@ export default function TestForm({ onSubmit, loading }) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Progress Bar */}
       <div className="mb-8">
         <div className="h-2 bg-gray-100 rounded-3xl overflow-hidden">
-          <div 
-            className="h-full bg-emerald-500 transition-all duration-500 rounded-3xl"
-            style={{ width: `${progressPercent}%` }}
-          />
+          <div className="h-full bg-emerald-500 transition-all duration-500 rounded-3xl" style={{ width: `${progressPercent}%` }} />
         </div>
         <div className="flex justify-between text-xs text-gray-400 mt-2">
           <span>{currentIndex + 1} / {questions.length}</span>
@@ -96,35 +92,16 @@ export default function TestForm({ onSubmit, loading }) {
 
       <div className="flex gap-4">
         {currentIndex > 0 && (
-          <button
-            onClick={handlePrevious}
-            className="flex-1 py-5 text-lg font-semibold border-2 border-gray-300 rounded-3xl hover:bg-gray-50 transition-colors"
-          >
+          <button onClick={handlePrevious} className="flex-1 py-5 text-lg font-semibold border-2 border-gray-300 rounded-3xl hover:bg-gray-50 transition-colors">
             {isEnglish ? '← Previous' : '← 이전'}
           </button>
         )}
-
         {currentIndex === questions.length - 1 ? (
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !canSubmit}
-            className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 animate-pop"
-          >
-            {loading ? (
-              <>
-                <span className="animate-spin">⟳</span>
-                {isEnglish ? 'Calculating...' : '계산 중...'}
-              </>
-            ) : (
-              isEnglish ? 'See My Level →' : '내 레벨 확인하기 →'
-            )}
+          <button onClick={handleSubmit} disabled={loading || !canSubmit} className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50 animate-pop">
+            {loading ? '계산 중...' : '내 레벨 확인하기 →'}
           </button>
         ) : (
-          <button
-            onClick={handleNext}
-            disabled={!currentAnswer}
-            className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <button onClick={handleNext} disabled={!currentAnswer} className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50">
             {isEnglish ? 'Next →' : '다음 →'}
           </button>
         )}
