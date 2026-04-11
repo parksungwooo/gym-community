@@ -522,9 +522,9 @@ async function run() {
       "!document.querySelector('[data-testid=\"auth-required-modal\"]')",
       'guest workout save without auth prompt',
     )
-    await waitForCondition(session, "Boolean(document.querySelector('.app-toast'))", 'guest save toast')
+    await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"app-toast\"]'))", 'guest save toast')
     await delay(320)
-    await assertElementInViewport(session, '.app-toast', 'guest save toast')
+    await assertElementInViewport(session, '[data-testid="app-toast"]', 'guest save toast')
     await waitForCondition(session, "Boolean(document.querySelector('[data-testid=\"guest-sync-pending\"]'))", 'guest sync notice')
     await waitForCondition(
       session,

@@ -74,18 +74,18 @@ export default function AuthRequiredModal({
   const copy = getCopy(reason, isEnglish)
 
   return (
-    <div className="auth-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
+    <div className="fixed inset-0 z-50 grid place-items-end bg-gray-950/70 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-6 backdrop-blur-sm sm:place-items-center sm:px-6" role="dialog" aria-modal="true" onClick={onClose}>
       <section className="grid w-full max-w-md gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6" data-testid="auth-required-modal" onClick={(event) => event.stopPropagation()}>
-        <button type="button" className="modal-close-x" onClick={onClose} aria-label={isEnglish ? 'Close' : '닫기'}>&times;</button>
-        <span className="auth-modal-kicker">{isEnglish ? 'Account Needed' : '로그인 필요'}</span>
-        <h2>{copy.title}</h2>
-        <p>{copy.body}</p>
+        <button type="button" className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-lg bg-gray-100 text-xl font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onClose} aria-label={isEnglish ? 'Close' : '닫기'}>&times;</button>
+        <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{isEnglish ? 'Account Needed' : '로그인 필요'}</span>
+        <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{copy.title}</h2>
+        <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{copy.body}</p>
 
-        <div className="auth-modal-actions">
-          <button type="button" className="social-btn google compact" data-testid="auth-google" onClick={onGoogleSignIn} disabled={loading}>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <button type="button" className="min-h-12 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-800 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10" data-testid="auth-google" onClick={onGoogleSignIn} disabled={loading}>
             {loading ? (isEnglish ? 'Connecting...' : '연결 중...') : 'Google'}
           </button>
-          <button type="button" className="social-btn kakao compact" onClick={onKakaoSignIn} disabled={loading}>
+          <button type="button" className="min-h-12 rounded-lg bg-yellow-300 px-4 text-sm font-black text-gray-950 shadow-sm transition hover:bg-yellow-200 disabled:opacity-50" onClick={onKakaoSignIn} disabled={loading}>
             {loading ? (isEnglish ? 'Connecting...' : '연결 중...') : 'Kakao'}
           </button>
         </div>

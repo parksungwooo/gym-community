@@ -58,23 +58,23 @@ export default function ModerationPanel({
 
   return (
     <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-      <div className="app-section-heading compact">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <span className="app-section-kicker">{isEnglish ? 'Admin' : '운영'}</span>
-          <h2>{isEnglish ? 'Reports' : '신고'}</h2>
+          <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{isEnglish ? 'Admin' : '운영'}</span>
+          <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{isEnglish ? 'Reports' : '신고'}</h2>
         </div>
-        <span className="community-mini-pill">
+        <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">
           {isEnglish ? `${reports.length} reports` : `${reports.length}건`}
         </span>
       </div>
 
-      <p className="subtext compact">
+      <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
         {isEnglish ? 'Review and hide.' : '검토하고 숨기기'}
       </p>
 
-      <div className="moderation-toolbar">
+      <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
         <select
-          className="workout-select compact"
+          className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
           value={status}
           onChange={(event) => onStatusChange(event.target.value)}
           disabled={loading || actionLoading}
@@ -94,12 +94,12 @@ export default function ModerationPanel({
       </div>
 
       {loading ? (
-        <div className="skeleton-stack">
+        <div className="grid gap-3">
           {Array.from({ length: 2 }).map((_, index) => (
             <div key={index} className="grid gap-3 rounded-2xl bg-gray-100 p-4 dark:bg-white/10">
-              <span className="skeleton-line medium" />
-              <span className="skeleton-line long" />
-              <span className="skeleton-line long" />
+              <span className="h-3 w-24 animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
+              <span className="h-3 w-full animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
+              <span className="h-3 w-full animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
             </div>
           ))}
         </div>
@@ -110,7 +110,7 @@ export default function ModerationPanel({
           <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{isEnglish ? 'New ones show here.' : '새 신고가 보여요.'}</p>
         </div>
       ) : (
-        <div className="moderation-report-list">
+        <div className="grid gap-3">
           {reports.map((report) => {
             const resolutionNote = getResolutionNote(report)
             const visibility = getPostVisibilityCopy(report.post_visibility_status, isEnglish)
@@ -118,40 +118,40 @@ export default function ModerationPanel({
 
             return (
               <article key={report.id} className="grid gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950">
-                <div className="moderation-report-head">
+                <div className="flex items-start justify-between gap-3">
                   <div>
-                    <strong>{report.reason_label}</strong>
-                    <span>{formatTimestamp(report.created_at, language === 'en' ? 'en-US' : 'ko-KR')}</span>
+                    <strong className="block text-base font-black text-gray-950 dark:text-white">{report.reason_label}</strong>
+                    <span className="mt-1 block text-xs font-bold text-gray-700 dark:text-gray-200">{formatTimestamp(report.created_at, language === 'en' ? 'en-US' : 'ko-KR')}</span>
                   </div>
-                  <span className={`community-mini-pill moderation-status-pill ${report.status}`}>
+                  <span className={`rounded-full px-3 py-1.5 text-xs font-black ${report.status === 'open' ? 'bg-amber-50 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>
                     {getReportStatusLabel(report.status, isEnglish)}
                   </span>
                 </div>
 
-                <p className="moderation-report-meta">
+                <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
                   {isEnglish
                     ? `From ${report.reporter_name || 'Unknown'} / To ${report.target_name || report.post_author_name || 'Unknown'}`
                     : `${report.reporter_name || '이름없음'} / ${report.target_name || report.post_author_name || '이름없음'}`}
                 </p>
 
                 {report.post_id && (
-                  <div className="moderation-post-state-row">
-                    <span className={`moderation-post-pill ${report.post_visibility_status || 'visible'}`}>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`rounded-lg px-3 py-2 text-xs font-black ${report.post_visibility_status === 'visible' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200' : 'bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300'}`}>
                       {visibility.label}
                     </span>
                     {report.post_hidden_reason && (
-                      <span className="moderation-post-note">
+                      <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
                         {isEnglish ? `Note ${report.post_hidden_reason}` : `메모 ${report.post_hidden_reason}`}
                       </span>
                     )}
                   </div>
                 )}
 
-                {report.post_preview && <p className="moderation-report-preview">{report.post_preview}</p>}
-                {report.details && <p className="moderation-report-details">{report.details}</p>}
+                {report.post_preview && <p className="m-0 rounded-2xl bg-white p-3 text-sm font-semibold leading-6 text-gray-800 dark:bg-white/10 dark:text-gray-100">{report.post_preview}</p>}
+                {report.details && <p className="m-0 rounded-2xl bg-white p-3 text-sm font-semibold leading-6 text-gray-800 dark:bg-white/10 dark:text-gray-100">{report.details}</p>}
 
                 <textarea
-                  className="workout-textarea settings-textarea compact"
+                  className="min-h-24 resize-none rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm font-semibold leading-6 text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
                   rows="3"
                   maxLength="240"
                   placeholder={isEnglish ? 'Note' : '메모'}
@@ -163,11 +163,11 @@ export default function ModerationPanel({
                   disabled={actionLoading}
                 />
 
-                <div className="moderation-report-actions">
+                <div className="flex flex-wrap justify-end gap-2">
                   {report.post_id && (
                     <button
                       type="button"
-                      className={`ghost-chip ${visibility.actionTone === 'hide' ? 'danger-chip' : ''}`}
+                      className={`min-h-11 rounded-lg px-4 text-sm font-black transition disabled:opacity-50 ${visibility.actionTone === 'hide' ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-500/15 dark:text-rose-300' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100'}`}
                       onClick={() => onTogglePostVisibility(report, nextVisibility, resolutionNote)}
                       disabled={actionLoading}
                     >
@@ -184,7 +184,7 @@ export default function ModerationPanel({
                   </button>
                   <button
                     type="button"
-                    className="ghost-chip danger-chip"
+                    className="min-h-11 rounded-lg bg-rose-50 px-4 text-sm font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-50 dark:bg-rose-500/15 dark:text-rose-300"
                     onClick={() => onResolve(report.id, 'dismissed', resolutionNote)}
                     disabled={actionLoading}
                   >

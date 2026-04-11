@@ -33,6 +33,14 @@ function getWorkoutMark(type) {
   }
 }
 
+function getDisplayText(value, language = 'ko', fallback = '') {
+  if (value && typeof value === 'object') {
+    return value[language] ?? value.ko ?? value.en ?? fallback
+  }
+
+  return value ?? fallback
+}
+
 function buildNewPhotoItems(files) {
   return files.map((file, index) => ({
     id: `${file.name}-${file.lastModified}-${index}-${Math.random().toString(36).slice(2, 6)}`,
@@ -121,8 +129,8 @@ export default function WorkoutPanel({
   const defaultOptionalFields = Boolean(initialSelection?.note || initialSelection?.defaultShareToFeed === false)
   const [workoutType, setWorkoutType] = useState(() => initialSelection?.workoutType || '러닝')
   const [durationMinutes, setDurationMinutes] = useState(() => String(initialSelection?.durationMinutes || 30))
-  const [note, setNote] = useState(() => initialSelection?.note || '')
-  const [routineName, setRoutineName] = useState(() => initialSelection?.name || '')
+  const [note, setNote] = useState(() => getDisplayText(initialSelection?.note, language, ''))
+  const [routineName, setRoutineName] = useState(() => getDisplayText(initialSelection?.name, language, ''))
   const [photoItems, setPhotoItems] = useState([])
   const [shareToFeed, setShareToFeed] = useState(() => initialSelection?.defaultShareToFeed !== false)
   const [showRoutineTools, setShowRoutineTools] = useState(false)
@@ -301,12 +309,12 @@ export default function WorkoutPanel({
   const handleApplyRoutine = (routine) => {
     const nextWorkoutType = routine.workout_type || '러닝'
     const nextDurationMinutes = routine.duration_minutes || 30
-    const nextNote = routine.note || ''
+    const nextNote = getDisplayText(routine.note, language, '')
 
     setWorkoutType(nextWorkoutType)
     setDurationMinutes(String(nextDurationMinutes))
     setNote(nextNote)
-    setRoutineName(routine.name || '')
+    setRoutineName(getDisplayText(routine.name, language, ''))
     setShowRoutineTools(false)
     if (nextNote) setShowOptionalFields(true)
     syncManualEditor(nextWorkoutType, nextDurationMinutes)
@@ -345,7 +353,7 @@ export default function WorkoutPanel({
 
   return (
     <section
-      className="h-full min-h-0 w-full max-h-full overflow-y-auto rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6"
+      className="min-h-0 w-full max-h-[calc(100dvh-env(safe-area-inset-top)-1rem)] overflow-y-auto overscroll-contain rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:max-h-[calc(100dvh-3rem)] sm:p-6"
       data-testid="workout-panel-surface"
     >
       <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-gray-200 dark:bg-white/20" aria-hidden="true" />
@@ -545,22 +553,27 @@ export default function WorkoutPanel({
 
             {routineTemplates.length > 0 ? (
               <div className="grid gap-2">
-                {routineTemplates.map((routine) => (
-                  <div key={routine.id} className="grid grid-cols-[1fr_auto] gap-2 rounded-2xl bg-gray-50 p-2 dark:bg-white/10">
-                    <button type="button" className="grid min-h-11 gap-1 rounded-lg p-2 text-left hover:bg-white dark:hover:bg-neutral-950" onClick={() => handleApplyRoutine(routine)} disabled={loading}>
-                      <strong className="text-sm font-black text-gray-950 dark:text-white">{routine.name}</strong>
-                      <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
-                            {getWorkoutTypeLabel(routine.workout_type, language)}
-                            {routine.duration_minutes ? (isEnglish ? ` · ${routine.duration_minutes} min` : ` · ${routine.duration_minutes}분`) : ''}
-                      </span>
-                      {routine.note && <p className="m-0 text-xs font-semibold text-gray-700 dark:text-gray-200">{routine.note}</p>}
-                    </button>
+                {routineTemplates.map((routine, index) => {
+                  const displayName = getDisplayText(routine.name, language, isEnglish ? 'Routine' : '루틴')
+                  const displayNote = getDisplayText(routine.note, language, '')
 
-                    <button type="button" className="min-h-11 self-start rounded-lg bg-rose-50 px-3 text-xs font-black text-rose-600 disabled:opacity-50 dark:bg-rose-500/15 dark:text-rose-300" onClick={() => onDeleteRoutine(routine.id)} disabled={loading}>
-                      {isEnglish ? 'Delete' : '삭제'}
-                    </button>
-                  </div>
-                ))}
+                  return (
+                    <div key={routine.id ?? `${displayName}-${index}`} className="grid grid-cols-[1fr_auto] gap-2 rounded-2xl bg-gray-50 p-2 dark:bg-white/10">
+                      <button type="button" className="grid min-h-11 gap-1 rounded-lg p-2 text-left hover:bg-white dark:hover:bg-neutral-950" onClick={() => handleApplyRoutine(routine)} disabled={loading}>
+                        <strong className="text-sm font-black text-gray-950 dark:text-white">{displayName}</strong>
+                        <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
+                              {getWorkoutTypeLabel(routine.workout_type, language)}
+                              {routine.duration_minutes ? (isEnglish ? ` · ${routine.duration_minutes} min` : ` · ${routine.duration_minutes}분`) : ''}
+                        </span>
+                        {displayNote && <p className="m-0 text-xs font-semibold text-gray-700 dark:text-gray-200">{displayNote}</p>}
+                      </button>
+
+                      <button type="button" className="min-h-11 self-start rounded-lg bg-rose-50 px-3 text-xs font-black text-rose-600 disabled:opacity-50 dark:bg-rose-500/15 dark:text-rose-300" onClick={() => onDeleteRoutine(routine.id)} disabled={loading}>
+                        {isEnglish ? 'Delete' : '삭제'}
+                      </button>
+                    </div>
+                  )
+                })}
               </div>
             ) : (
               <div className="grid gap-1 rounded-2xl border border-dashed border-gray-200 p-4 text-center dark:border-white/10">

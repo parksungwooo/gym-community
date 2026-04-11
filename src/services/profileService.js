@@ -2,6 +2,13 @@ import { supabase } from '../lib/supabaseClient'
 import { resolveProfileAvatar } from './mediaService'
 import { assertServiceSuccess } from './serviceErrors'
 
+const BASE_PROFILE_SELECT = 'id,display_name,avatar_emoji,avatar_url,weekly_goal,height_cm,target_weight_kg,bio,fitness_tags,default_share_to_feed,reminder_enabled,reminder_time,total_xp,weekly_points,activity_level,activity_level_label,streak_days,last_activity_date,is_admin,created_at'
+const PROFILE_SELECT = `${BASE_PROFILE_SELECT},is_pro,is_premium,premium_until,subscription_tier,subscription_plan,subscription_provider`
+
+function isMissingPremiumColumnError(error) {
+  return error?.code === '42703' || /is_pro|is_premium|premium_until|subscription_tier|subscription_plan|subscription_provider/i.test(error?.message ?? '')
+}
+
 export async function upsertUser(userId) {
   const { error } = await supabase.from('users').upsert(
     {
@@ -17,11 +24,24 @@ export async function upsertUser(userId) {
 }
 
 export async function getUserProfile(userId) {
-  const { data, error } = await supabase
+  const query = supabase
     .from('users')
-    .select('id,display_name,avatar_emoji,avatar_url,weekly_goal,height_cm,target_weight_kg,bio,fitness_tags,default_share_to_feed,reminder_enabled,reminder_time,total_xp,weekly_points,activity_level,activity_level_label,streak_days,last_activity_date,is_admin,created_at')
+    .select(PROFILE_SELECT)
     .eq('id', userId)
+
+  const { data, error } = await query
     .maybeSingle()
+
+  if (isMissingPremiumColumnError(error)) {
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from('users')
+      .select(BASE_PROFILE_SELECT)
+      .eq('id', userId)
+      .maybeSingle()
+
+    assertServiceSuccess(fallbackError, 'users.get_profile')
+    return fallbackData
+  }
 
   assertServiceSuccess(error, 'users.get_profile')
 
@@ -56,8 +76,20 @@ export async function updateUserProfile(userId, profile) {
     .from('users')
     .update(payload)
     .eq('id', userId)
-    .select('id,display_name,avatar_emoji,avatar_url,weekly_goal,height_cm,target_weight_kg,bio,fitness_tags,default_share_to_feed,reminder_enabled,reminder_time,total_xp,weekly_points,activity_level,activity_level_label,streak_days,last_activity_date,is_admin,created_at')
+    .select(PROFILE_SELECT)
     .single()
+
+  if (isMissingPremiumColumnError(error)) {
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from('users')
+      .update(payload)
+      .eq('id', userId)
+      .select(BASE_PROFILE_SELECT)
+      .single()
+
+    assertServiceSuccess(fallbackError, 'users.update_profile')
+    return fallbackData
+  }
 
   assertServiceSuccess(error, 'users.update_profile')
 

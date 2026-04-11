@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import MonthlyCalendar from '../components/MonthlyCalendar'
+import PremiumStudio from '../components/PremiumStudio'
 import ProgressPanel from '../components/ProgressPanel'
 import ResultView from '../components/ResultView'
 import TestForm from '../components/TestForm'
@@ -15,6 +16,7 @@ export default function ProgressRoute({
   onGoHome,
   onSubmitTest,
   loadingAction,
+  profile,
   testResult,
   latestResult,
   badges,
@@ -23,6 +25,8 @@ export default function ProgressRoute({
   activitySummary,
   achievementBadges,
   recentActivityEvents,
+  isPro,
+  onOpenPaywall,
   onSaveWeight,
   workoutStats,
   workoutHistory,
@@ -219,6 +223,18 @@ export default function ProgressRoute({
         bodyMetrics={bodyMetrics}
         activitySummary={activitySummary}
         achievementBadges={achievementBadges}
+        recentActivityEvents={recentActivityEvents}
+      />
+      <PremiumStudio
+        isPro={isPro}
+        onOpenPaywall={onOpenPaywall}
+        profile={profile}
+        latestResult={latestResult}
+        workoutStats={workoutStats}
+        workoutHistory={workoutHistory}
+        weeklyGoal={weeklyGoal}
+        activitySummary={activitySummary}
+        bodyMetrics={bodyMetrics}
         recentActivityEvents={recentActivityEvents}
       />
       <MonthlyCalendar history={workoutHistory} />

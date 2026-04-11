@@ -38,7 +38,13 @@ export function createGuestProfile() {
     target_weight_kg: null,
     is_admin: false,
     is_pro: false,
+    is_premium: false,
+    isPremium: false,
+    premium_until: null,
+    premiumUntil: null,
     subscription_tier: 'free',
+    subscription_plan: 'free',
+    subscription_provider: null,
   }
 }
 

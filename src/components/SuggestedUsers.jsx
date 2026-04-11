@@ -62,15 +62,15 @@ export default function SuggestedUsers({
 
   return (
     <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-      <div className="app-section-heading compact">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <span className="app-section-kicker">{t('사람', 'People')}</span>
-          <h2 className="app-section-title small">{t('함께할 사람', 'Suggested people')}</h2>
+          <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('사람', 'People')}</span>
+          <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('함께할 사람', 'Suggested people')}</h2>
         </div>
-        <span className="community-mini-pill">{isEnglish ? `${rows.length} picks` : `${rows.length}명 추천`}</span>
+        <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{isEnglish ? `${rows.length} picks` : `${rows.length}명 추천`}</span>
       </div>
 
-      <p className="subtext compact">
+      <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
         {t(
           '비슷한 페이스부터 만나보세요.',
           'Start with a similar pace.',
@@ -78,20 +78,20 @@ export default function SuggestedUsers({
       </p>
 
       {loading && (
-        <div className="skeleton-stack compact">
+        <div className="grid gap-3">
           {Array.from({ length: 2 }).map((_, index) => (
             <div key={index} className="grid gap-3 rounded-2xl bg-gray-100 p-4 dark:bg-white/10">
-              <div className="skeleton-row">
-                <span className="skeleton-avatar" />
-                <div className="skeleton-copy">
-                  <span className="skeleton-line medium" />
-                  <span className="skeleton-line long" />
+              <div className="flex items-center gap-3">
+                <span className="h-12 w-12 animate-pulse rounded-2xl bg-gray-200 dark:bg-white/10" />
+                <div className="grid flex-1 gap-2">
+                  <span className="h-3 w-24 animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
+                  <span className="h-3 w-full animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
                 </div>
               </div>
-              <div className="skeleton-tag-row">
-                <span className="skeleton-chip" />
-                <span className="skeleton-chip wide" />
-                <span className="skeleton-chip" />
+              <div className="flex gap-2">
+                <span className="h-8 w-16 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
+                <span className="h-8 w-24 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
+                <span className="h-8 w-16 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
               </div>
             </div>
           ))}
@@ -111,7 +111,7 @@ export default function SuggestedUsers({
         </div>
       )}
 
-      <div className="suggested-user-list compact community-spotlight-grid">
+      <div className="grid gap-3">
         {rows.map((item) => {
           const isMe = item.user_id === currentUserId
           const isFollowing = followingIds.includes(item.user_id)
@@ -126,22 +126,22 @@ export default function SuggestedUsers({
                 selectedUserId === item.user_id ? 'ring-2 ring-emerald-400' : ''
               }`}
             >
-              <div className="community-spotlight-top">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <button
                   type="button"
-                  className="suggested-user-select-btn community-spotlight-select"
+                  className="min-w-0 flex-1 text-left"
                   onClick={() => onSelectUser?.(item)}
                 >
-                  <div className="suggested-user-top">
+                  <div className="flex min-w-0 items-center gap-3">
                     <UserAvatar
-                      className="suggested-user-avatar"
+                      className="h-12 w-12 rounded-2xl"
                       imageUrl={item.avatar_url}
                       fallback={item.avatar_emoji || 'RUN'}
                       alt={item.display_name || (isEnglish ? 'Suggested user' : '추천 사용자')}
                     />
-                    <div className="community-spotlight-copy">
-                      <strong className="suggested-user-name">{item.display_name}</strong>
-                      <p className="suggested-user-meta">{buildReason(item, currentLevel, language)}</p>
+                    <div className="min-w-0">
+                      <strong className="block truncate text-base font-black text-gray-950 dark:text-white">{item.display_name}</strong>
+                      <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{buildReason(item, currentLevel, language)}</p>
                     </div>
                   </div>
                 </button>
@@ -156,15 +156,15 @@ export default function SuggestedUsers({
                 )}
               </div>
 
-              <div className="community-score-strip">
-                <span className="community-score-pill accent">{`Lv ${item.activity_level ?? 1}`}</span>
-                <span className="community-score-pill warm">
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{`Lv ${item.activity_level ?? 1}`}</span>
+                <span className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-black text-amber-800 dark:bg-amber-500/15 dark:text-amber-200">
                   {t(`${item.weekly_points ?? 0}P 이번 주`, `${item.weekly_points ?? 0} pts this week`)}
                 </span>
-                <span className="community-score-pill subtle">{levelLabel}</span>
+                <span className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{levelLabel}</span>
               </div>
 
-              <div className="community-insight-grid">
+              <div className="grid gap-2 sm:grid-cols-3">
                 <Insight
                   label={t('이번 주 운동', 'This week')}
                   value={t(`${item.weekly_count ?? 0}회`, `${item.weekly_count ?? 0}`)}

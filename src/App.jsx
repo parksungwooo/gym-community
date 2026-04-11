@@ -72,7 +72,7 @@ import {
   shouldPushHomeBackGuard,
 } from './utils/appRouting'
 import { getLevelByScore } from './utils/level'
-import { PREMIUM_CONTEXT } from './utils/premium'
+import { FREE_WORKOUT_LOG_LIMIT, getCheckoutPreparation, PREMIUM_CONTEXT } from './utils/premium'
 import { getNextThemeMode, resolveThemeMode, THEME_STORAGE_KEY } from './utils/theme'
 
 const HomeRoute = lazy(() => import('./routes/HomeRoute'))
@@ -542,7 +542,7 @@ export default function App() {
     }
   }, [captureError, isEnglish, openAuthPrompt, setErrorMessage, syncGuestWorkoutsToAccount, user])
 
-  const handleUpgradePlan = useCallback((planId) => {
+  const handleUpgradePlan = useCallback((planId, provider = 'stripe') => {
     if (isPro) {
       showSuccess(
         isEnglish ? 'You are already on Pro.' : '이미 Pro 플랜을 사용 중이에요.',
@@ -558,10 +558,11 @@ export default function App() {
       return
     }
 
+    const checkout = getCheckoutPreparation(planId, provider)
     showSuccess(
       isEnglish
-        ? `Paywall is ready for ${planId}. Connect App Store / Play billing next to activate purchases.`
-        : `${planId === 'annual' ? '연간' : '월간'} Pro 결제 화면은 준비됐어요. 다음 단계로 App Store / Play 결제를 연결하면 실제 구매까지 이어집니다.`,
+        ? `${provider === 'stripe' ? 'Stripe' : 'Toss Payments'} checkout is ready for ${checkout.planId}. Connect ${checkout.priceId} next.`
+        : `${provider === 'stripe' ? 'Stripe' : 'Toss Payments'} ${checkout.planId === 'annual' ? '연간' : '월간'} Pro 결제 UI가 준비됐어요. 다음 단계에서 ${checkout.priceId}를 실제 결제창에 연결하면 됩니다.`,
       'info',
     )
     closePaywall()
@@ -1040,6 +1041,17 @@ export default function App() {
       view: VIEW.HOME,
       payload: workoutPayload,
     })) return false
+
+    if (!isPro && workoutHistory.length >= FREE_WORKOUT_LOG_LIMIT) {
+      openPaywall(PREMIUM_CONTEXT.UNLIMITED)
+      showSuccess(
+        isEnglish
+          ? `Free includes ${FREE_WORKOUT_LOG_LIMIT} saved workouts. Pro unlocks unlimited history.`
+          : `Free는 운동 기록 ${FREE_WORKOUT_LOG_LIMIT}개까지 저장돼요. Pro로 무제한 히스토리를 열 수 있어요.`,
+        'info',
+      )
+      return false
+    }
 
     const previousWeeklyCount = workoutStats.weeklyCount
     const previousTotalXp = activitySummary.totalXp
@@ -2005,6 +2017,21 @@ export default function App() {
 
     return null
   })()
+  const toastToneClass = {
+    default: 'border-emerald-100 bg-white text-gray-950 dark:border-emerald-400/20 dark:bg-neutral-900 dark:text-white',
+    success: 'border-emerald-100 bg-white text-gray-950 dark:border-emerald-400/20 dark:bg-neutral-900 dark:text-white',
+    info: 'border-sky-100 bg-white text-gray-950 dark:border-sky-400/20 dark:bg-neutral-900 dark:text-white',
+    routine: 'border-emerald-100 bg-white text-gray-950 dark:border-emerald-400/20 dark:bg-neutral-900 dark:text-white',
+    'danger-soft': 'border-rose-100 bg-white text-gray-950 dark:border-rose-400/20 dark:bg-neutral-900 dark:text-white',
+  }[successState?.accent ?? 'default'] ?? 'border-emerald-100 bg-white text-gray-950 dark:border-emerald-400/20 dark:bg-neutral-900 dark:text-white'
+  const toastDotClass = {
+    default: 'bg-emerald-700',
+    success: 'bg-emerald-700',
+    info: 'bg-sky-700 dark:bg-sky-300',
+    routine: 'bg-emerald-700',
+    'danger-soft': 'bg-rose-600 dark:bg-rose-300',
+  }[successState?.accent ?? 'default'] ?? 'bg-emerald-700'
+
   return (
     <div className="min-h-dvh bg-gradient-to-b from-gray-50 via-white to-emerald-50/40 text-gray-950 dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-900 dark:text-white">
       {guestSyncNotice && (
@@ -2055,9 +2082,14 @@ export default function App() {
         </section>
       )}
       {successState && (
-        <div className={`app-toast ${successState.accent ?? 'default'}`}>
-          <span className="app-toast-dot" />
-          <span className="app-toast-text">{successState.message}</span>
+        <div
+          className={`fixed bottom-[calc(env(safe-area-inset-bottom)+5.75rem)] left-1/2 z-50 flex w-[min(92vw,32rem)] -translate-x-1/2 items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-black shadow-sm sm:bottom-[calc(env(safe-area-inset-bottom)+6rem)] ${toastToneClass}`}
+          role="status"
+          aria-live="polite"
+          data-testid="app-toast"
+        >
+          <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${toastDotClass}`} />
+          <span>{successState.message}</span>
         </div>
       )}
       <AuthRequiredModal
@@ -2209,6 +2241,7 @@ export default function App() {
                   onGoHome={() => navigateToView(VIEW.HOME)}
                   onSubmitTest={handleSubmitTest}
                   loadingAction={loadingAction}
+                  profile={effectiveProfile}
                   testResult={testResult}
                   latestResult={latestResult}
                   badges={badges}
@@ -2264,6 +2297,8 @@ export default function App() {
                   onToggleMateInterest={handleToggleMateInterest}
                   onUpdateMatePostStatus={handleUpdateMatePostStatus}
                   isAdmin={isAdmin}
+                  isPro={isPro}
+                  onOpenPaywall={openPaywall}
                   moderationReports={moderationReports}
                   moderationLoading={loadingModeration}
                   moderationActionLoading={moderationActionLoading}

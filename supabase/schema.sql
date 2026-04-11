@@ -23,6 +23,12 @@ create table if not exists public.users (
   streak_days int not null default 0,
   last_activity_date date,
   is_admin boolean not null default false,
+  is_pro boolean not null default false,
+  is_premium boolean not null default false,
+  premium_until timestamptz,
+  subscription_tier text not null default 'free',
+  subscription_plan text not null default 'free',
+  subscription_provider text,
   created_at timestamptz not null default now()
 );
 
@@ -44,6 +50,12 @@ alter table public.users add column if not exists activity_level_label text not 
 alter table public.users add column if not exists streak_days int not null default 0;
 alter table public.users add column if not exists last_activity_date date;
 alter table public.users add column if not exists is_admin boolean not null default false;
+alter table public.users add column if not exists is_pro boolean not null default false;
+alter table public.users add column if not exists is_premium boolean not null default false;
+alter table public.users add column if not exists premium_until timestamptz;
+alter table public.users add column if not exists subscription_tier text not null default 'free';
+alter table public.users add column if not exists subscription_plan text not null default 'free';
+alter table public.users add column if not exists subscription_provider text;
 alter table public.users alter column weekly_goal set default 4;
 update public.users set weekly_goal = 4 where weekly_goal is null;
 update public.users set fitness_tags = '[]'::jsonb where fitness_tags is null;
@@ -53,6 +65,10 @@ update public.users set weekly_points = 0 where weekly_points is null;
 update public.users set activity_level = 1 where activity_level is null;
 update public.users set activity_level_label = 'Starter' where activity_level_label is null or activity_level_label = '';
 update public.users set streak_days = 0 where streak_days is null;
+update public.users set is_pro = false where is_pro is null;
+update public.users set is_premium = false where is_premium is null;
+update public.users set subscription_tier = 'free' where subscription_tier is null or subscription_tier = '';
+update public.users set subscription_plan = 'free' where subscription_plan is null or subscription_plan = '';
 alter table public.users alter column weekly_goal set not null;
 
 create table if not exists public.test_results (
@@ -297,6 +313,7 @@ create index if not exists idx_mate_posts_user_created_at on public.mate_posts (
 create index if not exists idx_mate_post_interests_post_id on public.mate_post_interests (post_id);
 create index if not exists idx_mate_post_interests_user_id on public.mate_post_interests (user_id);
 create index if not exists idx_users_display_name_trgm on public.users using gin (display_name gin_trgm_ops);
+create index if not exists idx_users_premium_until on public.users (is_premium, premium_until desc);
 
 insert into storage.buckets (id, name, public)
 select 'workout-photos', 'workout-photos', true
@@ -1848,6 +1865,9 @@ returns table (
   display_name text,
   avatar_emoji text,
   avatar_url text,
+  is_premium boolean,
+  premium_until timestamptz,
+  subscription_plan text,
   weekly_goal int,
   weekly_points int,
   weekly_count bigint,
@@ -1892,6 +1912,9 @@ as $$
     coalesce(nullif(u.display_name, ''), '게스트-' || left(u.id::text, 6)) as display_name,
     coalesce(u.avatar_emoji, 'RUN') as avatar_emoji,
     u.avatar_url as avatar_url,
+    coalesce(u.is_premium, false) as is_premium,
+    u.premium_until as premium_until,
+    coalesce(nullif(u.subscription_plan, ''), 'free') as subscription_plan,
     coalesce(u.weekly_goal, 4) as weekly_goal,
     coalesce(u.weekly_points, 0) as weekly_points,
     coalesce(ww.weekly_count, 0) as weekly_count,
@@ -1923,6 +1946,9 @@ returns table (
   display_name text,
   avatar_emoji text,
   avatar_url text,
+  is_premium boolean,
+  premium_until timestamptz,
+  subscription_plan text,
   bio text,
   fitness_tags jsonb,
   weekly_goal int,
@@ -1991,6 +2017,9 @@ as $$
     coalesce(nullif(u.display_name, ''), '게스트-' || left(u.id::text, 6)) as display_name,
     coalesce(u.avatar_emoji, 'RUN') as avatar_emoji,
     u.avatar_url as avatar_url,
+    coalesce(u.is_premium, false) as is_premium,
+    u.premium_until as premium_until,
+    coalesce(nullif(u.subscription_plan, ''), 'free') as subscription_plan,
     u.bio as bio,
     coalesce(u.fitness_tags, '[]'::jsonb) as fitness_tags,
     coalesce(u.weekly_goal, 4) as weekly_goal,

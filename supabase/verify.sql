@@ -167,6 +167,30 @@ select 'column.users.is_admin', exists (
     and column_name = 'is_admin'
 )
 union all
+select 'column.users.is_premium', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'users'
+    and column_name = 'is_premium'
+)
+union all
+select 'column.users.premium_until', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'users'
+    and column_name = 'premium_until'
+)
+union all
+select 'column.users.subscription_plan', exists (
+  select 1
+  from information_schema.columns
+  where table_schema = 'public'
+    and table_name = 'users'
+    and column_name = 'subscription_plan'
+)
+union all
 select 'column.users.total_xp', exists (
   select 1
   from information_schema.columns
@@ -356,6 +380,13 @@ select 'index.users_display_name_trgm', exists (
   from pg_indexes
   where schemaname = 'public'
     and indexname = 'idx_users_display_name_trgm'
+)
+union all
+select 'index.users_premium_until', exists (
+  select 1
+  from pg_indexes
+  where schemaname = 'public'
+    and indexname = 'idx_users_premium_until'
 )
 union all
 select 'index.reports_status_created_at', exists (

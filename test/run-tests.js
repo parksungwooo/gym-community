@@ -10,7 +10,8 @@ import { getTodayWorkoutRecommendation } from '../src/features/workout/recommend
 import { getActivityEventMeta, getActivityLevelProgress } from '../src/utils/activityLevel.js'
 import { buildAppHistoryState, getHashForView, parseViewFromHash, shouldPushHomeBackGuard } from '../src/utils/appRouting.js'
 import { getImageSourceCandidates } from '../src/utils/imageOptimization.js'
-import { getPaywallCopy, isProMember, PREMIUM_CONTEXT } from '../src/utils/premium.js'
+import { getCheckoutPreparation, getPaywallCopy, isProMember, PREMIUM_CONTEXT } from '../src/utils/premium.js'
+import { buildAdvancedAnalytics, buildAiTrainingPlan } from '../src/utils/premiumInsights.js'
 import { getNextThemeMode, normalizeThemeMode, resolveThemeMode } from '../src/utils/theme.js'
 
 const tests = [
@@ -246,6 +247,45 @@ const tests = [
     },
   },
   {
+    name: 'AI premium plan uses level, goal, and history to build renderable sessions',
+    run() {
+      const plan = buildAiTrainingPlan({
+        latestResult: { level: 'Lv3' },
+        workoutHistory: [
+          { date: '2026-04-10', workout_type: '웨이트', duration_minutes: 40 },
+          { date: '2026-04-09', workout_type: '러닝', duration_minutes: 25 },
+        ],
+        workoutStats: { weeklyCount: 2, streak: 2 },
+        weeklyGoal: 4,
+        language: 'ko',
+      })
+
+      assert.equal(plan.weeklyTarget, '주 4회')
+      assert.ok(plan.weekPlan.length >= 4)
+      assert.equal(typeof plan.weekPlan[0].focus, 'string')
+    },
+  },
+  {
+    name: 'advanced premium analytics returns 1RM and recovery signals',
+    run() {
+      const analytics = buildAdvancedAnalytics({
+        latestResult: { level: 'Lv4' },
+        workoutHistory: [
+          { date: '2026-04-10', workout_type: '웨이트', duration_minutes: 45 },
+          { date: '2026-04-08', workout_type: '웨이트', duration_minutes: 35 },
+        ],
+        workoutStats: { weeklyCount: 2, streak: 3 },
+        weeklyGoal: 4,
+        language: 'en',
+        isEnglish: true,
+      })
+
+      assert.equal(analytics.cards.length, 4)
+      assert.match(analytics.cards[1].value, /kg/)
+      assert.equal(analytics.chartBuckets.length, 7)
+    },
+  },
+  {
     name: 'image source candidates fall back to the original public URL',
     run() {
       const candidates = getImageSourceCandidates(
@@ -262,8 +302,21 @@ const tests = [
     name: 'isProMember detects common pro flags',
     run() {
       assert.equal(isProMember({ is_pro: true }), true)
+      assert.equal(isProMember({ isPremium: true, premiumUntil: '2099-01-01T00:00:00Z' }), true)
+      assert.equal(isProMember({ is_premium: true, premium_until: '2000-01-01T00:00:00Z' }), false)
       assert.equal(isProMember({ subscription_tier: 'pro' }), true)
       assert.equal(isProMember({ plan_tier: 'free' }), false)
+    },
+  },
+  {
+    name: 'checkout preparation exposes Stripe and Toss subscription IDs',
+    run() {
+      const stripeCheckout = getCheckoutPreparation('annual', 'stripe')
+      const tossCheckout = getCheckoutPreparation('monthly', 'toss')
+
+      assert.equal(stripeCheckout.mode, 'subscription')
+      assert.match(stripeCheckout.priceId, /price_gym_pro_annual/)
+      assert.equal(tossCheckout.priceId, 'gym_pro_monthly')
     },
   },
   {

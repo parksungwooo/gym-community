@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import UserAvatar from './UserAvatar'
 import { useI18n } from '../i18n.js'
 import { localizeLevelText } from '../utils/level'
+import { PREMIUM_CONTEXT } from '../utils/premium'
 
 const AVATAR_OPTIONS = ['RUN', 'GYM', 'ZEN', 'LIFT', 'CARD', 'FLOW']
 const GOAL_OPTIONS = [3, 4, 5, 6]
@@ -9,21 +10,21 @@ const FITNESS_TAG_OPTIONS = ['러닝', '웨이트', '다이어트', '벌크업',
 
 function SettingRow({ label, helper, compact = false, children }) {
   return (
-    <section className={`settings-row ${compact ? 'compact' : ''}`}>
-      <div className="settings-row-copy">
-        <strong>{label}</strong>
-        {helper ? <span>{helper}</span> : null}
+    <section className={`grid gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950 ${compact ? 'sm:grid-cols-[0.9fr_1.1fr] sm:items-start' : ''}`}>
+      <div className="grid gap-1">
+        <strong className="text-sm font-black text-gray-950 dark:text-white">{label}</strong>
+        {helper ? <span className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{helper}</span> : null}
       </div>
-      <div className="settings-row-control">{children}</div>
+      <div className="min-w-0">{children}</div>
     </section>
   )
 }
 
 function SummaryStat({ label, value }) {
   return (
-    <article className="profile-summary-stat">
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <article className="grid gap-1 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+      <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">{label}</span>
+      <strong className="truncate text-2xl font-black leading-tight text-gray-950 dark:text-white">{value}</strong>
     </article>
   )
 }
@@ -32,13 +33,13 @@ function MenuButton({ menuKey, label, meta, active, onClick }) {
   return (
     <button
       type="button"
-      className={`profile-menu-button ${active ? 'active' : ''}`}
+      className={`min-h-16 rounded-2xl border p-4 text-left transition ${active ? 'active border-emerald-500 bg-emerald-50 text-emerald-950 shadow-sm dark:bg-emerald-700/20 dark:text-emerald-50' : 'border-gray-100 bg-gray-50 text-gray-950 hover:bg-white dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:hover:bg-white/10'}`}
       onClick={onClick}
       data-testid={`profile-menu-${menuKey}`}
     >
-      <div className="profile-menu-button-copy">
-        <strong>{label}</strong>
-        <span>{meta}</span>
+      <div className="grid gap-1">
+        <strong className="text-base font-black">{label}</strong>
+        <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{meta}</span>
       </div>
     </button>
   )
@@ -56,6 +57,8 @@ export default function ProfilePanel({
   canUseCommunity,
   language,
   reminderPermission,
+  isPro,
+  onOpenPaywall,
   onSetLanguage,
   onRequestAuth,
   onRequestReminderPermission,
@@ -72,6 +75,10 @@ export default function ProfilePanel({
   const avatarUrl = profile?.avatar_url || ''
   const weeklyGoal = profile?.weekly_goal || 4
   const currentTags = Array.isArray(profile?.fitness_tags) ? profile.fitness_tags : []
+  const premiumUntil = profile?.premium_until ?? profile?.premiumUntil
+  const premiumUntilLabel = premiumUntil
+    ? new Date(premiumUntil).toLocaleDateString(language === 'en' ? 'en-US' : 'ko-KR', { month: 'short', day: 'numeric' })
+    : t('활성', 'Active')
 
   const [draftName, setDraftName] = useState(profile?.display_name ?? '')
   const [draftAvatar, setDraftAvatar] = useState(avatarTag)
@@ -270,32 +277,43 @@ export default function ProfilePanel({
   return (
     <section className="grid gap-6">
       <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-        <div className="profile-settings-top compact profile-settings-top-simple">
-          <div className="profile-photo-stack">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="shrink-0">
             <UserAvatar
-              className="profile-avatar large compact"
+              className="h-20 w-20 rounded-3xl sm:h-24 sm:w-24"
               imageUrl={draftAvatarUrl}
               fallback={draftAvatar}
               alt={isEnglish ? 'Profile photo' : '프로필 사진'}
             />
           </div>
 
-          <div className="profile-settings-copy">
-            <span className="app-section-kicker">{isGuest ? t('게스트 체험 중', 'Guest Trial') : t('프로필', 'Profile')}</span>
-            <h2 className="profile-settings-name compact">{heroDisplayName}</h2>
-            <p className="subtext compact">{heroBio}</p>
+          <div className="grid min-w-0 gap-2">
+            <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{isGuest ? t('게스트 체험 중', 'Guest Trial') : t('프로필', 'Profile')}</span>
+            <h2 className="m-0 truncate text-3xl font-black leading-tight text-gray-950 dark:text-white">{heroDisplayName}</h2>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{heroBio}</p>
+
+            <div className="flex flex-wrap gap-2">
+              <span className={`rounded-lg px-3 py-2 text-xs font-black ${isPro ? 'bg-emerald-700 text-white' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>
+                {isPro ? t('Pro 멤버', 'Pro member') : t('Free 플랜', 'Free plan')}
+              </span>
+              {isPro ? (
+                <span className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">
+                  {t(`유효 ${premiumUntilLabel}`, `Valid ${premiumUntilLabel}`)}
+                </span>
+              ) : null}
+            </div>
 
             {!!draftTags.length && (
-              <div className="profile-tag-row">
+              <div className="flex flex-wrap gap-2">
                 {draftTags.map((tag) => (
-                  <span key={tag} className="profile-tag-pill">{tag}</span>
+                  <span key={tag} className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{tag}</span>
                 ))}
               </div>
             )}
           </div>
         </div>
 
-        <div className="profile-summary-grid compact profile-summary-grid-simple">
+        <div className="grid gap-3 sm:grid-cols-3">
           <SummaryStat label={t('레벨', 'Level')} value={heroLevelLabel} />
           <SummaryStat label={t('목표', 'Goal')} value={`${stats.weeklyCount}/${draftGoal}`} />
           <SummaryStat label={t('팔로워', 'Followers')} value={String(followStats?.followerCount ?? 0)} />
@@ -304,28 +322,28 @@ export default function ProfilePanel({
 
       {setupCard && (
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <div className="app-section-heading compact">
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <span className="app-section-kicker">{t('다음', 'Next')}</span>
-              <h2 className="app-section-title small">{t('시작 준비', 'Profile setup')}</h2>
+              <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('다음', 'Next')}</span>
+              <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('시작 준비', 'Profile setup')}</h2>
             </div>
-            <span className="community-mini-pill accent">{`${readyStepCount}/${readySteps.length}`}</span>
+            <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{`${readyStepCount}/${readySteps.length}`}</span>
           </div>
 
-          <div className="profile-next-step-copy">
-            <strong>{setupCard.title}</strong>
-            <p>{setupCard.body}</p>
+          <div className="grid gap-2 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+            <strong className="text-base font-black text-gray-950 dark:text-white">{setupCard.title}</strong>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{setupCard.body}</p>
           </div>
 
-          <div className="profile-next-step-status">
+          <div className="flex flex-wrap gap-2">
             {readySteps.map((step) => (
-              <span key={step.key} className={`profile-next-step-chip ${step.done ? 'done' : ''}`}>
+              <span key={step.key} className={`rounded-lg px-3 py-2 text-xs font-black ${step.done ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>
                 {step.label}
               </span>
             ))}
           </div>
 
-          <div className="profile-next-step-actions">
+          <div className="grid">
             <button
               type="button"
               className="min-h-12 rounded-lg bg-emerald-700 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50"
@@ -339,20 +357,20 @@ export default function ProfilePanel({
       )}
 
       <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-        <div className="app-section-heading compact">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <span className="app-section-kicker">{t('마이페이지', 'My page')}</span>
-            <h2 className="app-section-title small">{t('빠른 이동', 'Quick access')}</h2>
+            <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('마이페이지', 'My page')}</span>
+            <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('빠른 이동', 'Quick access')}</h2>
           </div>
-          <span className="community-mini-pill">{activeSectionTitle}</span>
+          <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{activeSectionTitle}</span>
         </div>
 
         {setupCard && (
           <>
-            <div className="profile-setup-inline">
-              <div className="profile-setup-inline-copy">
-                <span className="profile-setup-inline-label">{t('다음 한 걸음', 'Next best step')}</span>
-                <strong>{setupCard.title}</strong>
+            <div className="grid gap-3 rounded-2xl bg-gray-50 p-4 dark:bg-white/10 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div className="grid gap-1">
+                <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">{t('다음 한 걸음', 'Next best step')}</span>
+                <strong className="text-base font-black text-gray-950 dark:text-white">{setupCard.title}</strong>
               </div>
               <button
                 type="button"
@@ -364,9 +382,9 @@ export default function ProfilePanel({
               </button>
             </div>
 
-            <div className="profile-next-step-status inline">
+            <div className="flex flex-wrap gap-2">
               {readySteps.map((step) => (
-                <span key={step.key} className={`profile-next-step-chip ${step.done ? 'done' : ''}`}>
+                <span key={step.key} className={`rounded-lg px-3 py-2 text-xs font-black ${step.done ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>
                   {step.label}
                 </span>
               ))}
@@ -374,7 +392,7 @@ export default function ProfilePanel({
           </>
         )}
 
-        <div className="profile-menu-grid">
+        <div className="grid gap-3 sm:grid-cols-2">
           {menuItems.map((item) => (
             <MenuButton
               key={item.key}
@@ -388,10 +406,10 @@ export default function ProfilePanel({
         </div>
       </section>
 
-      <form className="profile-settings-stack compact" onSubmit={handleSubmit}>
+      <form className="grid gap-5" onSubmit={handleSubmit}>
         <input
           ref={fileInputRef}
-          className="hidden-file-input"
+          className="sr-only"
           type="file"
           accept="image/*"
           onChange={handleAvatarFileChange}
@@ -400,8 +418,8 @@ export default function ProfilePanel({
         {activeSection === 'profile' && (
           <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
             <div className="grid gap-1">
-              <span className="app-section-kicker">{t('내 정보', 'Identity')}</span>
-              <h2 className="app-section-title small">{t('프로필 기본 정보', 'Profile basics')}</h2>
+              <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('내 정보', 'Identity')}</span>
+              <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('프로필 기본 정보', 'Profile basics')}</h2>
             </div>
 
             <SettingRow
@@ -409,10 +427,10 @@ export default function ProfilePanel({
               helper={t('커뮤니티에서 보여요.', 'Needed to save.')}
               compact
             >
-              <div className="settings-input-stack">
+              <div className="grid gap-2">
                 <input
                   ref={nicknameInputRef}
-                  className={`workout-input settings-input compact ${nicknameMissing ? 'invalid' : ''}`}
+                  className={`min-h-12 rounded-lg border bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300 ${nicknameMissing ? 'border-rose-300 dark:border-rose-400/40' : 'border-gray-200 dark:border-white/10'}`}
                   type="text"
                   maxLength="20"
                   required
@@ -422,7 +440,7 @@ export default function ProfilePanel({
                   disabled={loading}
                 />
                 {nicknameMissing && (
-                  <span className="field-error-text">
+                  <span className="text-sm font-bold text-rose-700 dark:text-rose-300">
                     {t('닉네임을 입력해 주세요.', 'Enter a nickname.')}
                   </span>
                 )}
@@ -434,14 +452,14 @@ export default function ProfilePanel({
               helper={t('피드와 프로필에 보여요.', 'Shows in community.')}
               compact
             >
-              <div className="profile-photo-field">
+              <div className="grid gap-3 sm:grid-cols-[auto_1fr] sm:items-center">
                 <UserAvatar
-                  className="profile-photo-preview"
+                  className="h-16 w-16 rounded-2xl"
                   imageUrl={draftAvatarUrl}
                   fallback={draftAvatar}
                   alt={isEnglish ? 'Profile preview' : '프로필 미리보기'}
                 />
-                <div className="profile-photo-field-actions">
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     className="min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
@@ -464,12 +482,12 @@ export default function ProfilePanel({
               helper={t('사진 없을 때 보여요.', 'Used without a photo.')}
               compact
             >
-              <div className="avatar-grid settings-avatar-grid compact">
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
                 {AVATAR_OPTIONS.map((item) => (
                   <button
                     key={item}
                     type="button"
-                    className={`avatar-btn compact ${draftAvatar === item ? 'active' : ''}`}
+                    className={`min-h-11 rounded-lg px-3 text-sm font-black transition disabled:opacity-50 ${draftAvatar === item ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                     onClick={() => setDraftAvatar(item)}
                     disabled={loading}
                   >
@@ -485,7 +503,7 @@ export default function ProfilePanel({
               compact
             >
               <textarea
-                className="workout-textarea settings-textarea compact"
+                className="min-h-24 resize-none rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm font-semibold leading-6 text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
                 rows="3"
                 maxLength="90"
                 value={draftBio}
@@ -500,12 +518,12 @@ export default function ProfilePanel({
               helper={t('최대 4개', 'Up to 4.')}
               compact
             >
-              <div className="profile-tag-selector">
+              <div className="flex flex-wrap gap-2">
                 {activeTagOptions.map((tag) => (
                   <button
                     key={tag}
                     type="button"
-                    className={`tag-chip ${draftTags.includes(tag) ? 'active' : ''}`}
+                    className={`min-h-11 rounded-lg px-3 text-sm font-black transition disabled:opacity-50 ${draftTags.includes(tag) ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                     onClick={() => toggleTag(tag)}
                     disabled={loading || (!draftTags.includes(tag) && draftTags.length >= 4)}
                   >
@@ -520,11 +538,11 @@ export default function ProfilePanel({
         {activeSection === 'activity' && (
           <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
             <div className="grid gap-1">
-              <span className="app-section-kicker">{t('내 활동', 'Activity')}</span>
-              <h2 className="app-section-title small">{t('목표', 'Goals')}</h2>
+              <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('내 활동', 'Activity')}</span>
+              <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('목표', 'Goals')}</h2>
             </div>
 
-            <div className="profile-summary-grid compact profile-menu-summary-grid">
+            <div className="grid gap-3 sm:grid-cols-3">
               <SummaryStat label={t('현재 레벨', 'Current level')} value={latestLevelLabel} />
               <SummaryStat label={t('주간 목표', 'Weekly goal')} value={isEnglish ? `${stats.weeklyCount}/${draftGoal}` : `${stats.weeklyCount}/${draftGoal}회`} />
               <SummaryStat label={t('팔로잉', 'Following')} value={String(followStats?.followingCount ?? 0)} />
@@ -536,7 +554,7 @@ export default function ProfilePanel({
               compact
             >
               <input
-                className="workout-input settings-input compact"
+                className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
                 type="number"
                 min="1"
                 step="0.1"
@@ -553,7 +571,7 @@ export default function ProfilePanel({
               compact
             >
               <input
-                className="workout-input settings-input compact"
+                className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
                 type="number"
                 min="1"
                 step="0.1"
@@ -569,12 +587,12 @@ export default function ProfilePanel({
               helper={t('홈에 보여요.', 'Shown on Home.')}
               compact
             >
-              <div className="goal-chip-row settings-goal-row compact">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {GOAL_OPTIONS.map((goal) => (
                   <button
                     key={goal}
                     type="button"
-                    className={`goal-chip compact ${draftGoal === goal ? 'active' : ''}`}
+                    className={`min-h-11 rounded-lg px-3 text-sm font-black transition disabled:opacity-50 ${draftGoal === goal ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                     onClick={() => setDraftGoal(goal)}
                     disabled={loading}
                   >
@@ -584,7 +602,7 @@ export default function ProfilePanel({
               </div>
             </SettingRow>
 
-            <p className="subtext compact settings-inline-note">
+            <p className="m-0 rounded-2xl bg-gray-50 p-4 text-sm font-semibold leading-6 text-gray-700 dark:bg-white/10 dark:text-gray-200">
               {t('체중은 기록 탭에서 남겨요.', 'Log weight in Records.')}
             </p>
           </section>
@@ -593,11 +611,11 @@ export default function ProfilePanel({
         {activeSection === 'community' && (
           <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
             <div className="grid gap-1">
-              <span className="app-section-kicker">{t('커뮤니티', 'Community')}</span>
-              <h2 className="app-section-title small">{t('공개', 'Sharing')}</h2>
+              <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('커뮤니티', 'Community')}</span>
+              <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('공개', 'Sharing')}</h2>
             </div>
 
-            <div className="profile-summary-grid compact profile-menu-summary-grid">
+            <div className="grid gap-3 sm:grid-cols-3">
               <SummaryStat label={t('팔로워', 'Followers')} value={String(followStats?.followerCount ?? 0)} />
               <SummaryStat label={t('팔로잉', 'Following')} value={String(followStats?.followingCount ?? 0)} />
               <SummaryStat label={t('닉네임', 'Nickname')} value={nicknameMissing ? t('필요', 'Required') : t('준비 완료', 'Ready')} />
@@ -610,7 +628,7 @@ export default function ProfilePanel({
             >
               <button
                 type="button"
-                className={`toggle-chip ${draftDefaultShare ? 'active' : ''}`}
+                className={`min-h-11 rounded-lg px-4 text-sm font-black transition disabled:opacity-50 ${draftDefaultShare ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                 onClick={() => setDraftDefaultShare((prev) => !prev)}
                 disabled={loading}
               >
@@ -628,19 +646,49 @@ export default function ProfilePanel({
         {activeSection === 'settings' && (
           <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
             <div className="grid gap-1">
-              <span className="app-section-kicker">{t('설정', 'Settings')}</span>
-              <h2 className="app-section-title small">{t('설정', 'Settings')}</h2>
+              <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('설정', 'Settings')}</span>
+              <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('설정', 'Settings')}</h2>
             </div>
+
+            <SettingRow
+              label={t('Pro 구독', 'Pro subscription')}
+              helper={isPro
+                ? t('AI 플랜, 고급 분석, 공유 카드가 열려 있어요.', 'AI plans, analytics, and share cards are unlocked.')
+                : t('AI 플랜과 Pro 클럽을 열 수 있어요.', 'Unlock AI plans and Pro Club.')}
+              compact
+            >
+              <div className="grid gap-3">
+                <div className="grid gap-1 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+                  <strong className="text-base font-black text-gray-950 dark:text-white">
+                    {isPro ? t('Pro 사용 중', 'Pro active') : t('Free 사용 중', 'Free active')}
+                  </strong>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    {isPro
+                      ? t(`다음 갱신/만료: ${premiumUntilLabel}`, `Renews/expires: ${premiumUntilLabel}`)
+                      : t('연간 Pro는 월 4,900원 수준으로 가장 저렴해요.', 'Annual Pro gives the best monthly price.')}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className={isPro
+                    ? 'min-h-11 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'
+                    : 'min-h-11 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800'}
+                  onClick={() => onOpenPaywall?.(PREMIUM_CONTEXT.AI_PLAN)}
+                >
+                  {isPro ? t('Pro 혜택 보기', 'View Pro benefits') : t('Pro 업그레이드', 'Upgrade to Pro')}
+                </button>
+              </div>
+            </SettingRow>
 
             <SettingRow
               label={t('운동 리마인더', 'Workout reminder')}
               helper={t('정한 시간에 알려드릴게요.', 'Alerts at that time.')}
               compact
             >
-              <div className="settings-reminder-stack">
+              <div className="grid gap-3">
                 <button
                   type="button"
-                  className={`toggle-chip ${draftReminderEnabled ? 'active' : ''}`}
+                  className={`min-h-11 rounded-lg px-4 text-sm font-black transition disabled:opacity-50 ${draftReminderEnabled ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                   onClick={() => setDraftReminderEnabled((prev) => !prev)}
                   disabled={loading}
                 >
@@ -650,13 +698,13 @@ export default function ProfilePanel({
                 {draftReminderEnabled && (
                   <>
                     <input
-                      className="workout-input settings-input compact"
+                      className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
                       type="time"
                       value={draftReminderTime}
                       onChange={(event) => setDraftReminderTime(event.target.value)}
                       disabled={loading}
                     />
-                    <div className="settings-reminder-meta">
+                    <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
                       <span>{reminderPermissionLabel}</span>
                       {reminderPermission !== 'granted' && reminderPermission !== 'unsupported' && (
                         <button
@@ -679,17 +727,17 @@ export default function ProfilePanel({
               helper={t('앱 언어', 'App language.')}
               compact
             >
-              <div className="language-switcher settings-language-switcher segmented-language-switcher">
+              <div className="grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-white/10">
                 <button
                   type="button"
-                  className={`lang-btn ${language === 'ko' ? 'active' : ''}`}
+                  className={`min-h-11 rounded-lg px-4 text-sm font-black transition ${language === 'ko' ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-900 dark:text-white' : 'text-gray-700 hover:text-gray-950 dark:text-gray-100 dark:hover:text-white'}`}
                   onClick={() => onSetLanguage('ko')}
                 >
                   한국어
                 </button>
                 <button
                   type="button"
-                  className={`lang-btn ${language === 'en' ? 'active' : ''}`}
+                  className={`min-h-11 rounded-lg px-4 text-sm font-black transition ${language === 'en' ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-900 dark:text-white' : 'text-gray-700 hover:text-gray-950 dark:text-gray-100 dark:hover:text-white'}`}
                   onClick={() => onSetLanguage('en')}
                 >
                   English
@@ -706,7 +754,7 @@ export default function ProfilePanel({
               }
               compact
             >
-              <div className="profile-auth-actions compact">
+              <div className="flex flex-wrap gap-2">
                 {isGuest ? (
                   <button
                     type="button"

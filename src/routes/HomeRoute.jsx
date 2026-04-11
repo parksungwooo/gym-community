@@ -109,20 +109,20 @@ export default function HomeRoute({
       />
       {showWorkoutPanel && (
         <div
-          className="auth-modal-backdrop home-workout-sheet-overlay"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-gray-950/70 px-3 pb-[env(safe-area-inset-bottom)] pt-[calc(env(safe-area-inset-top)+1rem)] backdrop-blur-sm sm:items-center sm:px-6 sm:pb-6"
           role="presentation"
           onClick={onCloseWorkoutComposer}
           data-testid="workout-sheet-backdrop"
         >
           <div
-            className="home-workout-sheet-panel"
+            className="max-h-[calc(100dvh-env(safe-area-inset-top)-1rem)] w-full max-w-3xl overflow-hidden rounded-t-3xl border border-gray-100 bg-white shadow-2xl dark:border-white/10 dark:bg-neutral-900 sm:max-h-[calc(100dvh-3rem)] sm:rounded-3xl"
             role="dialog"
             aria-modal="true"
             data-testid="workout-sheet"
             aria-label={isEnglish ? 'Workout logging sheet' : '운동 기록 바텀시트'}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="home-workout-panel-shell w-full">
+            <div className="max-h-[inherit] w-full overflow-y-auto overscroll-contain">
               <WorkoutPanel
                 key={[
                   workoutPreset?.name || '',
