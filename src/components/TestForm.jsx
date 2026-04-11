@@ -2,15 +2,19 @@ import { useMemo, useState } from 'react';
 import { getTestQuestions } from '../constants/questions';
 import { useI18n } from '../i18n.js';
 
-function OptionButton({ isSelected, text, onClick }) {
+function OptionButton({ isSelected, testId, text, onClick }) {
   return (
     <button
+      type="button"
       onClick={onClick}
+      data-testid={testId}
+      aria-pressed={isSelected}
       className={`
         w-full p-5 text-left rounded-3xl border-2 transition-all duration-200
         flex items-center gap-3 hover:shadow-md active:scale-95
+        focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-emerald-300
         ${isSelected 
-          ? 'border-emerald-500 bg-emerald-50 shadow-emerald-200 scale-[1.02]' 
+          ? 'border-emerald-500 bg-emerald-50 shadow-emerald-200 scale-[1.02] animate-pop'
           : 'border-gray-200 hover:border-gray-300 bg-white'
         }
       `}
@@ -39,7 +43,7 @@ export default function TestForm({ onSubmit, loading }) {
   const canSubmit = answeredCount === questions.length;
   const currentQuestion = questions[currentIndex];
   const currentAnswer = answers[currentQuestion?.id] ?? null;
-  const progressPercent = ((currentIndex + 1) / questions.length) * 100;
+  const progressPercent = ((currentIndex + 1) / (questions.length || 1)) * 100;
 
   const handleAnswer = (questionId, score) => {
     setAnswers(prev => ({ ...prev, [questionId]: score }));
@@ -61,7 +65,14 @@ export default function TestForm({ onSubmit, loading }) {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <div className="h-2 bg-gray-100 rounded-3xl overflow-hidden">
+        <div
+          className="h-2 bg-gray-100 rounded-3xl overflow-hidden"
+          role="progressbar"
+          aria-label={isEnglish ? 'Fitness test progress' : '체력 테스트 진행률'}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progressPercent)}
+        >
           <div className="h-full bg-emerald-500 transition-all duration-500 rounded-3xl" style={{ width: `${progressPercent}%` }} />
         </div>
         <div className="flex justify-between text-xs text-gray-400 mt-2">
@@ -70,7 +81,10 @@ export default function TestForm({ onSubmit, loading }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
+      <div
+        className="product-glass-card bg-white rounded-3xl shadow-xl p-8 mb-8 animate-pop"
+        data-testid={`test-question-${currentQuestion.id}`}
+      >
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           {isEnglish ? `Question ${currentIndex + 1}` : `질문 ${currentIndex + 1}`}
         </h2>
@@ -81,9 +95,10 @@ export default function TestForm({ onSubmit, loading }) {
         <div className="space-y-4">
           {currentQuestion.options.map((option, index) => (
             <OptionButton
-              key={index}
+              key={`${currentQuestion.id}-${index}`}
+              testId={`test-option-${currentQuestion.id}-${index}`}
               isSelected={currentAnswer === option.score}
-              text={option.text}
+              text={option.text ?? option.label}
               onClick={() => handleAnswer(currentQuestion.id, option.score)}
             />
           ))}
@@ -92,16 +107,16 @@ export default function TestForm({ onSubmit, loading }) {
 
       <div className="flex gap-4">
         {currentIndex > 0 && (
-          <button onClick={handlePrevious} className="flex-1 py-5 text-lg font-semibold border-2 border-gray-300 rounded-3xl hover:bg-gray-50 transition-colors">
+          <button type="button" onClick={handlePrevious} data-testid="test-prev-question" className="flex-1 py-5 text-lg font-semibold border-2 border-gray-300 rounded-3xl hover:bg-gray-50 transition-colors">
             {isEnglish ? '← Previous' : '← 이전'}
           </button>
         )}
         {currentIndex === questions.length - 1 ? (
-          <button onClick={handleSubmit} disabled={loading || !canSubmit} className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50 animate-pop">
+          <button type="button" onClick={handleSubmit} disabled={loading || !canSubmit} data-testid="test-submit" className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50 animate-pop">
             {loading ? '계산 중...' : '내 레벨 확인하기 →'}
           </button>
         ) : (
-          <button onClick={handleNext} disabled={!currentAnswer} className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50">
+          <button type="button" onClick={handleNext} disabled={!currentAnswer} data-testid="test-next-question" className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50">
             {isEnglish ? 'Next →' : '다음 →'}
           </button>
         )}

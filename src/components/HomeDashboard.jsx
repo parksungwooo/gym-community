@@ -1,4 +1,5 @@
 import { formatDateTimeByLanguage, getWorkoutTypeLabel, useI18n } from '../i18n.js'
+import { getTodayWorkoutRecommendation } from '../features/workout/recommendations'
 import OptimizedImage from './OptimizedImage'
 import UserAvatar from './UserAvatar'
 import { localizeLevelText } from '../utils/level'
@@ -284,7 +285,24 @@ export default function HomeDashboard({
   const currentLevelLabel = currentLevel
     ? localizeLevelText(currentLevel, language)
     : t('레벨 준비 중', 'Level pending')
+  const todayRecommendation = getTodayWorkoutRecommendation({
+    currentLevel,
+    activitySummary,
+    stats,
+    todayDone,
+    isEnglish,
+  })
   const quickWorkouts = [
+    {
+      key: 'recommended-today',
+      name: todayRecommendation.title,
+      workoutType: todayRecommendation.workoutType,
+      durationMinutes: todayRecommendation.durationMinutes,
+      icon: 'RC',
+      iconType: todayRecommendation.workoutType === '웨이트' ? 'strength' : todayRecommendation.workoutType === '요가' ? 'yoga' : 'hiit',
+      tone: 'routine',
+      note: todayRecommendation.body,
+    },
     ...routineTemplates.slice(0, 2).map((routine, index) => ({
       ...routine,
       key: `routine-${routine.id ?? routine.name ?? index}`,
@@ -416,6 +434,43 @@ export default function HomeDashboard({
             </small>
           </div>
         </div>
+
+        <button
+          type="button"
+          className="product-recommend-card product-lift grid gap-3 p-5 text-left animate-pop"
+          onClick={() => onStartRoutine?.({
+            name: todayRecommendation.title,
+            workoutType: todayRecommendation.workoutType,
+            durationMinutes: todayRecommendation.durationMinutes,
+            note: todayRecommendation.body,
+          })}
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <span className="product-pill">{todayRecommendation.label}</span>
+              <h3 className="mt-3 mb-1 text-2xl font-black tracking-[-0.06em] text-white">
+                {todayRecommendation.title}
+              </h3>
+              <p className="m-0 text-sm font-semibold leading-6 text-slate-300">
+                {todayRecommendation.body}
+              </p>
+            </div>
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-emerald-400 text-lg font-black text-slate-950 shadow-lg shadow-emerald-500/30 motion-safe:animate-float">
+              +{todayRecommendation.estimatedXp}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-black text-white">
+              {isEnglish ? `${todayRecommendation.durationMinutes} min` : `${todayRecommendation.durationMinutes}분`}
+            </span>
+            <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-black text-white">
+              {todayRecommendation.intensityLabel}
+            </span>
+            <span className="rounded-full bg-emerald-400/90 px-3 py-1.5 text-xs font-black text-slate-950">
+              {isEnglish ? 'Start' : '바로 기록'}
+            </span>
+          </div>
+        </button>
 
         <div className="home-quick-workout-shell">
           <div className="home-quick-workout-heading">

@@ -1,5 +1,6 @@
 import { useI18n } from '../i18n.js'
 import { getResultMessage, localizeLevelText } from '../utils/level'
+import { shareOrDownloadCard } from '../utils/shareCard'
 
 function ShareIcon() {
   return (
@@ -50,14 +51,20 @@ export default function ResultView({ score, level, onStartWorkout }) {
 
     try {
       await navigator.clipboard.writeText(`${shareText} ${window.location.href}`)
-      alert(isEnglish ? 'Link copied.' : '\uB9C1\uD06C \uBCF5\uC0AC\uB428')
+      await shareOrDownloadCard({
+        eyebrow: isEnglish ? 'Fitness Result' : '체력 결과',
+        title: displayLevel,
+        metric: isEnglish ? `${score} pts` : `${score}점`,
+        detail: message,
+        footer: isEnglish ? 'Level test complete' : '레벨 테스트 완료',
+      }, 'fitness-result-card.svg')
     } catch {
       alert(isEnglish ? 'Copy failed.' : '\uBCF5\uC0AC \uC2E4\uD328.')
     }
   }
 
   return (
-    <section className="mx-auto grid w-full max-w-xl gap-5 rounded-[2rem] border border-white/70 bg-white/95 p-5 text-center text-slate-950 shadow-2xl shadow-slate-950/10 backdrop-blur-xl sm:p-7">
+    <section className="product-glass-card mx-auto grid w-full max-w-xl gap-5 rounded-[2rem] border border-white/70 bg-white/95 p-5 text-center text-slate-950 shadow-2xl shadow-slate-950/10 backdrop-blur-xl sm:p-7">
       <div className="mx-auto grid justify-items-center gap-4">
         <div className="relative grid h-32 w-32 place-items-center">
           <span className="absolute inset-0 rounded-full bg-emerald-400/20 animate-burst" aria-hidden="true" />

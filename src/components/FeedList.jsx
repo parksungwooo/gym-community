@@ -3,6 +3,7 @@ import UserAvatar from './UserAvatar'
 import { formatDateTimeByLanguage, getWorkoutTypeLabel, useI18n } from '../i18n.js'
 import OptimizedImage from './OptimizedImage'
 import { localizeLevelText } from '../utils/level'
+import { shareOrDownloadCard } from '../utils/shareCard'
 
 const FILTERS = {
   ko: [
@@ -127,6 +128,24 @@ function getWorkoutStatsForPost(post, isEnglish) {
   return stats.slice(0, 3)
 }
 
+function getSharePayloadForPost(post, language, isEnglish) {
+  const title = getTypeLabel(post.type, isEnglish)
+  const content = getPostContent(post, language)
+  const stats = getWorkoutStatsForPost(post, isEnglish)
+  const primaryStat = stats[0]?.value ?? (isEnglish ? `${post.likeCount ?? 0} likes` : `좋아요 ${post.likeCount ?? 0}`)
+  const detail = stats.length
+    ? stats.map((item) => `${item.label} ${item.value}`).join(' · ')
+    : content
+
+  return {
+    eyebrow: isEnglish ? 'Gym Community' : '운동 커뮤니티',
+    title,
+    metric: primaryStat,
+    detail,
+    footer: isEnglish ? 'Shared workout story' : '공유 운동 카드',
+  }
+}
+
 function FeedCard({
   post,
   onToggleLike,
@@ -157,9 +176,16 @@ function FeedCard({
     setCommentOpen(false)
   }
 
+  const handleSharePost = async () => {
+    await shareOrDownloadCard(
+      getSharePayloadForPost(post, language, isEnglish),
+      `gym-community-post-${post.id}.svg`,
+    )
+  }
+
   return (
     <article
-      className={`feed-card compact feed-story-card feed-card-${post.type} rounded-3xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10`}
+      className={`feed-card compact feed-story-card feed-card-${post.type} product-lift rounded-3xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10`}
     >
       <div className="feed-story-header">
         <button
@@ -281,6 +307,13 @@ function FeedCard({
             {commentOpen
               ? (isEnglish ? `Hide ${post.comments.length}` : `접기 ${post.comments.length}`)
               : (isEnglish ? `Replies ${post.comments.length}` : `댓글 ${post.comments.length}`)}
+          </button>
+          <button
+            type="button"
+            className="ghost-chip inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-extrabold transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:text-emerald-600 active:scale-95"
+            onClick={handleSharePost}
+          >
+            {isEnglish ? 'Share card' : '공유 카드'}
           </button>
           {post.user_id !== currentUserId && (
             <div className="feed-more-wrap">

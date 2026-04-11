@@ -3,6 +3,7 @@ import AppTopActions from './components/AppTopActions'
 import AuthRequiredModal from './components/AuthRequiredModal'
 import BottomTabNav from './components/BottomTabNav'
 import NotificationCenter from './components/NotificationCenter'
+import OnboardingCoach, { ONBOARDING_STORAGE_KEY } from './components/OnboardingCoach'
 import PaywallModal from './components/PaywallModal'
 import ReportModal from './components/ReportModal'
 import {
@@ -117,6 +118,7 @@ export default function App() {
   const [notifications, setNotifications] = useState([])
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0)
   const [showNotificationCenter, setShowNotificationCenter] = useState(false)
+  const [showOnboardingCoach, setShowOnboardingCoach] = useState(false)
   const [loadingNotifications, setLoadingNotifications] = useState(false)
   const [communitySearchQuery, setCommunitySearchQuery] = useState('')
   const [communitySearchResults, setCommunitySearchResults] = useState([])
@@ -618,6 +620,14 @@ export default function App() {
   }, [successState])
 
   useEffect(() => {
+    if (loadingInit || typeof window === 'undefined') return undefined
+    if (window.localStorage.getItem(ONBOARDING_STORAGE_KEY) === '1') return undefined
+
+    const timer = setTimeout(() => setShowOnboardingCoach(true), 450)
+    return () => clearTimeout(timer)
+  }, [loadingInit])
+
+  useEffect(() => {
     if (!celebration) return undefined
     const timer = setTimeout(() => setCelebration(null), 4200)
     return () => clearTimeout(timer)
@@ -792,6 +802,13 @@ export default function App() {
 
   const closeNotificationCenter = useCallback(() => {
     setShowNotificationCenter(false)
+  }, [])
+
+  const closeOnboardingCoach = useCallback(() => {
+    setShowOnboardingCoach(false)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(ONBOARDING_STORAGE_KEY, '1')
+    }
   }, [])
 
   const handleRequestReminderPermission = useCallback(async () => {
@@ -1049,6 +1066,7 @@ export default function App() {
         workoutType: workoutPayload.workoutType || '운동',
         durationMinutes: Number(workoutPayload.durationMinutes) || 0,
         nextWeeklyCount: summary.stats.weeklyCount,
+        gainedXp,
       })
       setShowWorkoutPanel(false)
       setWorkoutPreset(null)
@@ -2046,6 +2064,20 @@ export default function App() {
         onRefresh={() => refreshNotifications(user?.id)}
         onMarkAllRead={handleMarkAllNotificationsRead}
         onOpenNotification={handleOpenNotification}
+      />
+      <OnboardingCoach
+        open={showOnboardingCoach && view === VIEW.HOME && !loadingInit && !showWorkoutPanel && !showTestForm && !showTestResult}
+        isEnglish={isEnglish}
+        onClose={closeOnboardingCoach}
+        onStartTest={() => {
+          closeOnboardingCoach()
+          navigateToView(VIEW.PROGRESS)
+          openTestFlow()
+        }}
+        onStartWorkout={() => {
+          closeOnboardingCoach()
+          openWorkoutComposer()
+        }}
       />
 
       {loadingInit ? (

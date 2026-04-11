@@ -63,7 +63,10 @@ export default function HomeRoute({
   return (
     <div className="view-stage">
       {celebration && (
-        <section className="card celebration-card">
+        <section className="card celebration-card product-glass-card animate-pop">
+          <div className="product-xp-burst mb-3 inline-grid h-16 w-16 place-items-center rounded-3xl bg-emerald-400 text-2xl font-black text-slate-950 shadow-xl shadow-emerald-500/25">
+            {celebration.gainedXp ? `+${celebration.gainedXp}` : 'OK'}
+          </div>
           <span className="celebration-eyebrow">Nice Work</span>
           <h2>{isEnglish ? `${celebration.workoutType} saved` : `${celebration.workoutType} 기록 완료`}</h2>
           <p className="subtext">
@@ -71,6 +74,7 @@ export default function HomeRoute({
               ? isEnglish ? `${celebration.durationMinutes} minutes were saved.` : `${celebration.durationMinutes}분 운동이 저장됐어요.`
               : isEnglish ? 'Today\'s workout was saved.' : '오늘 운동 기록이 저장됐어요.'}{' '}
             {isEnglish ? `You are now at ${celebration.nextWeeklyCount} this week.` : `이번 주 누적 ${celebration.nextWeeklyCount}회입니다.`}
+            {celebration.gainedXp ? ` ${isEnglish ? `You earned ${celebration.gainedXp} XP.` : `${celebration.gainedXp} XP를 얻었어요.`}` : ''}
           </p>
           <div className="celebration-actions">
             <button type="button" className="secondary-btn" onClick={onOpenWorkoutComposer}>

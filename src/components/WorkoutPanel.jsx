@@ -177,6 +177,11 @@ export default function WorkoutPanel({
 
     return summaryParts.join(' · ')
   }, [durationMinutes, isEnglish, language, workoutType])
+  const estimatedXp = useMemo(() => {
+    const durationValue = Number(durationMinutes)
+    if (!Number.isFinite(durationValue) || durationValue <= 0) return 10
+    return Math.max(10, Math.min(60, Math.round(durationValue * 0.75)))
+  }, [durationMinutes])
 
   const routineSummary = useMemo(() => {
     if (routineTemplates.length > 0) {
@@ -334,7 +339,7 @@ export default function WorkoutPanel({
   }
 
   return (
-    <section className="card workout-capture-card compact rounded-[2rem] border border-white/70 bg-white/95 shadow-2xl shadow-slate-950/10 backdrop-blur-xl animate-pop">
+    <section className="card workout-capture-card compact product-glass-card rounded-[2rem] border border-white/70 bg-white/95 shadow-2xl shadow-slate-950/10 backdrop-blur-xl animate-pop">
       <div className="sheet-handle" />
 
       <div className="workout-capture-header compact">
@@ -478,6 +483,11 @@ export default function WorkoutPanel({
           <div className="capture-helper-card compact">
             <span className="capture-helper-label">{isEnglish ? "Today's Logs" : '오늘 기록'}</span>
             <strong className="capture-helper-value">{todayCount}</strong>
+          </div>
+
+          <div className="capture-helper-card compact product-shimmer">
+            <span className="capture-helper-label">{isEnglish ? 'XP preview' : '예상 XP'}</span>
+            <strong className="capture-helper-value">{`+${estimatedXp}`}</strong>
           </div>
 
           {recentWorkout?.workoutType && (

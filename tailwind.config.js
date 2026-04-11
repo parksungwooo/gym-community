@@ -1,9 +1,22 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  darkMode: ['selector', '[data-theme="dark"]'],
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
+      colors: {
+        brand: {
+          primary: '#00d4aa',
+          strong: '#009879',
+          ink: '#07111f',
+          coral: '#ff5e5e',
+        },
+      },
+      boxShadow: {
+        glow: '0 20px 60px rgba(0, 212, 170, 0.28)',
+        card: '0 24px 70px rgba(15, 23, 42, 0.14)',
+      },
       animation: {
         'pop': 'pop 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)',
         'float': 'float 3s ease-in-out infinite',

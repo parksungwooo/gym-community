@@ -36,22 +36,40 @@ export default function RankingBoard({
   const { language, isEnglish } = useI18n()
   const t = (ko, en) => (isEnglish ? en : ko)
   const [expanded, setExpanded] = useState(false)
+  const [timeframe, setTimeframe] = useState('week')
   const visibleRows = useMemo(() => (expanded ? rows : rows.slice(0, 3)), [expanded, rows])
+  const topScore = rows[0]?.weekly_points ?? rows[0]?.total_xp ?? 0
 
   return (
-    <section className="card community-block-card ranking-surface compact community-ranking-redesign rounded-3xl">
+    <section className="card community-block-card ranking-surface compact community-ranking-redesign product-glass-card rounded-3xl animate-pop">
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{t('랭킹', 'Ranking')}</span>
           <h2>{t('이번 주', 'This week')}</h2>
         </div>
-        <span className="community-mini-pill accent">{t('상위 활동', 'Top')}</span>
+        <span className="community-mini-pill accent">{t(`1위 ${topScore}P`, `Top ${topScore} pts`)}</span>
+      </div>
+
+      <div className="mb-3 grid grid-cols-2 gap-2 rounded-3xl bg-slate-950/5 p-1 dark:bg-white/10">
+        {[
+          ['week', t('주간', 'Weekly')],
+          ['month', t('월간', 'Monthly')],
+        ].map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            className={`rounded-2xl px-3 py-2 text-sm font-black transition-all ${timeframe === key ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:bg-white/70 dark:text-slate-300 dark:hover:bg-white/10'}`}
+            onClick={() => setTimeframe(key)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       <p className="subtext compact">
         {t(
           '포인트와 운동량 기준이에요.',
-          'Based on activity.',
+          timeframe === 'week' ? 'Based on weekly activity points.' : 'Monthly view blends total XP with recent weekly points.',
         )}
       </p>
 
