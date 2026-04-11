@@ -130,6 +130,37 @@ export async function updateUserProfile(userId, profile) {
   return data
 }
 
+export async function activateUserPremium(userId, activationPatch = {}) {
+  if (!userId) return null
+
+  const payload = {
+    is_pro: activationPatch.is_pro === true,
+    is_premium: activationPatch.is_premium === true,
+    premium_until: activationPatch.premium_until ?? activationPatch.premiumUntil ?? null,
+    subscription_tier: activationPatch.subscription_tier ?? 'pro',
+    subscription_plan: activationPatch.subscription_plan ?? 'annual',
+    subscription_provider: activationPatch.subscription_provider ?? 'stripe',
+  }
+
+  const { data, error } = await supabase
+    .from('users')
+    .update(payload)
+    .eq('id', userId)
+    .select(PROFILE_SELECT)
+    .single()
+
+  if (isMissingPremiumColumnError(error)) {
+    return {
+      id: userId,
+      ...payload,
+    }
+  }
+
+  assertServiceSuccess(error, 'users.activate_premium')
+
+  return data
+}
+
 export async function fetchWeightLogs(userId) {
   if (!userId) {
     return []
