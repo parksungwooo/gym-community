@@ -5,6 +5,7 @@ export default function AuthPanel({
   authLoading,
   onGoogleSignIn,
   onKakaoSignIn,
+  onNaverSignIn,
   onSignOut,
 }) {
   const { isEnglish } = useI18n()
@@ -23,10 +24,18 @@ export default function AuthPanel({
             : '계정이 연결되어 있어요.'}
       </p>
 
-      <div className="social-grid">
+      <div className="grid gap-2">
         <button
           type="button"
-          className="social-btn google"
+          className="min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50"
+          onClick={onNaverSignIn}
+          disabled={authLoading}
+        >
+          {authLoading ? (isEnglish ? 'Connecting...' : '연결 중...') : isEnglish ? 'Continue with Naver' : '네이버로 시작'}
+        </button>
+        <button
+          type="button"
+          className="min-h-12 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-800 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
           onClick={onGoogleSignIn}
           disabled={authLoading}
         >
@@ -34,7 +43,7 @@ export default function AuthPanel({
         </button>
         <button
           type="button"
-          className="social-btn kakao"
+          className="min-h-12 rounded-lg bg-yellow-300 px-4 text-sm font-black text-gray-950 shadow-sm transition hover:bg-yellow-200 disabled:opacity-50"
           onClick={onKakaoSignIn}
           disabled={authLoading}
         >

@@ -18,6 +18,7 @@ import {
   getLatestTestResult,
   getUserProfile,
   hasWorkoutCompleted,
+  syncOAuthProfile,
   upsertUser,
 } from '../services/communityService'
 import { getE2EAppSnapshot } from '../features/app/e2eFixtures'
@@ -345,7 +346,8 @@ export function useAppBootstrap({
 
     setInitStatus(isEnglish ? 'Loading user...' : '사용자 정보를 불러오는 중입니다...')
     setUser(nextUser)
-    await ensureUserProfileReady(nextUser.id)
+    const readyProfile = await ensureUserProfileReady(nextUser.id)
+    await syncOAuthProfile(nextUser, readyProfile)
 
     setInitStatus(isEnglish ? 'Checking today\'s log...' : '오늘 운동 기록을 확인하는 중입니다...')
     const doneToday = await withTimeout(

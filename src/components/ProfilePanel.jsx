@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import UserAvatar from './UserAvatar'
 import { useI18n } from '../i18n.js'
 import { localizeLevelText } from '../utils/level'
-import { PREMIUM_CONTEXT } from '../utils/premium'
+import { PREMIUM_CONTEXT, PREMIUM_LAUNCH_OFFER } from '../utils/premium'
 
 const AVATAR_OPTIONS = ['RUN', 'GYM', 'ZEN', 'LIFT', 'CARD', 'FLOW']
 const GOAL_OPTIONS = [3, 4, 5, 6]
@@ -653,29 +653,48 @@ export default function ProfilePanel({
             <SettingRow
               label={t('Pro 구독', 'Pro subscription')}
               helper={isPro
-                ? t('AI 플랜, 고급 분석, 공유 카드가 열려 있어요.', 'AI plans, analytics, and share cards are unlocked.')
-                : t('AI 플랜과 Pro 클럽을 열 수 있어요.', 'Unlock AI plans and Pro Club.')}
+                ? t('AI 플랜, 고급 분석, 공유 카드, Pro 클럽이 모두 열려 있어요.', 'AI plans, analytics, share cards, and Pro Club are unlocked.')
+                : t('운동 기록을 AI 코치와 성장 리포트로 바꾸는 업그레이드입니다.', 'Upgrade logs into AI coaching and growth reports.')}
               compact
             >
               <div className="grid gap-3">
-                <div className="grid gap-1 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
-                  <strong className="text-base font-black text-gray-950 dark:text-white">
-                    {isPro ? t('Pro 사용 중', 'Pro active') : t('Free 사용 중', 'Free active')}
+                <div className={`grid gap-3 rounded-2xl p-4 ${isPro ? 'border border-emerald-300/20 bg-neutral-950 text-white' : 'bg-emerald-50 dark:bg-emerald-500/10'}`}>
+                  <strong className={`text-base font-black ${isPro ? 'text-white' : 'text-emerald-950 dark:text-emerald-50'}`}>
+                    {isPro ? t('Pro 활성화 완료', 'Pro active') : t('지금 Pro로 바꾸면 달라지는 것', 'What changes when you upgrade')}
                   </strong>
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  <span className={`text-sm font-semibold leading-6 ${isPro ? 'text-gray-100' : 'text-emerald-900 dark:text-emerald-100'}`}>
                     {isPro
                       ? t(`다음 갱신/만료: ${premiumUntilLabel}`, `Renews/expires: ${premiumUntilLabel}`)
-                      : t('연간 Pro는 월 4,900원 수준으로 가장 저렴해요.', 'Annual Pro gives the best monthly price.')}
+                      : t('다음 운동, 회복 타이밍, 성장 분석이 기록 화면에서 바로 열립니다.', 'Your next session, recovery timing, and growth analysis unlock inside Records.')}
                   </span>
+                  {!isPro && (
+                    <span className="w-fit rounded-lg bg-emerald-700 px-3 py-2 text-xs font-black text-white">
+                      {PREMIUM_LAUNCH_OFFER.title[language]}
+                    </span>
+                  )}
                 </div>
+                {!isPro && (
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {[
+                      [t('AI 플랜', 'AI plan'), t('오늘 할 운동 자동 추천', 'Next workout planned')],
+                      [t('고급 분석', 'Analytics'), t('1RM·회복·XP 흐름', '1RM, recovery, XP')],
+                      [t('공유 카드', 'Share card'), t('카톡/인스타용 결과물', 'Kakao/Instagram-ready')],
+                    ].map(([title, body]) => (
+                      <article key={title} className="rounded-2xl bg-gray-50 p-3 dark:bg-white/10">
+                        <strong className="text-sm font-black text-gray-950 dark:text-white">{title}</strong>
+                        <p className="m-0 mt-1 text-xs font-bold leading-5 text-gray-700 dark:text-gray-200">{body}</p>
+                      </article>
+                    ))}
+                  </div>
+                )}
                 <button
                   type="button"
                   className={isPro
                     ? 'min-h-11 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'
-                    : 'min-h-11 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800'}
+                    : 'min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800'}
                   onClick={() => onOpenPaywall?.(PREMIUM_CONTEXT.AI_PLAN)}
                 >
-                  {isPro ? t('Pro 혜택 보기', 'View Pro benefits') : t('Pro 업그레이드', 'Upgrade to Pro')}
+                  {isPro ? t('Pro 혜택 다시 보기', 'View Pro benefits') : t('첫 달 40% 할인으로 Pro 보기', 'See Pro with 40% off')}
                 </button>
               </div>
             </SettingRow>

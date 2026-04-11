@@ -31,7 +31,7 @@ import { useI18n } from './i18n.js'
 import MainLayout from './components/Layout/MainLayout'
 import { supabase } from './lib/supabaseClient'
 import RouteSuspenseFallback from './routes/RouteSuspenseFallback'
-import { signInWithOAuth, signOutUser } from './services/auth'
+import { AUTH_PROVIDERS, signInWithOAuth, signOutUser } from './services/auth'
 import {
   addComment,
   blockUser,
@@ -560,9 +560,9 @@ export default function App() {
 
     const checkout = getCheckoutPreparation(planId, provider)
     showSuccess(
-      isEnglish
-        ? `${provider === 'stripe' ? 'Stripe' : 'Toss Payments'} checkout is ready for ${checkout.planId}. Connect ${checkout.priceId} next.`
-        : `${provider === 'stripe' ? 'Stripe' : 'Toss Payments'} ${checkout.planId === 'annual' ? '연간' : '월간'} Pro 결제 UI가 준비됐어요. 다음 단계에서 ${checkout.priceId}를 실제 결제창에 연결하면 됩니다.`,
+        isEnglish
+          ? `${provider === 'stripe' ? 'Stripe' : 'Toss Payments'} Pro upgrade flow is ready. In live payments, Pro unlocks immediately after approval.`
+          : `${provider === 'stripe' ? 'Stripe' : 'Toss Payments'} ${checkout.planId === 'annual' ? '연간' : '월간'} Pro 업그레이드 화면이 준비됐어요. 실제 결제가 연결되면 승인 완료 즉시 Pro 혜택이 적용됩니다.`,
       'info',
     )
     closePaywall()
@@ -880,7 +880,7 @@ export default function App() {
     setErrorMessage('')
     try {
       persistPendingAction(authPrompt?.pendingAction ?? null)
-      await signInWithOAuth('google')
+      await signInWithOAuth(AUTH_PROVIDERS.GOOGLE)
     } catch (error) {
       captureError(error, isEnglish ? 'Google sign-in failed.' : 'Google 로그인을 완료하지 못했어요.')
       setLoadingAuth(false)
@@ -892,9 +892,21 @@ export default function App() {
     setErrorMessage('')
     try {
       persistPendingAction(authPrompt?.pendingAction ?? null)
-      await signInWithOAuth('kakao')
+      await signInWithOAuth(AUTH_PROVIDERS.KAKAO)
     } catch (error) {
       captureError(error, isEnglish ? 'Kakao sign-in failed.' : 'Kakao 로그인을 완료하지 못했어요.')
+      setLoadingAuth(false)
+    }
+  }
+
+  const handleNaverSignIn = async () => {
+    setLoadingAuth(true)
+    setErrorMessage('')
+    try {
+      persistPendingAction(authPrompt?.pendingAction ?? null)
+      await signInWithOAuth(AUTH_PROVIDERS.NAVER)
+    } catch (error) {
+      captureError(error, isEnglish ? 'Naver sign-in failed.' : '네이버 로그인을 완료하지 못했어요.')
       setLoadingAuth(false)
     }
   }
@@ -1013,6 +1025,13 @@ export default function App() {
         setErrorMessage('')
         await saveGuestWorkout(workoutPayload)
         await refreshGuestSyncState(false)
+        setTodayDone(true)
+        setCelebration({
+          workoutType: workoutPayload.workoutType || (isEnglish ? 'Workout' : '운동'),
+          durationMinutes: Number(workoutPayload.durationMinutes) || 0,
+          nextWeeklyCount: (Number(workoutStats.weeklyCount) || 0) + 1,
+          gainedXp: 0,
+        })
         showSuccess(
           isEnglish
             ? 'Saved locally. Log in later to sync it to your account.'
@@ -2099,6 +2118,7 @@ export default function App() {
         onClose={closeAuthPrompt}
         onGoogleSignIn={handleGoogleSignIn}
         onKakaoSignIn={handleKakaoSignIn}
+        onNaverSignIn={handleNaverSignIn}
       />
       <PaywallModal
         open={Boolean(paywallContext)}
@@ -2199,11 +2219,18 @@ export default function App() {
                   reminderPermission={reminderPermission}
                   feedPreview={homeFeedPreview}
                   routineTemplates={workoutTemplates}
+                  workoutHistory={workoutHistory}
                   workoutLoading={loadingAction}
+                  isPro={isPro}
                   onOpenWorkoutComposer={() => {
                     setCelebration(null)
                     openWorkoutComposer()
                   }}
+                  onCompleteRecommendedWorkout={(workoutDetails) => {
+                    setCelebration(null)
+                    handleWorkoutComplete(workoutDetails)
+                  }}
+                  onOpenPaywall={openPaywall}
                   onStartRoutine={(routine) => openWorkoutComposer(routine)}
                   onOpenTest={() => {
                     navigateToView(VIEW.PROGRESS)

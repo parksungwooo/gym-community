@@ -324,6 +324,8 @@ export default function CommunityRoute({
             onSelectUser={onSelectCommunityUser}
             followingIds={followingIds}
             currentUserId={currentUserId}
+            isPro={isPro}
+            onOpenPaywall={onOpenPaywall}
           />
           <ProCommunityPanel
             isPro={isPro}

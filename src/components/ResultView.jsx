@@ -1,6 +1,7 @@
 import { useI18n } from '../i18n.js'
 import { getResultMessage, localizeLevelText } from '../utils/level'
-import { shareOrDownloadCard } from '../utils/shareCard'
+import { PREMIUM_CONTEXT } from '../utils/premium'
+import { shareToKakao } from '../utils/kakaoShare'
 
 function ShareIcon() {
   return (
@@ -38,7 +39,7 @@ function TrophyIcon() {
   )
 }
 
-export default function ResultView({ score, level, onStartWorkout }) {
+export default function ResultView({ score, level, isPro = false, onOpenPaywall, onStartWorkout }) {
   const { language, isEnglish } = useI18n()
   const levelValue = Number(String(level).match(/Lv(\d)/)?.[1] ?? 1)
   const message = getResultMessage(levelValue, language)
@@ -51,13 +52,21 @@ export default function ResultView({ score, level, onStartWorkout }) {
 
     try {
       await navigator.clipboard.writeText(`${shareText} ${window.location.href}`)
-      await shareOrDownloadCard({
-        eyebrow: isEnglish ? 'Fitness Result' : '내 레벨',
-        title: displayLevel,
-        metric: isEnglish ? `${score} pts` : `${score}점`,
-        detail: message,
-        footer: isEnglish ? 'Level test complete' : '레벨 체크 완료',
-      }, 'fitness-result-card.svg')
+      await shareToKakao({
+        isPremium: isPro,
+        isEnglish,
+        contentType: 'level_result',
+        filename: 'fitness-result-kakao-card.png',
+        payload: {
+          eyebrow: isEnglish ? 'Fitness Result' : '내 레벨',
+          title: displayLevel,
+          metric: isEnglish ? `${score} pts` : `${score}점`,
+          detail: message,
+          footer: isPro
+            ? (isEnglish ? 'Premium level card' : '프리미엄 레벨 카드')
+            : (isEnglish ? 'Level test complete' : '레벨 체크 완료'),
+        },
+      })
     } catch {
       alert(isEnglish ? 'Copy failed.' : '복사 실패.')
     }
@@ -115,6 +124,15 @@ export default function ResultView({ score, level, onStartWorkout }) {
           {isEnglish ? 'Log workout' : '운동 기록'}
         </button>
       </div>
+      {!isPro && (
+        <button
+          type="button"
+          className="min-h-11 rounded-lg bg-emerald-50 px-4 text-sm font-black text-emerald-800 transition hover:bg-emerald-100 dark:bg-emerald-700/20 dark:text-emerald-200"
+          onClick={() => onOpenPaywall?.(PREMIUM_CONTEXT.SHARE_CARDS)}
+        >
+          {isEnglish ? 'Make this a Pro image card' : '이 결과를 Pro 이미지 카드로 만들기'}
+        </button>
+      )}
     </section>
   )
 }

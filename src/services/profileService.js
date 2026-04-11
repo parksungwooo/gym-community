@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabaseClient'
 import { resolveProfileAvatar } from './mediaService'
 import { assertServiceSuccess } from './serviceErrors'
+import { buildOAuthProfilePatch } from '../utils/oauthProfile'
 
 const BASE_PROFILE_SELECT = 'id,display_name,avatar_emoji,avatar_url,weekly_goal,height_cm,target_weight_kg,bio,fitness_tags,default_share_to_feed,reminder_enabled,reminder_time,total_xp,weekly_points,activity_level,activity_level_label,streak_days,last_activity_date,is_admin,created_at'
 const PROFILE_SELECT = `${BASE_PROFILE_SELECT},is_pro,is_premium,premium_until,subscription_tier,subscription_plan,subscription_provider`
@@ -21,6 +22,39 @@ export async function upsertUser(userId) {
   )
 
   assertServiceSuccess(error, 'users.upsert')
+}
+
+export async function syncOAuthProfile(user, existingProfile = null) {
+  if (!user?.id) return existingProfile
+
+  const patch = buildOAuthProfilePatch(user, existingProfile)
+
+  if (!Object.keys(patch).length) {
+    return existingProfile
+  }
+
+  const { data, error } = await supabase
+    .from('users')
+    .update(patch)
+    .eq('id', user.id)
+    .select(PROFILE_SELECT)
+    .single()
+
+  if (isMissingPremiumColumnError(error)) {
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from('users')
+      .update(patch)
+      .eq('id', user.id)
+      .select(BASE_PROFILE_SELECT)
+      .single()
+
+    assertServiceSuccess(fallbackError, 'users.sync_oauth_profile')
+    return fallbackData
+  }
+
+  assertServiceSuccess(error, 'users.sync_oauth_profile')
+
+  return data
 }
 
 export async function getUserProfile(userId) {

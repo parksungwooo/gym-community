@@ -3,7 +3,8 @@ import UserAvatar from './UserAvatar'
 import { formatDateTimeByLanguage, getWorkoutTypeLabel, useI18n } from '../i18n.js'
 import OptimizedImage from './OptimizedImage'
 import { localizeLevelText } from '../utils/level'
-import { shareOrDownloadCard } from '../utils/shareCard'
+import { PREMIUM_CONTEXT } from '../utils/premium'
+import { shareToKakao } from '../utils/kakaoShare'
 
 const FILTERS = {
   ko: [
@@ -155,6 +156,8 @@ function FeedCard({
   onReportPost,
   onBlockUser,
   currentUserId,
+  isPro,
+  onOpenPaywall,
 }) {
   const { language, isEnglish } = useI18n()
   const [comment, setComment] = useState('')
@@ -178,10 +181,13 @@ function FeedCard({
   }
 
   const handleSharePost = async () => {
-    await shareOrDownloadCard(
-      getSharePayloadForPost(post, language, isEnglish),
-      `gym-community-post-${post.id}.svg`,
-    )
+    await shareToKakao({
+      payload: getSharePayloadForPost(post, language, isEnglish),
+      isPremium: isPro,
+      isEnglish,
+      contentType: post.type || 'feed_post',
+      filename: `gym-community-post-${post.id}.png`,
+    })
   }
 
   return (
@@ -320,8 +326,18 @@ function FeedCard({
           className="min-h-11 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-emerald-800 dark:bg-white/10 dark:text-gray-100 dark:hover:text-emerald-300"
           onClick={handleSharePost}
         >
-          {isEnglish ? 'Share card' : '공유 카드'}
+          {isPro ? (isEnglish ? 'Kakao Pro card' : '카카오 Pro 카드') : (isEnglish ? 'Kakao share' : '카카오 공유')}
         </button>
+
+        {!isPro && (
+          <button
+            type="button"
+            className="min-h-11 rounded-lg bg-emerald-50 px-4 text-sm font-black text-emerald-800 transition hover:bg-emerald-100 dark:bg-emerald-700/20 dark:text-emerald-200"
+            onClick={() => onOpenPaywall?.(PREMIUM_CONTEXT.SHARE_CARDS)}
+          >
+            {isEnglish ? 'Pro image card' : 'Pro 이미지 카드'}
+          </button>
+        )}
 
         {post.user_id !== currentUserId && (
           <div className="relative">
@@ -409,6 +425,8 @@ export default function FeedList({
   onSelectUser,
   followingIds = [],
   currentUserId,
+  isPro = false,
+  onOpenPaywall,
 }) {
   const { language, isEnglish } = useI18n()
   const [filter, setFilter] = useState('all')
@@ -511,6 +529,8 @@ export default function FeedList({
             onReportPost={onReportPost}
             onBlockUser={onBlockUser}
             currentUserId={currentUserId}
+            isPro={isPro}
+            onOpenPaywall={onOpenPaywall}
           />
         ))}
       </div>

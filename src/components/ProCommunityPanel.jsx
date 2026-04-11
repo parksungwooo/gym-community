@@ -7,37 +7,37 @@ function ProLockedPanel({ onOpenPaywall }) {
   const t = (ko, en) => (isEnglish ? en : ko)
 
   return (
-    <section className="grid gap-5 rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm dark:border-emerald-400/20 dark:bg-neutral-900 sm:p-6">
+    <section className="grid gap-5 rounded-3xl border border-emerald-300/20 bg-neutral-950 p-5 text-white shadow-sm sm:p-6">
       <div className="grid gap-2">
-        <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">Pro Club</span>
-        <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">
+        <span className="w-fit rounded-full border border-emerald-300/30 bg-emerald-400 px-3 py-1.5 text-xs font-black uppercase text-emerald-950">Pro Club</span>
+        <h2 className="m-0 text-3xl font-black leading-tight text-white">
           {t('진짜 꾸준한 사람들끼리 모이는 공간', 'A tighter club for people who keep showing up')}
         </h2>
-        <p className="m-0 text-sm font-semibold leading-6 text-gray-800 dark:text-gray-100">
+        <p className="m-0 text-sm font-semibold leading-6 text-gray-100">
           {t(
-            'Pro 배지, 전용 리더보드, 비공개 소모임으로 운동을 더 오래 이어가게 만듭니다.',
-            'Pro badges, a dedicated leaderboard, and private circles help consistency last longer.',
+            'Pro 배지와 비공개 챌린지는 단순한 장식이 아니라, 계속 운동하게 만드는 공개 약속입니다.',
+            'Pro badges and private challenges are not decoration. They are a visible commitment to keep training.',
           )}
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         {[
-          [t('Pro 배지', 'Pro badge'), t('프로필과 피드에서 신뢰도 상승', 'Higher trust on profile and feed')],
-          [t('전용 리더보드', 'Pro leaderboard'), t('광고 없이 진짜 활동량으로 경쟁', 'Compete by real activity without feed ads')],
-          [t('비공개 챌린지', 'Private challenges'), t('친구끼리만 주간 목표 운영', 'Run weekly goals with friends only')],
+          [t('Pro 배지', 'Pro badge'), t('프로필과 피드에서 꾸준함이 바로 보입니다.', 'Consistency shows instantly on profile and feed.')],
+          [t('전용 리더보드', 'Pro leaderboard'), t('광고 없이 진짜 활동량으로 경쟁합니다.', 'Compete by real activity without feed ads.')],
+          [t('비공개 챌린지', 'Private challenges'), t('친구끼리만 주간 목표와 랭킹을 운영합니다.', 'Run weekly goals and rankings with friends only.')],
         ].map(([title, body]) => (
-          <article key={title} className="rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
-            <strong className="text-base font-black text-gray-950 dark:text-white">{title}</strong>
-            <p className="m-0 mt-1 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{body}</p>
+          <article key={title} className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+            <strong className="text-base font-black text-white">{title}</strong>
+            <p className="m-0 mt-1 text-sm font-semibold leading-6 text-gray-100">{body}</p>
           </article>
         ))}
       </div>
       <button
         type="button"
-        className="min-h-12 rounded-lg bg-emerald-700 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800"
+        className="min-h-12 rounded-lg bg-emerald-400 px-5 text-sm font-black text-emerald-950 shadow-sm transition hover:bg-emerald-300"
         onClick={() => onOpenPaywall?.(PREMIUM_CONTEXT.PRO_COMMUNITY)}
       >
-        {t('Pro 커뮤니티 열기', 'Unlock Pro Club')}
+        {t('Pro 커뮤니티 혜택 보기', 'See Pro Club benefits')}
       </button>
     </section>
   )
@@ -61,14 +61,17 @@ export default function ProCommunityPanel({
 
   return (
     <section className="grid gap-5 rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm dark:border-emerald-400/20 dark:bg-neutral-900 sm:p-6">
-      <div className="flex items-start justify-between gap-4">
+      <div className="grid gap-4 rounded-3xl bg-neutral-950 p-4 text-white sm:grid-cols-[1fr_auto] sm:items-start">
         <div className="grid gap-1">
-          <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">Pro Club</span>
-          <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">
+          <span className="text-xs font-black uppercase text-emerald-200">Pro Club</span>
+          <h2 className="m-0 text-2xl font-black leading-tight text-white">
             {t('Pro 전용 리더보드', 'Pro leaderboard')}
           </h2>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-100">
+            {t('광고와 잡음 없이, 이번 주 진짜 활동량만 봅니다.', 'No ads or noise, just real activity this week.')}
+          </p>
         </div>
-        <span className="rounded-full bg-emerald-700 px-3 py-1.5 text-xs font-black text-white">PRO</span>
+        <span className="w-fit rounded-full bg-emerald-400 px-3 py-1.5 text-xs font-black text-emerald-950">PRO ACTIVE</span>
       </div>
 
       <div className="grid gap-3">

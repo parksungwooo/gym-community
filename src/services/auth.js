@@ -1,6 +1,12 @@
 import { supabase } from '../lib/supabaseClient'
 import { assertServiceSuccess } from './serviceErrors'
 
+export const AUTH_PROVIDERS = {
+  GOOGLE: 'google',
+  KAKAO: 'kakao',
+  NAVER: 'naver',
+}
+
 export async function getCurrentUser() {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
 

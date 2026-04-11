@@ -66,6 +66,7 @@ export default function AuthRequiredModal({
   onClose,
   onGoogleSignIn,
   onKakaoSignIn,
+  onNaverSignIn,
 }) {
   const { isEnglish } = useI18n()
 
@@ -81,13 +82,24 @@ export default function AuthRequiredModal({
         <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{copy.title}</h2>
         <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{copy.body}</p>
 
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <button
+            type="button"
+            className="min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50"
+            data-testid="auth-naver"
+            onClick={onNaverSignIn}
+            disabled={loading}
+          >
+            {loading ? (isEnglish ? 'Connecting...' : '연결 중...') : isEnglish ? 'Continue with Naver' : '네이버로 로그인'}
+          </button>
+          <div className="grid gap-2 sm:grid-cols-2">
           <button type="button" className="min-h-12 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-800 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10" data-testid="auth-google" onClick={onGoogleSignIn} disabled={loading}>
             {loading ? (isEnglish ? 'Connecting...' : '연결 중...') : 'Google'}
           </button>
           <button type="button" className="min-h-12 rounded-lg bg-yellow-300 px-4 text-sm font-black text-gray-950 shadow-sm transition hover:bg-yellow-200 disabled:opacity-50" onClick={onKakaoSignIn} disabled={loading}>
             {loading ? (isEnglish ? 'Connecting...' : '연결 중...') : 'Kakao'}
           </button>
+          </div>
         </div>
 
         <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" data-testid="auth-modal-close" onClick={onClose} disabled={loading}>

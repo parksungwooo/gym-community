@@ -1,103 +1,16 @@
 import { formatDateTimeByLanguage, getWorkoutTypeLabel, useI18n } from '../i18n.js'
 import { getTodayWorkoutRecommendation } from '../features/workout/recommendations'
-import OptimizedImage from './OptimizedImage'
-import UserAvatar from './UserAvatar'
 import { localizeLevelText } from '../utils/level'
-
-function MetricPill({ eyebrow, value, detail }) {
-  return (
-    <article className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-neutral-950">
-      <span className="block text-xs font-black uppercase text-gray-700 dark:text-gray-200">{eyebrow}</span>
-      <strong className="mt-1 block text-2xl font-black text-gray-950 dark:text-white">{value}</strong>
-      {detail ? <small className="mt-1 block text-xs font-bold text-gray-700 dark:text-gray-200">{detail}</small> : null}
-    </article>
-  )
-}
-
-function DailyLoopCard({ title, body, steps, primaryAction, secondaryAction }) {
-  return (
-    <section className="grid gap-4 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-      <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-start">
-        <div className="grid gap-1">
-          <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">
-            {title.eyebrow}
-          </span>
-          <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">
-            {title.heading}
-          </h2>
-          <p className="m-0 text-sm font-semibold leading-6 text-gray-800 dark:text-gray-100">
-            {body}
-          </p>
-        </div>
-      </div>
-
-      <div className="grid gap-2 sm:grid-cols-4">
-        {steps.map((step) => (
-          <article
-            key={step.key}
-            className={`grid min-h-28 gap-2 rounded-2xl border p-4 ${
-              step.active
-                ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-400/20 dark:bg-emerald-700/20'
-                : 'border-gray-100 bg-gray-50 dark:border-white/10 dark:bg-neutral-950'
-            }`}
-          >
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">
-                {step.label}
-              </span>
-              <span className={`rounded-full px-2.5 py-1 text-xs font-black ${
-                step.done
-                  ? 'bg-emerald-700 text-white'
-                  : step.active
-                    ? 'bg-white text-emerald-800 shadow-sm dark:bg-neutral-900 dark:text-emerald-200'
-                    : 'bg-white text-gray-700 shadow-sm dark:bg-white/10 dark:text-gray-100'
-              }`}
-              >
-                {step.status}
-              </span>
-            </div>
-            <strong className="text-sm font-black leading-6 text-gray-950 dark:text-white">
-              {step.title}
-            </strong>
-            <p className="m-0 text-xs font-semibold leading-5 text-gray-700 dark:text-gray-200">
-              {step.detail}
-            </p>
-          </article>
-        ))}
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-        <button
-          type="button"
-          className="min-h-12 rounded-lg bg-emerald-700 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800"
-          onClick={primaryAction.onClick}
-        >
-          {primaryAction.label}
-        </button>
-        <button
-          type="button"
-          className="min-h-12 rounded-lg bg-gray-100 px-5 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
-          onClick={secondaryAction.onClick}
-        >
-          {secondaryAction.label}
-        </button>
-      </div>
-    </section>
-  )
-}
+import OptimizedImage from './OptimizedImage'
+import TodayWorkoutRecommendationCard from './TodayWorkoutRecommendationCard'
+import UserAvatar from './UserAvatar'
 
 const QUICK_WORKOUT_PRESETS = [
-  { key: 'hiit', ko: 'HIIT', en: 'HIIT', workoutType: '운동', durationMinutes: 15, icon: 'HI', tone: 'blue' },
-  { key: 'yoga', ko: '요가', en: 'Yoga', workoutType: '요가', durationMinutes: 20, icon: 'YO', tone: 'cyan' },
-  { key: 'core', ko: '코어', en: 'Core', workoutType: '필라테스', durationMinutes: 12, icon: 'CO', tone: 'lime' },
-  { key: 'strength', ko: '근력', en: 'Strength', workoutType: '웨이트', durationMinutes: 18, icon: 'ST', tone: 'steel' },
+  { key: 'walk', name: { ko: '빠른 걷기', en: 'Fast walk' }, workoutType: '걷기', durationMinutes: 15, iconType: 'walk' },
+  { key: 'run', name: { ko: '러닝', en: 'Run' }, workoutType: '러닝', durationMinutes: 25, iconType: 'run' },
+  { key: 'strength', name: { ko: '웨이트', en: 'Strength' }, workoutType: '웨이트', durationMinutes: 35, iconType: 'strength' },
+  { key: 'mobility', name: { ko: '스트레칭', en: 'Mobility' }, workoutType: '스트레칭', durationMinutes: 12, iconType: 'mobility' },
 ]
-
-function clampPercent(value) {
-  const parsed = Number(value)
-  if (!Number.isFinite(parsed)) return 0
-  return Math.max(0, Math.min(parsed, 100))
-}
 
 function getDisplayText(value, language = 'ko', fallback = '') {
   if (value && typeof value === 'object') {
@@ -107,6 +20,22 @@ function getDisplayText(value, language = 'ko', fallback = '') {
   return value ?? fallback
 }
 
+function clampPercent(value) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return 0
+  return Math.max(0, Math.min(parsed, 100))
+}
+
+function MetricPill({ label, value, detail }) {
+  return (
+    <article className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900">
+      <span className="block text-xs font-black uppercase text-gray-700 dark:text-gray-200">{label}</span>
+      <strong className="mt-2 block text-2xl font-black leading-tight text-gray-950 dark:text-white">{value}</strong>
+      {detail ? <span className="mt-1 block text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{detail}</span> : null}
+    </article>
+  )
+}
+
 function QuickWorkoutIcon({ type }) {
   const commonProps = {
     viewBox: '0 0 24 24',
@@ -114,85 +43,72 @@ function QuickWorkoutIcon({ type }) {
     focusable: 'false',
   }
 
-  switch (type) {
-    case 'hiit':
-      return (
-        <svg {...commonProps}>
-          <path d="m13 2-7 11h5l-1 9 8-13h-5l1-7Z" />
-        </svg>
-      )
-    case 'yoga':
-      return (
-        <svg {...commonProps}>
-          <path d="M12 6.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
-          <path d="M12 8v5" />
-          <path d="m7 11 5 2 5-2" />
-          <path d="M5 20c2.6-3 4.7-4.5 7-4.5S16.4 17 19 20" />
-        </svg>
-      )
-    case 'core':
-      return (
-        <svg {...commonProps}>
-          <path d="M8 5h8" />
-          <path d="M7 19h10" />
-          <path d="M9 5c-.8 2.2-1.2 4.5-1.2 7s.4 4.8 1.2 7" />
-          <path d="M15 5c.8 2.2 1.2 4.5 1.2 7s-.4 4.8-1.2 7" />
-          <path d="M10 10h4" />
-          <path d="M10 14h4" />
-        </svg>
-      )
-    case 'strength':
-      return (
-        <svg {...commonProps}>
-          <path d="M4 10v4" />
-          <path d="M8 8v8" />
-          <path d="M16 8v8" />
-          <path d="M20 10v4" />
-          <path d="M8 12h8" />
-        </svg>
-      )
-    default:
-      return (
-        <svg {...commonProps}>
-          <path d="M12 3v18" />
-          <path d="M5 12h14" />
-          <path d="m8 7 4-4 4 4" />
-          <path d="m16 17-4 4-4-4" />
-        </svg>
-      )
+  if (type === 'strength') {
+    return (
+      <svg {...commonProps}>
+        <path d="M4 10v4" />
+        <path d="M8 8v8" />
+        <path d="M16 8v8" />
+        <path d="M20 10v4" />
+        <path d="M8 12h8" />
+      </svg>
+    )
   }
+
+  if (type === 'mobility') {
+    return (
+      <svg {...commonProps}>
+        <path d="M12 5v14" />
+        <path d="M6 9c2 2 4 3 6 3s4-1 6-3" />
+        <path d="M7 19c1.6-2.5 3.2-3.8 5-3.8s3.4 1.3 5 3.8" />
+      </svg>
+    )
+  }
+
+  if (type === 'run') {
+    return (
+      <svg {...commonProps}>
+        <path d="M13 4.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+        <path d="m7 21 3-6" />
+        <path d="m14 21-2-5-3-2 2-5 3 2 3 1" />
+        <path d="m5 11 4-2" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg {...commonProps}>
+      <path d="M7 19c1.5-3 3.2-4.5 5-4.5S15.5 16 17 19" />
+      <path d="M8 7h8" />
+      <path d="M9 7c-.8 2-1.2 4-1.2 6" />
+      <path d="M15 7c.8 2 1.2 4 1.2 6" />
+    </svg>
+  )
 }
 
-function QuickWorkoutCard({ item, isEnglish, onStart }) {
-  const language = isEnglish ? 'en' : 'ko'
-  const title = getDisplayText(item.name, language, isEnglish ? item.en : item.ko)
-  const duration = item.duration_minutes ?? item.durationMinutes ?? 15
+function QuickWorkoutCard({ item, language, isEnglish, onStart }) {
+  const title = getDisplayText(item.name, language, item.workoutType)
+  const duration = Number(item.duration_minutes ?? item.durationMinutes) || 20
 
   return (
     <button
       type="button"
-      className="grid min-h-28 gap-3 rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 dark:border-white/10 dark:bg-neutral-950"
-      onClick={() => onStart?.(item)}
-      aria-label={
-        isEnglish
-          ? `Start ${title} workout for ${duration} minutes`
-          : `${title} ${duration}분 운동 시작`
-        }
+      className="grid min-h-32 gap-3 rounded-3xl border border-gray-100 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 dark:border-white/10 dark:bg-neutral-900"
+      onClick={() => onStart?.({
+        ...item,
+        name: title,
+        workoutType: item.workout_type ?? item.workoutType,
+        durationMinutes: duration,
+      })}
+      aria-label={isEnglish ? `Start ${title} for ${duration} minutes` : `${title} ${duration}분 시작`}
     >
-      <span className="text-sm font-black text-gray-950 dark:text-white">{title}</span>
-      <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-emerald-800 dark:bg-emerald-700/20 dark:text-emerald-200 [&_svg]:h-5 [&_svg]:w-5 [&_svg]:fill-none [&_svg]:stroke-current [&_svg]:stroke-2">
+      <span className="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-50 text-emerald-800 dark:bg-emerald-700/20 dark:text-emerald-200 [&_svg]:h-5 [&_svg]:w-5 [&_svg]:fill-none [&_svg]:stroke-current [&_svg]:stroke-2">
         <QuickWorkoutIcon type={item.iconType ?? item.key} />
       </span>
-      <span className="text-xs font-black text-gray-700 dark:text-gray-200">
-        {isEnglish ? `${duration} min` : `${duration}분`}
-      </span>
+      <span className="text-base font-black leading-6 text-gray-950 dark:text-white">{title}</span>
+      <span className="text-sm font-bold text-gray-700 dark:text-gray-200">{isEnglish ? `${duration} min` : `${duration}분`}</span>
     </button>
   )
-}
-
-function formatCalories(value, isEnglish) {
-  if (!value) return isEnglish ? 'No data yet' : '기록 없음'
-  return isEnglish ? `~${value} kcal` : `${value}kcal`
 }
 
 function getHomeFeedPhotoUrl(post) {
@@ -204,49 +120,43 @@ function getHomeFeedPhotoUrl(post) {
 }
 
 function getHomeFeedMeta(post, language, isEnglish) {
-  if (post?.type !== 'workout_complete') {
-    if (post?.type === 'challenge_complete') return isEnglish ? 'Challenge complete' : '챌린지 완료'
-    if (post?.type === 'level_up') return isEnglish ? 'Level up' : '레벨업'
-    return isEnglish ? 'Community update' : '새 피드'
-  }
+  if (post?.type === 'challenge_complete') return isEnglish ? 'Challenge complete' : '챌린지 완료'
+  if (post?.type === 'level_up') return isEnglish ? 'Level up' : '레벨업'
+  if (post?.type !== 'workout_complete') return isEnglish ? 'Community update' : '커뮤니티 업데이트'
 
   const workoutType = getWorkoutTypeLabel(post?.metadata?.workoutType, language)
+  const duration = Number(post?.metadata?.durationMinutes)
   const parts = [workoutType]
 
-  if (post?.metadata?.durationMinutes) {
-    parts.push(isEnglish ? `${post.metadata.durationMinutes} min` : `${post.metadata.durationMinutes}분`)
+  if (Number.isFinite(duration) && duration > 0) {
+    parts.push(isEnglish ? `${duration} min` : `${duration}분`)
   }
 
-  return parts.filter(Boolean).join(' · ')
+  return parts.join(' • ')
 }
 
 function getHomeFeedCopy(post, language, isEnglish) {
   if (post?.content?.trim()) return post.content
 
   if (post?.type === 'workout_complete') {
-    const workoutType = getWorkoutTypeLabel(post?.metadata?.workoutType, language)
-    if (post?.metadata?.note) {
-      return isEnglish
-        ? `${workoutType} session saved. ${post.metadata.note}`
-        : `${workoutType} 완료. ${post.metadata.note}`
-    }
-
-    return isEnglish ? `${workoutType} session saved.` : `${workoutType} 완료.`
+    return isEnglish
+      ? `${getWorkoutTypeLabel(post?.metadata?.workoutType, language)} session saved.`
+      : `${getWorkoutTypeLabel(post?.metadata?.workoutType, language)} 운동을 완료했어요.`
   }
 
   if (post?.type === 'challenge_complete') return isEnglish ? 'Weekly challenge cleared.' : '주간 챌린지를 달성했어요.'
-  if (post?.type === 'level_up') return isEnglish ? 'Level-up update shared.' : '레벨업을 공유했어요.'
+  if (post?.type === 'level_up') return isEnglish ? 'Shared a level-up moment.' : '레벨업 순간을 공유했어요.'
 
-  return isEnglish ? 'Shared a fresh progress update.' : '새 기록을 공유했어요.'
+  return isEnglish ? 'Shared a fresh progress update.' : '새로운 성장 기록을 공유했어요.'
 }
 
 function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }) {
   const { language, isEnglish } = useI18n()
   const t = (ko, en) => (isEnglish ? en : ko)
-  const authorName = post.authorDisplayName || (isEnglish ? 'Guest' : '게스트')
+  const authorName = post.authorDisplayName || t('게스트', 'Guest')
   const authorLevel = post.authorLevel
     ? localizeLevelText(post.authorLevel, language)
-    : t('레벨 미정', 'Level pending')
+    : t('레벨 미측정', 'Level pending')
   const photoUrl = getHomeFeedPhotoUrl(post)
   const storyMeta = getHomeFeedMeta(post, language, isEnglish)
   const content = getHomeFeedCopy(post, language, isEnglish)
@@ -275,11 +185,13 @@ function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }
             className="h-12 w-12 rounded-2xl"
             imageUrl={post.authorAvatarUrl}
             fallback={post.authorAvatarEmoji || 'RUN'}
-            alt={post.authorDisplayName || (isEnglish ? 'Author avatar' : '작성자 아바타')}
+            alt={post.authorDisplayName || t('작성자 아바타', 'Author avatar')}
           />
           <div className="min-w-0">
             <strong className="block truncate text-base font-black text-gray-950 dark:text-white">{authorName}</strong>
-            <span className="mt-1 inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{authorLevel}</span>
+            <span className="mt-1 inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">
+              {authorLevel}
+            </span>
           </div>
         </button>
 
@@ -302,7 +214,7 @@ function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }
             className="aspect-[4/3] w-full object-cover"
             imageUrl={photoUrl}
             preset="feedThumbnail"
-            alt={isEnglish ? 'Workout proof preview' : '운동 인증 사진 미리보기'}
+            alt={t('운동 인증 사진 미리보기', 'Workout proof preview')}
             loading="lazy"
             decoding="async"
             fetchPriority="low"
@@ -313,7 +225,7 @@ function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }
 
       <div className="grid gap-2">
         <span className="text-sm font-black text-emerald-800 dark:text-emerald-200">{storyMeta}</span>
-        <p className="m-0 text-base font-semibold leading-7 text-gray-700 dark:text-gray-200">{content}</p>
+        <p className="m-0 text-base font-semibold leading-7 text-gray-800 dark:text-gray-100">{content}</p>
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 dark:border-white/10">
@@ -321,8 +233,12 @@ function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }
           <span>{t(`좋아요 ${post.likeCount ?? 0}`, `${post.likeCount ?? 0} likes`)}</span>
           <span>{t(`댓글 ${post.comments?.length ?? 0}`, `${post.comments?.length ?? 0} comments`)}</span>
         </div>
-        <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onSeeCommunity}>
-          {t('더 보기', 'Open')}
+        <button
+          type="button"
+          className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
+          onClick={onSeeCommunity}
+        >
+          {t('열기', 'Open')}
         </button>
       </div>
     </article>
@@ -341,53 +257,53 @@ export default function HomeDashboard({
   reminderPermission,
   feedPreview = {},
   routineTemplates = [],
+  workoutHistory = [],
   workoutLoading,
+  celebration,
+  isPro = false,
   onOpenWorkoutComposer,
+  onCompleteRecommendedWorkout,
   onStartRoutine,
   onOpenTest,
   onSeeCommunity,
   onSelectFeedPreviewUser,
   onRequestReminderPermission,
+  onOpenPaywall,
 }) {
   const { isEnglish, language } = useI18n()
   const t = (ko, en) => (isEnglish ? en : ko)
-
-  const nickname = profile?.display_name?.trim()
-  const topRoutine = routineTemplates[0] ?? null
-  const topRoutineName = getDisplayText(topRoutine?.name, language, t('내 루틴', 'Routine'))
-  const goalCurrent = challenge?.current ?? 0
-  const goalTarget = challenge?.goal ?? 0
-  const goalProgress = Math.max(0, Math.min(challenge?.progress ?? 0, 100))
-  const todayCalories = Number(stats.todayCalories) || 0
-  const dailyGoalCalories = Math.max(440, (goalTarget || 4) * 220)
-  const dailyGoalProgress = clampPercent((todayCalories / dailyGoalCalories) * 100)
-  const dailyGoalAngle = `${dailyGoalProgress * 3.6}deg`
+  const weeklyGoal = challenge?.goal ?? profile?.weekly_goal ?? 4
+  const weeklyCount = challenge?.current ?? stats.weeklyCount ?? 0
+  const goalProgress = clampPercent(challenge?.progress ?? ((weeklyCount / Math.max(weeklyGoal, 1)) * 100))
   const activityLevelValue = Number(activitySummary?.levelValue) || 1
-  const activityLevelProgress = clampPercent(activitySummary?.progressPercent ?? goalProgress)
+  const activityLevelProgress = clampPercent(activitySummary?.progressPercent ?? 0)
   const currentLevelLabel = currentLevel
     ? localizeLevelText(currentLevel, language)
-    : t('레벨 미정', 'Level pending')
+    : t('레벨 미측정', 'Level pending')
   const todayRecommendation = getTodayWorkoutRecommendation({
     currentLevel,
     activitySummary,
     stats,
     todayDone,
+    workoutHistory,
+    weeklyGoal,
+    isPremium: isPro,
     language,
     isEnglish,
   })
+  const topRoutine = routineTemplates[0] ?? null
+  const topRoutineName = getDisplayText(topRoutine?.name, language, t('저장 루틴', 'Saved routine'))
   const quickWorkouts = [
     {
       key: 'recommended-today',
       name: todayRecommendation.title,
       workoutType: todayRecommendation.workoutType,
       durationMinutes: todayRecommendation.durationMinutes,
-      icon: 'RC',
-      iconType: todayRecommendation.workoutType === '웨이트' ? 'strength' : todayRecommendation.workoutType === '요가' ? 'yoga' : 'hiit',
-      tone: 'routine',
-      note: todayRecommendation.body,
+      iconType: todayRecommendation.workoutType === '웨이트' ? 'strength' : todayRecommendation.workoutType === '러닝' ? 'run' : 'walk',
+      note: '',
     },
     ...routineTemplates.slice(0, 2).map((routine, index) => {
-      const routineName = getDisplayText(routine.name, language, t('내 루틴', 'Routine'))
+      const routineName = getDisplayText(routine.name, language, t('저장 루틴', 'Saved routine'))
 
       return {
         ...routine,
@@ -395,350 +311,189 @@ export default function HomeDashboard({
         name: routineName,
         durationMinutes: routine.duration_minutes ?? routine.durationMinutes ?? 20,
         workoutType: routine.workout_type ?? routine.workoutType ?? '운동',
-        icon: routineName.slice(0, 2).toUpperCase() || 'RT',
-        tone: index === 0 ? 'routine' : 'steel',
+        iconType: 'strength',
       }
     }),
     ...QUICK_WORKOUT_PRESETS,
   ].slice(0, 4)
-
-  const heroTitle = todayDone
-    ? t('오늘 완료', 'Saved for today')
-    : t('오늘은 한 번만', 'One log is enough today')
-
-  const heroBadgeLabel = todayDone
-    ? t('오늘 완료', 'Saved today')
-    : goalCurrent > 0
-      ? t(`이번 주 ${goalCurrent}/${goalTarget}`, `Week ${goalCurrent}/${goalTarget}`)
-      : t('첫 기록 시작', 'Start the first log')
-
-  const heroDescription = nickname
-    ? todayDone
-      ? t(
-          `${nickname}님, 오늘도 해냈어요.`,
-          `${nickname}, today is already done.`,
-        )
-      : t(
-          `${nickname}님, 짧게라도 남겨봐요.`,
-          `${nickname}, a short log is enough.`,
-        )
-    : t(
-        '종류와 시간만 남기면 돼요.',
-        'Type and time are enough.',
-      )
-
-  const recentWorkoutTitle = stats.lastWorkoutType
-    ? getWorkoutTypeLabel(stats.lastWorkoutType, language)
-    : t('기록 없음', 'No workout yet')
-
-  const recentWorkoutMeta = stats.lastWorkoutType
-    ? [
-        stats.lastWorkoutDuration ? t(`${stats.lastWorkoutDuration}분`, `${stats.lastWorkoutDuration} min`) : null,
-        stats.lastWorkoutCalories ? formatCalories(stats.lastWorkoutCalories, isEnglish) : null,
-      ].filter(Boolean).join(' · ')
-    : t('첫 기록이 여기 쌓여요.', 'Your first log shows here.')
-
-  const recentWorkoutFootnote = stats.lastWorkoutType
-    ? t(
-        `최근 운동 ${recentWorkoutTitle}${recentWorkoutMeta ? ` · ${recentWorkoutMeta}` : ''}`,
-        `Latest ${recentWorkoutTitle}${recentWorkoutMeta ? ` · ${recentWorkoutMeta}` : ''}`,
-      )
-    : t('기록하면 최근 운동이 여기 보여요.', 'Recent workouts show up here after you log.')
-
-  const heroMetrics = [
-    {
-      eyebrow: t('주간 목표', 'Weekly goal'),
-      value: `${goalCurrent}/${goalTarget}`,
-      detail: `${goalProgress}%`,
-    },
-    {
-      eyebrow: t('연속 기록', 'Streak'),
-      value: t(`${stats.streak}일`, `${stats.streak} days`),
-      detail: t(`오늘 XP ${activitySummary?.todayXp ?? 0}`, `Today XP ${activitySummary?.todayXp ?? 0}`),
-    },
-  ]
-
-  const showReminderInline = reminder?.enabled && !todayDone
-  const reminderTitle = reminder?.due
-    ? t('지금 한 번 남겨요.', 'Time to log today.')
-    : t(
-        `리마인더 ${reminder?.reminderTimeLabel}`,
-        `Reminder ${reminder?.reminderTimeLabel}`,
-      )
-
-  const reminderBody = reminder?.due
-    ? t(
-        '한 번이면 리듬이 이어져요.',
-        'One quick save keeps the streak alive.',
-      )
-    : t(
-        '운동할 시간을 기억해둘게요.',
-        'A return time is already set.',
-      )
-
   const featuredFeedSection =
     (feedPreview.following?.length ? { label: t('팔로잉', 'Following'), items: feedPreview.following } : null)
     ?? (feedPreview.recommended?.length ? { label: t('추천', 'Recommended'), items: feedPreview.recommended } : null)
     ?? (feedPreview.popular?.length ? { label: t('인기', 'Popular'), items: feedPreview.popular } : null)
     ?? { label: t('피드', 'Feed'), items: [] }
-
   const featuredPost = featuredFeedSection.items[0] ?? null
-  const emptyFeedSecondaryAction = !currentLevel
-    ? { label: t('레벨 확인', 'Level test'), onClick: onOpenTest }
-    : { label: t('피드 보기', 'Open community'), onClick: onSeeCommunity }
-  const todayXp = activitySummary?.todayXp ?? 0
-  const dailyLoopSteps = [
-    {
-      key: 'level',
-      label: t('레벨', 'Level'),
-      title: currentLevel ? currentLevelLabel : t('3분 체크 필요', '3-min check needed'),
-      detail: currentLevel
-        ? t('추천 기준이 준비됐어요.', 'Your recommendation baseline is ready.')
-        : t('처음 한 번만 하면 추천이 정확해져요.', 'One quick test makes suggestions sharper.'),
-      status: currentLevel ? t('완료', 'Done') : t('먼저', 'First'),
-      active: !currentLevel,
-      done: Boolean(currentLevel),
-    },
-    {
-      key: 'workout',
-      label: t('운동', 'Workout'),
-      title: todayDone ? t('오늘 기록 완료', 'Logged today') : todayRecommendation.title,
-      detail: todayDone
-        ? t('오늘 루프의 핵심은 이미 채웠어요.', 'The core loop is already complete today.')
-        : todayRecommendation.body,
-      status: todayDone ? t('완료', 'Done') : t('다음', 'Next'),
-      active: Boolean(currentLevel) && !todayDone,
-      done: todayDone,
-    },
-    {
-      key: 'xp',
-      label: 'XP',
-      title: todayXp > 0
-        ? t(`+${todayXp} XP 적립`, `+${todayXp} XP earned`)
-        : t(`예상 +${todayRecommendation.estimatedXp} XP`, `Est. +${todayRecommendation.estimatedXp} XP`),
-      detail: todayXp > 0
-        ? t('레벨과 배지에 반영됐어요.', 'It now feeds levels and badges.')
-        : t('짧은 기록 하나로 성장감이 생겨요.', 'One short log creates visible progress.'),
-      status: todayXp > 0 ? t('적립', 'Earned') : t('대기', 'Ready'),
-      active: Boolean(currentLevel) && !todayDone,
-      done: todayXp > 0,
-    },
-    {
-      key: 'community',
-      label: t('피드', 'Feed'),
-      title: todayDone
-        ? t('기록을 공유하고 응원받기', 'Share and get cheers')
-        : t('다른 기록으로 동기 얻기', 'Borrow momentum from others'),
-      detail: featuredPost
-        ? t('지금 볼 만한 기록이 있어요.', 'There is a fresh story to open.')
-        : t('기록하면 피드 카드로 이어져요.', 'A saved workout becomes a feed card.'),
-      status: featuredPost ? t('열림', 'Open') : t('준비', 'Ready'),
-      active: todayDone,
-      done: false,
-    },
-  ]
-  const dailyLoopPrimaryAction = !currentLevel
-    ? { label: t('3분 레벨 체크', 'Start level test'), onClick: onOpenTest }
-    : !todayDone
-      ? { label: t('오늘 운동 기록', 'Log today’s workout'), onClick: onOpenWorkoutComposer }
-      : { label: t('피드 열기', 'Open community'), onClick: onSeeCommunity }
-  const dailyLoopSecondaryAction = !todayDone
-    ? { label: t('피드 먼저 보기', 'Preview feed'), onClick: onSeeCommunity }
-    : { label: t('운동 하나 더', 'Add another log'), onClick: onOpenWorkoutComposer }
+  const emptyFeedAction = !currentLevel
+    ? { label: t('레벨 테스트 하기', 'Take level test'), onClick: onOpenTest }
+    : { label: t('커뮤니티 보기', 'Open community'), onClick: onSeeCommunity }
+  const reminderDue = reminder?.enabled && !todayDone
+
+  const completeRecommendation = (recommendation) => {
+    onCompleteRecommendedWorkout?.({
+      workoutType: recommendation.workoutType,
+      durationMinutes: recommendation.durationMinutes,
+      note: recommendation.note,
+      shareToFeed: profile?.default_share_to_feed !== false,
+      source: 'today_recommendation',
+    })
+  }
+
+  const customizeRecommendation = (recommendation) => {
+    onStartRoutine?.({
+      name: recommendation.title,
+      workoutType: recommendation.workoutType,
+      durationMinutes: recommendation.durationMinutes,
+      note: '',
+    })
+  }
 
   return (
     <section className="grid gap-6">
-      <DailyLoopCard
-        title={{
-          eyebrow: t('오늘의 루프', 'Daily loop'),
-          heading: t('한 번 들어와서 바로 할 일이 보이게', 'Open once and know the next move'),
-        }}
-        body={t(
-          '레벨 체크, 오늘 운동, XP, 피드까지 하나의 흐름으로 이어집니다.',
-          'Level, workout, XP, and community now move as one clear loop.',
-        )}
-        steps={dailyLoopSteps}
-        primaryAction={dailyLoopPrimaryAction}
-        secondaryAction={dailyLoopSecondaryAction}
+      <TodayWorkoutRecommendationCard
+        recommendation={todayRecommendation}
+        completed={todayDone}
+        celebration={celebration}
+        isPro={isPro}
+        loading={workoutLoading}
+        profile={profile}
+        activitySummary={activitySummary}
+        weeklyCount={weeklyCount}
+        weeklyGoal={weeklyGoal}
+        onComplete={completeRecommendation}
+        onCustomize={customizeRecommendation}
+        onOpenPaywall={onOpenPaywall}
+        onSeeCommunity={onSeeCommunity}
       />
 
-      <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-        <div className="grid gap-4 sm:grid-cols-2" aria-label={t('오늘 요약', 'Today goal and level summary')}>
-          <div
-            className="grid min-h-52 place-items-center rounded-3xl border border-gray-100 bg-gray-50 p-5 dark:border-white/10 dark:bg-neutral-950"
-            style={{ '--goal-angle': dailyGoalAngle }}
-          >
-            <div
-              className="grid h-40 w-40 place-items-center rounded-full p-3"
-              style={{ background: `conic-gradient(#10b981 ${dailyGoalAngle}, #e5e7eb 0deg)` }}
-            >
-              <div className="grid h-full w-full place-items-center rounded-full bg-white p-4 text-center dark:bg-neutral-900">
-                <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">{t('오늘 목표', 'Daily Goal')}</span>
-                <strong className="mt-1 text-xl font-black text-gray-950 dark:text-white">{`${Math.round(todayCalories)} / ${dailyGoalCalories}`}</strong>
-                <small className="text-xs font-bold text-gray-700 dark:text-gray-200">{t('kcal', 'kcal')}</small>
-                <em className="mt-1 not-italic text-xs font-black text-emerald-800 dark:text-emerald-200">{`${Math.round(dailyGoalProgress)}% ${isEnglish ? 'Completed' : '완료'}`}</em>
-              </div>
-            </div>
-          </div>
+      <section className="grid gap-4 sm:grid-cols-3">
+        <MetricPill
+          label={t('이번 주 목표', 'Weekly goal')}
+          value={`${weeklyCount}/${weeklyGoal}`}
+          detail={`${goalProgress}% ${t('완료', 'complete')}`}
+        />
+        <MetricPill
+          label={t('스트릭', 'Streak')}
+          value={t(`${activitySummary?.currentStreak ?? stats.streak ?? 0}일`, `${activitySummary?.currentStreak ?? stats.streak ?? 0} days`)}
+          detail={t(`오늘 XP ${activitySummary?.todayXp ?? 0}`, `Today XP ${activitySummary?.todayXp ?? 0}`)}
+        />
+        <MetricPill
+          label={t('피트니스 레벨', 'Fitness level')}
+          value={`Lv.${activityLevelValue}`}
+          detail={currentLevelLabel}
+        />
+      </section>
 
-          <div className="grid content-between gap-4 rounded-3xl border border-gray-100 bg-gray-50 p-5 dark:border-white/10 dark:bg-neutral-950">
-            <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('피트니스 레벨', 'Fitness Level')}</span>
-            <div className="grid gap-3">
-              <strong className="text-3xl font-black leading-tight text-gray-950 dark:text-white">{`Lv.${activityLevelValue}`}</strong>
-              <span className="text-base font-black text-gray-800 dark:text-gray-100">{currentLevelLabel}</span>
-              <div className="h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
-                <div className="h-full rounded-full bg-emerald-700 transition-all" style={{ width: `${activityLevelProgress}%` }} />
-              </div>
-            </div>
-            <small className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
-              {activitySummary?.remainingXp
-                ? t(`다음 레벨까지 ${activitySummary.remainingXp}XP`, `${activitySummary.remainingXp} XP to next level`)
-                : t('오늘도 성장 중', 'Growing today')}
-            </small>
+      <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="grid gap-1">
+            <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('오늘의 흐름', 'Today flow')}</span>
+            <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">
+              {todayDone ? t('완료 후에도 다음 행동이 보여요', 'Next action stays clear after completion') : t('추천 운동으로 바로 시작하세요', 'Start from the recommendation')}
+            </h2>
           </div>
+          <button
+            type="button"
+            className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
+            onClick={onOpenWorkoutComposer}
+            data-testid="home-log-workout"
+          >
+            {t('직접 기록', 'Custom')}
+          </button>
         </div>
 
-        <button
-          type="button"
-          className="grid gap-4 rounded-3xl border border-emerald-100 bg-emerald-50 p-5 text-left shadow-sm transition hover:-translate-y-0.5 dark:border-emerald-400/20 dark:bg-emerald-700/20"
-          onClick={() => onStartRoutine?.({
-            name: todayRecommendation.title,
-            workoutType: todayRecommendation.workoutType,
-            durationMinutes: todayRecommendation.durationMinutes,
-            note: todayRecommendation.body,
-          })}
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-emerald-700 shadow-sm dark:bg-neutral-900 dark:text-emerald-200">{todayRecommendation.label}</span>
-              <h3 className="mt-3 mb-1 text-2xl font-black leading-tight text-gray-950 dark:text-white">
-                {todayRecommendation.title}
-              </h3>
-              <p className="m-0 text-sm font-semibold leading-6 text-gray-800 dark:text-gray-100">
-                {todayRecommendation.body}
-              </p>
-            </div>
-            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-emerald-700 text-lg font-black text-white shadow-sm">
-              +{todayRecommendation.estimatedXp}
-            </span>
+        {homeInsight ? (
+          <div className="grid gap-1 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+            <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">{homeInsight.label}</span>
+            <strong className="text-base font-black text-gray-950 dark:text-white">{homeInsight.title}</strong>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{homeInsight.body}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-gray-700 shadow-sm dark:bg-neutral-900 dark:text-gray-200">
-              {isEnglish ? `${todayRecommendation.durationMinutes} min` : `${todayRecommendation.durationMinutes}분`}
-            </span>
-            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-gray-700 shadow-sm dark:bg-neutral-900 dark:text-gray-200">
-              {todayRecommendation.intensityLabel}
-            </span>
-            <span className="rounded-full bg-emerald-700 px-3 py-1.5 text-xs font-black text-white">
-              {isEnglish ? 'Start' : '바로 기록'}
-            </span>
-          </div>
-        </button>
+        ) : null}
 
         <div className="grid gap-3">
           <div className="flex items-center justify-between gap-3">
-            <strong className="text-base font-black text-gray-950 dark:text-white">{t('빠른 시작', 'Quick Workout')}</strong>
-            <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onOpenWorkoutComposer}>
-              {t('직접 입력', 'Custom')}
-            </button>
+            <strong className="text-base font-black text-gray-950 dark:text-white">{t('빠른 시작', 'Quick start')}</strong>
+            {topRoutine ? (
+              <button
+                type="button"
+                className="min-h-11 rounded-lg bg-emerald-50 px-3 text-sm font-black text-emerald-800 transition hover:bg-emerald-100 dark:bg-emerald-700/20 dark:text-emerald-200"
+                onClick={() => onStartRoutine?.({ ...topRoutine, name: topRoutineName })}
+              >
+                {topRoutineName}
+              </button>
+            ) : !currentLevel ? (
+              <button
+                type="button"
+                className="min-h-11 rounded-lg bg-emerald-50 px-3 text-sm font-black text-emerald-800 transition hover:bg-emerald-100 dark:bg-emerald-700/20 dark:text-emerald-200"
+                onClick={onOpenTest}
+              >
+                {t('레벨 테스트', 'Level test')}
+              </button>
+            ) : null}
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {quickWorkouts.map((item) => (
               <QuickWorkoutCard
                 key={item.key}
                 item={item}
+                language={language}
                 isEnglish={isEnglish}
-                onStart={(preset) => onStartRoutine?.(preset)}
+                onStart={onStartRoutine}
               />
             ))}
           </div>
         </div>
 
-        <div className="grid gap-5">
-          <div className="grid gap-3">
-            <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('오늘 할 일', 'Today')}</span>
-            <div>
-              <span className={`inline-flex rounded-full px-3 py-1.5 text-xs font-black ${todayDone ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>{heroBadgeLabel}</span>
+        <div className="grid gap-3 rounded-3xl border border-gray-100 bg-gray-50 p-5 dark:border-white/10 dark:bg-neutral-950">
+          <div className="flex items-center justify-between gap-3">
+            <div className="grid gap-1">
+              <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">{t('레벨 진행', 'Level progress')}</span>
+              <strong className="text-xl font-black text-gray-950 dark:text-white">{`${activityLevelProgress}%`}</strong>
             </div>
-            {homeInsight ? (
-              <div className="grid gap-1 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
-                <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">{homeInsight.label}</span>
-                <strong className="text-base font-black text-gray-950 dark:text-white">{homeInsight.title}</strong>
-                <small className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{homeInsight.body}</small>
-              </div>
-            ) : null}
-            <h2 className="m-0 text-3xl font-black leading-tight text-gray-950 dark:text-white">{heroTitle}</h2>
-            <p className="m-0 text-base font-semibold leading-7 text-gray-800 dark:text-gray-100">{heroDescription}</p>
+            <span className="rounded-full bg-emerald-700 px-3 py-1.5 text-xs font-black text-white">
+              {activitySummary?.remainingXp
+                ? t(`${activitySummary.remainingXp} XP 남음`, `${activitySummary.remainingXp} XP left`)
+                : t('성장 중', 'Growing')}
+            </span>
           </div>
+          <div className="h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
+            <div className="h-full rounded-full bg-emerald-700 transition-all" style={{ width: `${activityLevelProgress}%` }} />
+          </div>
+        </div>
 
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-            <button
-              type="button"
-              className="min-h-12 rounded-lg bg-emerald-700 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
-              onClick={onOpenWorkoutComposer}
-              disabled={workoutLoading}
-              data-testid="home-log-workout"
-            >
-              {workoutLoading
-                ? t('여는 중...', 'Opening...')
-                : todayDone
-                  ? t('하나 더', 'Add log')
-                  : t('기록하기', 'Log workout')}
-            </button>
-
-            {topRoutine ? (
+        {reminderDue ? (
+          <div className="flex items-center justify-between gap-4 rounded-2xl bg-rose-50 p-4 dark:bg-rose-500/15">
+            <div className="grid gap-1">
+              <strong className="text-sm font-black text-gray-950 dark:text-white">
+                {reminder?.due ? t('지금 한 번 기록할 시간이에요', 'Time to log today') : t(`리마인더 ${reminder?.reminderTimeLabel}`, `Reminder ${reminder?.reminderTimeLabel}`)}
+              </strong>
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                {reminder?.due ? t('짧게라도 저장하면 스트릭이 이어져요.', 'A quick save keeps the streak alive.') : t('정한 시간에 다시 알려드릴게요.', 'Your reminder is already set.')}
+              </span>
+            </div>
+            {reminderPermission !== 'granted' && reminderPermission !== 'unsupported' ? (
               <button
                 type="button"
-                className="min-h-12 rounded-lg bg-gray-100 px-5 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
-                onClick={() => onStartRoutine?.({ ...topRoutine, name: topRoutineName })}
+                className="min-h-11 rounded-lg bg-white px-3 text-sm font-black text-gray-800 shadow-sm transition hover:text-gray-950 dark:bg-neutral-900 dark:text-gray-100 dark:hover:text-white"
+                onClick={onRequestReminderPermission}
               >
-                {t(`루틴 · ${topRoutineName}`, `Routine · ${topRoutineName}`)}
-              </button>
-            ) : !currentLevel ? (
-              <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-5 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onOpenTest}>
-                {t('레벨 확인', 'Level test')}
+                {t('알림 켜기', 'Enable')}
               </button>
             ) : null}
           </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {heroMetrics.map((item) => (
-              <MetricPill
-                key={item.eyebrow}
-                eyebrow={item.eyebrow}
-                value={item.value}
-                detail={item.detail}
-              />
-            ))}
-          </div>
-
-          <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{recentWorkoutFootnote}</p>
-
-          {showReminderInline && (
-            <div className={`flex items-center justify-between gap-4 rounded-2xl p-4 ${reminder?.due ? 'bg-rose-50 dark:bg-rose-500/15' : 'bg-gray-50 dark:bg-white/10'}`}>
-              <div className="grid gap-1">
-                <strong className="text-sm font-black text-gray-950 dark:text-white">{reminderTitle}</strong>
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{reminderBody}</span>
-              </div>
-              {reminderPermission !== 'granted' && reminderPermission !== 'unsupported' && (
-                <button type="button" className="min-h-11 rounded-lg bg-white px-3 text-sm font-black text-gray-800 shadow-sm transition hover:text-gray-950 dark:bg-neutral-900 dark:text-gray-100 dark:hover:text-white" onClick={onRequestReminderPermission}>
-                  {t('알림 켜기', 'Enable alert')}
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
+        ) : null}
       </section>
 
       <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('피드', 'Now in feed')}</span>
-            <h3 className="m-0 mt-1 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('오늘의 피드', 'One story to see')}</h3>
+            <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('커뮤니티', 'Community')}</span>
+            <h3 className="m-0 mt-1 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('오늘 볼 만한 기록', 'A story worth opening')}</h3>
           </div>
-          <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onSeeCommunity}>
-            {t('피드 보기', 'Community')}
+          <button
+            type="button"
+            className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
+            onClick={onSeeCommunity}
+          >
+            {t('피드 보기', 'Open feed')}
           </button>
         </div>
 
@@ -750,21 +505,27 @@ export default function HomeDashboard({
             onSeeCommunity={onSeeCommunity}
           />
         ) : (
-          <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+          <div className="grid gap-3 rounded-3xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
             <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{t('피드', 'Feed')}</span>
-            <strong className="text-lg font-black text-gray-950 dark:text-white">{t('아직 조용해요', 'Feed is quiet for now.')}</strong>
+            <strong className="text-lg font-black text-gray-950 dark:text-white">{t('아직 조용해요', 'Feed is quiet for now')}</strong>
             <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
-              {t(
-                '첫 기록을 남기면 피드가 살아나요.',
-                'One log or a quick visit to community starts this area.',
-              )}
+              {t('오늘 운동을 완료하면 바로 공유할 수 있는 기록이 생겨요.', 'Complete today workout and you will have something worth sharing.')}
             </p>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              <button type="button" className="min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800" onClick={onOpenWorkoutComposer}>
-                {t('기록하기', 'Log workout')}
+              <button
+                type="button"
+                className="min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800"
+                onClick={() => completeRecommendation(todayRecommendation)}
+                disabled={workoutLoading}
+              >
+                {t('오늘 운동 완료', 'Complete today workout')}
               </button>
-              <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={emptyFeedSecondaryAction.onClick}>
-                {emptyFeedSecondaryAction.label}
+              <button
+                type="button"
+                className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
+                onClick={emptyFeedAction.onClick}
+              >
+                {emptyFeedAction.label}
               </button>
             </div>
           </div>

@@ -10,7 +10,9 @@ import { getTodayWorkoutRecommendation } from '../src/features/workout/recommend
 import { getActivityEventMeta, getActivityLevelProgress } from '../src/utils/activityLevel.js'
 import { buildAppHistoryState, getHashForView, parseViewFromHash, shouldPushHomeBackGuard } from '../src/utils/appRouting.js'
 import { getImageSourceCandidates } from '../src/utils/imageOptimization.js'
-import { getCheckoutPreparation, getPaywallCopy, isProMember, PREMIUM_CONTEXT } from '../src/utils/premium.js'
+import { buildKakaoShareUrl } from '../src/utils/kakaoShare.js'
+import { buildOAuthProfilePatch } from '../src/utils/oauthProfile.js'
+import { getCheckoutPreparation, getPaywallCopy, getPaywallTriggerCopy, isProMember, PREMIUM_CONTEXT } from '../src/utils/premium.js'
 import { buildAdvancedAnalytics, buildAiTrainingPlan } from '../src/utils/premiumInsights.js'
 import { getNextThemeMode, normalizeThemeMode, resolveThemeMode } from '../src/utils/theme.js'
 
@@ -237,17 +239,81 @@ const tests = [
       assert.equal(meta.description, '러닝 · 30 min')
     },
   },
-  {
-    name: 'premium paywall copy returns report-specific title',
-    run() {
-      const copy = getPaywallCopy(PREMIUM_CONTEXT.REPORTS, 'en')
+    {
+      name: 'premium paywall copy returns report-specific title',
+      run() {
+        const copy = getPaywallCopy(PREMIUM_CONTEXT.REPORTS, 'en')
 
-      assert.equal(copy.kicker, 'Pro Reports')
-      assert.match(copy.title, /Read the change/i)
+        assert.equal(copy.kicker, 'Pro Reports')
+        assert.match(copy.title, /Read the change/i)
+      },
     },
-  },
-  {
-    name: 'AI premium plan uses level, goal, and history to build renderable sessions',
+    {
+      name: 'premium paywall trigger copy matches the feature moment',
+      run() {
+        const aiTrigger = getPaywallTriggerCopy(PREMIUM_CONTEXT.AI_PLAN, 'ko')
+        const unlimitedTrigger = getPaywallTriggerCopy(PREMIUM_CONTEXT.UNLIMITED, 'en')
+
+        assert.match(aiTrigger.label, /AI 플랜/)
+        assert.match(aiTrigger.ctaHint, /7일 무료/)
+        assert.match(unlimitedTrigger.title, /Stopping here/i)
+      },
+    },
+    {
+      name: 'naver oauth metadata fills only empty profile fields',
+      run() {
+        const patch = buildOAuthProfilePatch({
+          email: 'member@example.com',
+          app_metadata: { provider: 'naver' },
+          user_metadata: {
+            name: '네이버회원',
+            avatar_url: 'https://example.com/naver-profile.jpg',
+          },
+        }, {
+          display_name: '',
+          avatar_url: null,
+          avatar_emoji: null,
+        })
+
+        assert.deepEqual(patch, {
+          display_name: '네이버회원',
+          avatar_url: 'https://example.com/naver-profile.jpg',
+          avatar_emoji: 'NAVER',
+        })
+
+        const preserved = buildOAuthProfilePatch({
+          app_metadata: { provider: 'naver' },
+          user_metadata: {
+            name: '새이름',
+            avatar_url: 'https://example.com/new.jpg',
+          },
+        }, {
+          display_name: '직접설정',
+          avatar_url: 'https://example.com/original.jpg',
+          avatar_emoji: 'RUN',
+        })
+
+        assert.deepEqual(preserved, {})
+      },
+    },
+    {
+      name: 'kakao share URL adds source and content UTM parameters',
+      run() {
+        const shareUrl = buildKakaoShareUrl({
+          baseUrl: 'https://gym-community.vercel.app/#/progress',
+          contentType: 'level_result',
+        })
+        const parsed = new URL(shareUrl)
+
+        assert.equal(parsed.searchParams.get('utm_source'), 'kakaotalk')
+        assert.equal(parsed.searchParams.get('utm_medium'), 'social')
+        assert.equal(parsed.searchParams.get('utm_campaign'), 'gym_community_share')
+        assert.equal(parsed.searchParams.get('utm_content'), 'level_result')
+        assert.equal(parsed.hash, '#/progress')
+      },
+    },
+    {
+      name: 'AI premium plan uses level, goal, and history to build renderable sessions',
     run() {
       const plan = buildAiTrainingPlan({
         latestResult: { level: 'Lv3' },

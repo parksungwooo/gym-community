@@ -203,6 +203,8 @@ export default function ProgressRoute({
                   <ResultView
                     score={testResult.score}
                     level={testResult.level}
+                    isPro={isPro}
+                    onOpenPaywall={onOpenPaywall}
                     onStartWorkout={() => {
                       onCloseTestFlow?.()
                       onGoHome?.()
