@@ -64,12 +64,12 @@ export default function HomeRoute({
     <div className="grid gap-6">
       {celebration && (
         <section className="grid gap-4 rounded-3xl border border-emerald-100 bg-white p-5 shadow-sm dark:border-emerald-400/20 dark:bg-neutral-900 sm:p-6">
-          <div className="inline-grid h-16 w-16 place-items-center rounded-3xl bg-emerald-500 text-2xl font-black text-white shadow-sm">
+          <div className="inline-grid h-16 w-16 place-items-center rounded-3xl bg-emerald-700 text-2xl font-black text-white shadow-sm">
             {celebration.gainedXp ? `+${celebration.gainedXp}` : 'OK'}
           </div>
-          <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">Nice Work</span>
+          <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">Nice Work</span>
           <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{isEnglish ? `${celebration.workoutType} saved` : `${celebration.workoutType} 기록 완료`}</h2>
-          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
             {celebration.durationMinutes
               ? isEnglish ? `${celebration.durationMinutes} minutes were saved.` : `${celebration.durationMinutes}분 운동이 저장됐어요.`
               : isEnglish ? 'Today\'s workout was saved.' : '오늘 운동 기록이 저장됐어요.'}{' '}
@@ -80,7 +80,7 @@ export default function HomeRoute({
             <button type="button" className="min-h-12 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10" onClick={onOpenWorkoutComposer}>
               {isEnglish ? 'Log Another' : '하나 더 기록'}
             </button>
-            <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onSeeCommunity}>
+            <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onSeeCommunity}>
               {isEnglish ? 'See Community' : '커뮤니티 보기'}
             </button>
           </div>

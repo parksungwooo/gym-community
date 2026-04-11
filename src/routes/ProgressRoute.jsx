@@ -93,10 +93,10 @@ export default function ProgressRoute({
         </div>
 
         <div className="record-hub-actions">
-          <button type="button" className="min-h-12 rounded-lg bg-emerald-500 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600" onClick={onGoHome}>
+          <button type="button" className="min-h-12 rounded-lg bg-emerald-700 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800" onClick={onGoHome}>
             {isEnglish ? 'Log workout now' : '지금 운동 기록하기'}
           </button>
-          <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-5 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onToggleTestFlow} data-testid="progress-open-level-test">
+          <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-5 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onToggleTestFlow} data-testid="progress-open-level-test">
             {levelTestActionLabel}
           </button>
         </div>

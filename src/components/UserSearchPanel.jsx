@@ -54,7 +54,7 @@ export default function UserSearchPanel({
           placeholder={isEnglish ? 'Nickname' : '닉네임'}
         />
         {!!trimmedQuery && (
-          <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={() => onQueryChange('')}>
+          <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={() => onQueryChange('')}>
             {isEnglish ? 'Clear' : '지우기'}
           </button>
         )}
@@ -62,7 +62,7 @@ export default function UserSearchPanel({
 
       {trimmedQuery.length > 0 && trimmedQuery.length < 2 && (
         <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'Tip' : '팁'}</span>
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{isEnglish ? 'Tip' : '팁'}</span>
           <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'Type 2+ characters.' : '2글자 이상 입력해요.'}</strong>
         </div>
       )}
@@ -85,9 +85,9 @@ export default function UserSearchPanel({
 
       {!loading && trimmedQuery.length >= 2 && !rows.length && (
         <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'No Match' : '없음'}</span>
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{isEnglish ? 'No Match' : '없음'}</span>
           <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No matching users.' : '일치하는 사람이 없어요.'}</strong>
-          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'Try another keyword.' : '다른 키워드로 찾아요.'}</p>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{isEnglish ? 'Try another keyword.' : '다른 키워드로 찾아요.'}</p>
         </div>
       )}
 

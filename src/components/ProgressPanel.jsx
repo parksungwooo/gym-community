@@ -31,9 +31,9 @@ function getWorkoutMark(type) {
 function HealthStatTile({ label, value, meta, tone = 'default' }) {
   return (
     <article className={`rounded-2xl p-4 ${tone === 'cool' ? 'bg-cyan-50 dark:bg-cyan-500/15' : tone === 'warm' ? 'bg-amber-50 dark:bg-amber-500/15' : 'bg-gray-50 dark:bg-white/10'}`}>
-      <span className="block text-xs font-black uppercase text-gray-400">{label}</span>
+      <span className="block text-xs font-black uppercase text-gray-700 dark:text-gray-200">{label}</span>
       <strong className="mt-1 block text-lg font-black text-gray-950 dark:text-white">{value}</strong>
-      <span className="mt-1 block text-xs font-bold text-gray-500 dark:text-gray-400">{meta}</span>
+      <span className="mt-1 block text-xs font-bold text-gray-700 dark:text-gray-200">{meta}</span>
     </article>
   )
 }
@@ -246,9 +246,9 @@ export default function ProgressPanel({
             </div>
           ) : (
             <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-              <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">XP</span>
+              <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">XP</span>
               <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No recent XP yet.' : '아직 XP가 없어요.'}</strong>
-              <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'Logs and tests fill this.' : '운동을 남기면 바로 쌓여요.'}</p>
+              <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{isEnglish ? 'Logs and tests fill this.' : '운동을 남기면 바로 쌓여요.'}</p>
             </div>
           )}
         </section>
@@ -368,9 +368,9 @@ export default function ProgressPanel({
           </div>
         ) : (
           <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'Weight' : '체중'}</span>
+            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{isEnglish ? 'Weight' : '체중'}</span>
             <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'The first entry starts this.' : '첫 체중을 남겨요.'}</strong>
-            <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'Log it in Profile.' : '프로필에서 바로 기록할 수 있어요.'}</p>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{isEnglish ? 'Log it in Profile.' : '프로필에서 바로 기록할 수 있어요.'}</p>
           </div>
         )}
       </section>
@@ -393,9 +393,9 @@ export default function ProgressPanel({
             </div>
           ) : (
             <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-              <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'Badge' : '배지'}</span>
+              <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{isEnglish ? 'Badge' : '배지'}</span>
               <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No badges yet.' : '아직 열린 배지가 없어요.'}</strong>
-              <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'They unlock as you log.' : '기록할수록 하나씩 열려요.'}</p>
+              <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{isEnglish ? 'They unlock as you log.' : '기록할수록 하나씩 열려요.'}</p>
             </div>
           )}
         </section>
@@ -427,9 +427,9 @@ export default function ProgressPanel({
               ))
             ) : (
               <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-                <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'Pattern' : '패턴'}</span>
+                <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{isEnglish ? 'Pattern' : '패턴'}</span>
                 <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'Patterns build here.' : '패턴이 여기에 쌓여요.'}</strong>
-                <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'More logs make it clearer.' : '기록할수록 패턴이 또렷해져요.'}</p>
+                <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{isEnglish ? 'More logs make it clearer.' : '기록할수록 패턴이 또렷해져요.'}</p>
               </div>
             )}
           </div>

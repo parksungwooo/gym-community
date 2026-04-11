@@ -53,7 +53,7 @@ export default function AppTopActions({
     >
       <button
         type="button"
-        className="grid h-11 w-11 place-items-center rounded-lg text-gray-600 transition hover:bg-gray-50 hover:text-gray-950 dark:text-gray-200 dark:hover:bg-white/10 dark:hover:text-white"
+        className="grid h-11 w-11 place-items-center rounded-lg text-gray-800 transition hover:bg-gray-50 hover:text-gray-950 dark:text-gray-200 dark:hover:bg-white/10 dark:hover:text-white"
         onClick={onToggleTheme}
         title={themeLabel}
         aria-label={themeLabel}
@@ -67,8 +67,8 @@ export default function AppTopActions({
           type="button"
           className={`relative grid h-11 w-11 place-items-center rounded-lg transition ${
             showNotificationCenter
-              ? 'bg-emerald-500 text-white'
-              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950 dark:text-gray-200 dark:hover:bg-white/10 dark:hover:text-white'
+              ? 'bg-emerald-700 text-white'
+              : 'text-gray-800 hover:bg-gray-50 hover:text-gray-950 dark:text-gray-200 dark:hover:bg-white/10 dark:hover:text-white'
           }`}
           onClick={onOpenNotifications}
           title={isEnglish ? 'Open notifications' : '알림 열기'}

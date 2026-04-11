@@ -28,7 +28,7 @@ function FollowButton({ isFollowing, disabled, onClick, isEnglish }) {
   return (
     <button
       type="button"
-      className={`min-h-10 rounded-lg px-4 text-sm font-black transition disabled:opacity-50 ${isFollowing ? 'bg-emerald-500 text-white shadow-sm' : 'border border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400/20 dark:bg-emerald-500/15 dark:text-emerald-300'}`}
+      className={`min-h-10 rounded-lg px-4 text-sm font-black transition disabled:opacity-50 ${isFollowing ? 'bg-emerald-700 text-white shadow-sm' : 'border border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400/20 dark:bg-emerald-500/15 dark:text-emerald-200'}`}
       onClick={onClick}
       disabled={disabled}
     >
@@ -40,7 +40,7 @@ function FollowButton({ isFollowing, disabled, onClick, isEnglish }) {
 function Insight({ label, value }) {
   return (
     <article className="rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
-      <span className="block text-xs font-black uppercase text-gray-400">{label}</span>
+      <span className="block text-xs font-black uppercase text-gray-700 dark:text-gray-200">{label}</span>
       <strong className="mt-1 block text-base font-black text-gray-950 dark:text-white">{value}</strong>
     </article>
   )
@@ -100,9 +100,9 @@ export default function SuggestedUsers({
 
       {!loading && !rows.length && (
         <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{t('곧 채워져요', 'Coming soon')}</span>
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{t('곧 채워져요', 'Coming soon')}</span>
           <strong className="text-lg font-black text-gray-950 dark:text-white">{t('곧 맞는 사람이 보여요.', 'Suggestions appear here.')}</strong>
-          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
             {t(
               '기록이 쌓이면 비슷한 페이스를 찾아드릴게요.',
               'More logs will unlock suggestions.',

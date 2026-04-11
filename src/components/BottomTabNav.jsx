@@ -54,8 +54,8 @@ export default function BottomTabNav({ tabs, currentView, onChangeView }) {
             type="button"
             className={`grid min-h-14 place-items-center gap-1 rounded-lg px-2 py-2 text-xs font-black transition ${
               isActive
-                ? 'bg-emerald-500 text-white shadow-sm'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-950 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white'
+                ? 'bg-emerald-700 text-white shadow-sm'
+                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-950 dark:text-gray-100 dark:hover:bg-white/10 dark:hover:text-white'
             }`}
             onClick={() => onChangeView(tab.key)}
             data-testid={`tab-${tab.key}`}

@@ -328,7 +328,7 @@ export default function ProfilePanel({
           <div className="profile-next-step-actions">
             <button
               type="button"
-              className="min-h-12 rounded-lg bg-emerald-500 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:opacity-50"
+              className="min-h-12 rounded-lg bg-emerald-700 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50"
               onClick={handleSetupAction}
               disabled={loading || authLoading}
             >
@@ -451,7 +451,7 @@ export default function ProfilePanel({
                     {t('사진 업로드', 'Upload photo')}
                   </button>
                   {!!draftAvatarUrl && (
-                    <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={clearAvatarImage} disabled={loading}>
+                    <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={clearAvatarImage} disabled={loading}>
                       {t('삭제', 'Remove')}
                     </button>
                   )}
@@ -620,7 +620,7 @@ export default function ProfilePanel({
 
             <div className="grid gap-1 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
               <strong className="text-sm font-black text-gray-950 dark:text-white">{t('닉네임과 사진이 보여요.', 'Nickname and photo show.')}</strong>
-              <p className="m-0 text-sm font-semibold text-gray-500 dark:text-gray-400">{t('짧을수록 좋아요.', 'Short looks better.')}</p>
+              <p className="m-0 text-sm font-semibold text-gray-700 dark:text-gray-200">{t('짧을수록 좋아요.', 'Short looks better.')}</p>
             </div>
           </section>
         )}
@@ -661,7 +661,7 @@ export default function ProfilePanel({
                       {reminderPermission !== 'granted' && reminderPermission !== 'unsupported' && (
                         <button
                           type="button"
-                          className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white"
+                          className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
                           onClick={onRequestReminderPermission}
                           disabled={loading}
                         >
@@ -731,7 +731,7 @@ export default function ProfilePanel({
           </section>
         )}
 
-        <button type="submit" className="min-h-14 rounded-lg bg-emerald-500 px-5 text-base font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50" disabled={loading || nicknameMissing}>
+        <button type="submit" className="min-h-14 rounded-lg bg-emerald-700 px-5 text-base font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50" disabled={loading || nicknameMissing}>
           {loading ? t('저장 중', 'Saving...') : t('저장하기', 'Save')}
         </button>
       </form>

@@ -13,7 +13,7 @@ export default function AuthPanel({
   return (
     <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
       <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{isEnglish ? 'Account' : '계정 연결'}</h2>
-      <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
+      <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
         {isGuest
           ? isEnglish
             ? 'You are using guest mode. Connect an account whenever you want.'

@@ -18,8 +18,8 @@ function OptionButton({ isSelected, testId, text, onClick }) {
       <span
         className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg text-sm font-black ${
           isSelected
-            ? 'bg-emerald-500 text-white'
-            : 'bg-gray-100 text-gray-400 dark:bg-white/10 dark:text-gray-400'
+            ? 'bg-emerald-700 text-white'
+            : 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200'
         }`}
       >
         {isSelected ? 'OK' : ''}
@@ -71,11 +71,11 @@ export default function TestForm({ onSubmit, loading }) {
           aria-valuemax={100}
           aria-valuenow={Math.round(progressPercent)}
         >
-          <div className="h-full rounded-full bg-emerald-500 transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+          <div className="h-full rounded-full bg-emerald-700 transition-all duration-500" style={{ width: `${progressPercent}%` }} />
         </div>
-        <div className="mt-3 flex items-center justify-between text-xs font-black text-gray-400 dark:text-gray-500">
+        <div className="mt-3 flex items-center justify-between text-xs font-black text-gray-700 dark:text-gray-100">
           <span>{currentIndex + 1} / {questions.length}</span>
-          <span className="text-emerald-600 dark:text-emerald-400">
+          <span className="text-emerald-800 dark:text-emerald-200">
             {isEnglish ? `${answeredCount} answered` : `${answeredCount}개 응답`}
           </span>
         </div>
@@ -86,7 +86,7 @@ export default function TestForm({ onSubmit, loading }) {
         data-testid={`test-question-${currentQuestion.id}`}
       >
         <div className="mb-6 grid gap-2">
-          <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">
+          <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">
             {isEnglish ? `Question ${currentIndex + 1}` : `체크 ${currentIndex + 1}`}
           </span>
           <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">
@@ -126,7 +126,7 @@ export default function TestForm({ onSubmit, loading }) {
             type="submit"
             disabled={loading || !canSubmit}
             data-testid="test-submit"
-            className="min-h-12 rounded-lg bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? (isEnglish ? 'Calculating...' : '계산 중') : (isEnglish ? 'See my level' : '결과 보기')}
           </button>
@@ -136,7 +136,7 @@ export default function TestForm({ onSubmit, loading }) {
             onClick={handleNext}
             disabled={currentAnswer == null}
             data-testid="test-next-question"
-            className="min-h-12 rounded-lg bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isEnglish ? 'Next' : '다음'}
           </button>

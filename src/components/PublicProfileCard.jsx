@@ -5,7 +5,7 @@ import { localizeLevelText } from '../utils/level'
 function StatChip({ label, value }) {
   return (
     <article className="rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
-      <span className="block text-xs font-black uppercase text-gray-400">{label}</span>
+      <span className="block text-xs font-black uppercase text-gray-700 dark:text-gray-200">{label}</span>
       <strong className="mt-1 block text-base font-black text-gray-950 dark:text-white">{value}</strong>
     </article>
   )
@@ -114,7 +114,7 @@ export default function PublicProfileCard({
                   </button>
                 </>
               )}
-              <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onClear}>
+              <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onClear}>
                 {t('닫기', 'Close')}
               </button>
             </div>

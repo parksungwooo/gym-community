@@ -85,7 +85,7 @@ export default function ModerationPanel({
         </select>
         <button
           type="button"
-          className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white"
+          className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
           onClick={onRefresh}
           disabled={loading || actionLoading}
         >
@@ -105,9 +105,9 @@ export default function ModerationPanel({
         </div>
       ) : !reports.length ? (
         <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'Clear' : '조용함'}</span>
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{isEnglish ? 'Clear' : '조용함'}</span>
           <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No reports.' : '신고 없음'}</strong>
-          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'New ones show here.' : '새 신고가 보여요.'}</p>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{isEnglish ? 'New ones show here.' : '새 신고가 보여요.'}</p>
         </div>
       ) : (
         <div className="moderation-report-list">

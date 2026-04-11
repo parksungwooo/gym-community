@@ -90,7 +90,7 @@ export default function AuthRequiredModal({
           </button>
         </div>
 
-        <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" data-testid="auth-modal-close" onClick={onClose} disabled={loading}>
+        <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" data-testid="auth-modal-close" onClick={onClose} disabled={loading}>
           {isEnglish ? 'Maybe later' : '나중에'}
         </button>
       </section>

@@ -2018,16 +2018,16 @@ export default function App() {
           aria-live="polite"
           data-testid={`guest-sync-${guestSyncNotice.tone}`}
         >
-          <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">{guestSyncNotice.kicker}</span>
+          <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{guestSyncNotice.kicker}</span>
           <strong className="text-base font-black leading-6">{guestSyncNotice.title}</strong>
-          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-300">{guestSyncNotice.body}</p>
-          <span className="text-xs font-black text-gray-400">{guestSyncNotice.meta}</span>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-100">{guestSyncNotice.body}</p>
+          <span className="text-xs font-black text-gray-700 dark:text-gray-200">{guestSyncNotice.meta}</span>
           {guestSyncNotice.actionKind !== 'none' && (
             <div className="mt-1">
               <button
                 type="button"
                 className={guestSyncNotice.actionKind === 'auth'
-                  ? 'min-h-10 rounded-lg bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:opacity-50'
+                  ? 'min-h-10 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50'
                   : 'min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10'}
                 data-testid="guest-sync-action"
                 onClick={guestSyncNotice.actionKind === 'auth' ? () => openAuthPrompt('guest_sync') : handleRetryGuestSync}
@@ -2043,12 +2043,12 @@ export default function App() {
         <section className="fixed left-1/2 top-[calc(env(safe-area-inset-top)+4.75rem)] z-50 grid w-[min(92vw,42rem)] -translate-x-1/2 gap-3 rounded-3xl border border-rose-100 bg-white p-4 text-gray-950 shadow-sm dark:border-rose-400/20 dark:bg-neutral-900 dark:text-white" role="status" aria-live="polite">
           <span className="text-xs font-black uppercase text-rose-600 dark:text-rose-300">{errorState.label}</span>
           <strong className="text-base font-black leading-6">{errorState.title}</strong>
-          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-300">{visibleErrorMessage}</p>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-100">{visibleErrorMessage}</p>
           <div className="grid gap-2 sm:grid-cols-2">
             <button type="button" className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10" onClick={() => window.location.reload()}>
               {isEnglish ? 'Refresh app' : '앱 새로고침'}
             </button>
-            <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={() => setErrorMessage('')}>
+            <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={() => setErrorMessage('')}>
               {isEnglish ? 'Hide' : '닫기'}
             </button>
           </div>
@@ -2147,7 +2147,7 @@ export default function App() {
               <span className="h-20 animate-pulse rounded-2xl bg-gray-100 dark:bg-white/10" />
               <span className="h-20 animate-pulse rounded-2xl bg-gray-100 dark:bg-white/10" />
             </div>
-            <p className="m-0 text-sm font-semibold text-gray-500 dark:text-gray-400">{initStatus}</p>
+            <p className="m-0 text-sm font-semibold text-gray-700 dark:text-gray-200">{initStatus}</p>
           </section>
         ) : (
             <Suspense fallback={<RouteSuspenseFallback label={isEnglish ? 'Loading route...' : '화면을 불러오는 중입니다...'} />}>

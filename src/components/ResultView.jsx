@@ -66,7 +66,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
   return (
     <section className="mx-auto grid w-full max-w-xl gap-6 rounded-3xl border border-gray-100 bg-white p-5 text-center shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
       <div className="mx-auto grid justify-items-center gap-4">
-        <div className="relative grid h-28 w-28 place-items-center rounded-3xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20">
+        <div className="relative grid h-28 w-28 place-items-center rounded-3xl bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-200 dark:ring-emerald-400/20">
           <TrophyIcon />
           <span className="absolute -right-2 -top-2 rounded-lg bg-yellow-300 px-3 py-1 text-xs font-black text-gray-950 shadow-sm">
             LV.{levelValue}
@@ -74,13 +74,13 @@ export default function ResultView({ score, level, onStartWorkout }) {
         </div>
 
         <div className="grid gap-2">
-          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
             {isEnglish ? 'Fitness Result' : '내 레벨'}
           </span>
           <h2 className="m-0 text-3xl font-black leading-tight text-gray-950 dark:text-white sm:text-4xl">
             {displayLevel}
           </h2>
-          <p className="m-0 text-5xl font-black leading-none text-emerald-600 dark:text-emerald-400 sm:text-6xl">
+          <p className="m-0 text-5xl font-black leading-none text-emerald-800 dark:text-emerald-200 sm:text-6xl">
             {isEnglish ? `${score} pts` : `${score}점`}
           </p>
         </div>
@@ -90,7 +90,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
         <p className="m-0 text-base font-extrabold leading-7 text-gray-700 dark:text-gray-200">
           {message}
         </p>
-        <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
+        <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
           {isEnglish
             ? "Now turn this level into today's workout log."
             : '이제 오늘 운동 하나만 남겨볼까요?'}
@@ -108,7 +108,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
         </button>
         <button
           type="button"
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800"
           onClick={onStartWorkout}
         >
           <DumbbellIcon />

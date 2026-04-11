@@ -10,7 +10,7 @@ function BenefitCard({ title, body }) {
   return (
     <article className="rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
       <strong className="text-sm font-black text-gray-950 dark:text-white">{title}</strong>
-      <p className="m-0 mt-1 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{body}</p>
+      <p className="m-0 mt-1 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{body}</p>
     </article>
   )
 }
@@ -87,7 +87,7 @@ export default function PaywallModal({
               <button
                 type="button"
                 className={plan.highlighted
-                  ? 'min-h-12 rounded-lg bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:opacity-50'
+                  ? 'min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50'
                   : 'min-h-12 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10'}
                 onClick={() => onUpgradePlan(plan.id)}
                 disabled={loading || isPro}
@@ -132,7 +132,7 @@ export default function PaywallModal({
           </p>
         </div>
 
-        <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onClose} disabled={loading}>
+        <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onClose} disabled={loading}>
           {t('무료로 계속 쓰기', 'Continue with Free')}
         </button>
       </section>

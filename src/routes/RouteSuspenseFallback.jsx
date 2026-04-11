@@ -9,7 +9,7 @@ export default function RouteSuspenseFallback({ label = 'Loading...' }) {
         <span className="h-24 animate-pulse rounded-2xl bg-gray-100 dark:bg-white/10" />
         <span className="h-24 animate-pulse rounded-2xl bg-gray-100 dark:bg-white/10" />
       </div>
-      <p className="m-0 text-sm font-semibold text-gray-500 dark:text-gray-400">{label}</p>
+      <p className="m-0 text-sm font-semibold text-gray-700 dark:text-gray-200">{label}</p>
     </section>
   )
 }

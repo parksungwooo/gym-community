@@ -16,8 +16,8 @@ function FollowButton({ isFollowing, disabled, onClick, isEnglish }) {
       type="button"
       className={`min-h-10 rounded-lg px-4 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${
         isFollowing
-          ? 'bg-emerald-500 text-white shadow-sm'
-          : 'border border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400/20 dark:bg-emerald-500/15 dark:text-emerald-300'
+          ? 'bg-emerald-700 text-white shadow-sm'
+          : 'border border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400/20 dark:bg-emerald-500/15 dark:text-emerald-200'
       }`}
       onClick={onClick}
       disabled={disabled}
@@ -48,14 +48,14 @@ export default function RankingBoard({
     <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="grid gap-1">
-          <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">
+          <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">
             {t('랭킹', 'Ranking')}
           </span>
           <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">
             {t('이번 주', 'This week')}
           </h2>
         </div>
-        <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+        <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
           {t(`1위 ${topScore}P`, `Top ${topScore} pts`)}
         </span>
       </div>
@@ -74,7 +74,7 @@ export default function RankingBoard({
               className={`min-h-10 rounded-lg px-3 text-sm font-black transition ${
                 isActive
                   ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-900 dark:text-white'
-                  : 'text-gray-500 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white'
+                  : 'text-gray-700 hover:text-gray-950 dark:text-gray-100 dark:hover:text-white'
               }`}
               onClick={() => setTimeframe(key)}
               aria-pressed={isActive}
@@ -85,7 +85,7 @@ export default function RankingBoard({
         })}
       </div>
 
-      <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
+      <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
         {t(
           '이번 주 기록 기준이에요.',
           timeframe === 'week' ? 'Based on weekly activity points.' : 'Monthly view blends total XP with recent weekly points.',
@@ -102,13 +102,13 @@ export default function RankingBoard({
 
       {!loading && !rows.length && (
         <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
             {t('랭킹 대기 중', 'Ranking loading up')}
           </span>
           <strong className="text-lg font-black text-gray-950 dark:text-white">
             {t('아직 랭킹이 비었어요.', 'Ranking is still empty.')}
           </strong>
-          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
             {t('첫 기록을 남기면 바로 채워져요.', 'Logs will show here.')}
           </p>
         </div>
@@ -146,7 +146,7 @@ export default function RankingBoard({
                     <strong className="block truncate text-base font-black">
                       {item.display_name}
                     </strong>
-                    <p className="m-0 truncate text-xs font-bold text-gray-500 dark:text-gray-300">
+                    <p className="m-0 truncate text-xs font-bold text-gray-700 dark:text-gray-100">
                       {t(
                         `${item.weekly_points ?? 0}P · ${item.weekly_count ?? 0}회`,
                         `${item.weekly_points ?? 0} pts · ${item.weekly_count ?? 0} logs`,
@@ -156,7 +156,7 @@ export default function RankingBoard({
                 </div>
                 <div className="grid justify-items-end gap-1">
                   <strong className="text-sm font-black">{`Lv ${item.activity_level ?? 1}`}</strong>
-                  <span className="max-w-24 truncate text-xs font-bold text-gray-500 dark:text-gray-300">
+                  <span className="max-w-24 truncate text-xs font-bold text-gray-700 dark:text-gray-100">
                     {item.latest_level
                       ? localizeLevelText(item.latest_level, language)
                       : t(`총 ${item.total_xp ?? 0} XP`, `${item.total_xp ?? 0} XP total`)}

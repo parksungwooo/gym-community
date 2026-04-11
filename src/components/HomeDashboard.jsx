@@ -7,9 +7,9 @@ import { localizeLevelText } from '../utils/level'
 function MetricPill({ eyebrow, value, detail }) {
   return (
     <article className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-neutral-950">
-      <span className="block text-xs font-black uppercase text-gray-400">{eyebrow}</span>
+      <span className="block text-xs font-black uppercase text-gray-700 dark:text-gray-200">{eyebrow}</span>
       <strong className="mt-1 block text-2xl font-black text-gray-950 dark:text-white">{value}</strong>
-      {detail ? <small className="mt-1 block text-xs font-bold text-gray-500 dark:text-gray-400">{detail}</small> : null}
+      {detail ? <small className="mt-1 block text-xs font-bold text-gray-700 dark:text-gray-200">{detail}</small> : null}
     </article>
   )
 }
@@ -99,10 +99,10 @@ function QuickWorkoutCard({ item, isEnglish, onStart }) {
         }
     >
       <span className="text-sm font-black text-gray-950 dark:text-white">{title}</span>
-      <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300 [&_svg]:h-5 [&_svg]:w-5 [&_svg]:fill-none [&_svg]:stroke-current [&_svg]:stroke-2">
+      <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200 [&_svg]:h-5 [&_svg]:w-5 [&_svg]:fill-none [&_svg]:stroke-current [&_svg]:stroke-2">
         <QuickWorkoutIcon type={item.iconType ?? item.key} />
       </span>
-      <span className="text-xs font-black text-gray-400">
+      <span className="text-xs font-black text-gray-700 dark:text-gray-200">
         {isEnglish ? `${duration} min` : `${duration}분`}
       </span>
     </button>
@@ -198,13 +198,13 @@ function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }
           />
           <div className="min-w-0">
             <strong className="block truncate text-base font-black text-gray-950 dark:text-white">{authorName}</strong>
-            <span className="mt-1 inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{authorLevel}</span>
+            <span className="mt-1 inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{authorLevel}</span>
           </div>
         </button>
 
         <div className="grid justify-items-end gap-1 text-right">
-          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-black text-gray-600 dark:bg-white/10 dark:text-gray-200">{sourceLabel}</span>
-          <span className="text-xs font-bold text-gray-400">
+          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-200">{sourceLabel}</span>
+          <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
             {formatDateTimeByLanguage(post.created_at, language, {
               month: 'short',
               day: 'numeric',
@@ -231,16 +231,16 @@ function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }
       ) : null}
 
       <div className="grid gap-2">
-        <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{storyMeta}</span>
+        <span className="text-sm font-black text-emerald-800 dark:text-emerald-200">{storyMeta}</span>
         <p className="m-0 text-base font-semibold leading-7 text-gray-700 dark:text-gray-200">{content}</p>
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 dark:border-white/10">
-        <div className="flex flex-wrap gap-2 text-xs font-black text-gray-400">
+        <div className="flex flex-wrap gap-2 text-xs font-black text-gray-700 dark:text-gray-200">
           <span>{t(`좋아요 ${post.likeCount ?? 0}`, `${post.likeCount ?? 0} likes`)}</span>
           <span>{t(`댓글 ${post.comments?.length ?? 0}`, `${post.comments?.length ?? 0} comments`)}</span>
         </div>
-        <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onSeeCommunity}>
+        <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onSeeCommunity}>
           {t('더 보기', 'Open')}
         </button>
       </div>
@@ -414,24 +414,24 @@ export default function HomeDashboard({
               style={{ background: `conic-gradient(#10b981 ${dailyGoalAngle}, #e5e7eb 0deg)` }}
             >
               <div className="grid h-full w-full place-items-center rounded-full bg-white p-4 text-center dark:bg-neutral-900">
-                <span className="text-xs font-black uppercase text-gray-400">{t('오늘 목표', 'Daily Goal')}</span>
+                <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">{t('오늘 목표', 'Daily Goal')}</span>
                 <strong className="mt-1 text-xl font-black text-gray-950 dark:text-white">{`${Math.round(todayCalories)} / ${dailyGoalCalories}`}</strong>
-                <small className="text-xs font-bold text-gray-500 dark:text-gray-400">{t('kcal', 'kcal')}</small>
-                <em className="mt-1 not-italic text-xs font-black text-emerald-600 dark:text-emerald-400">{`${Math.round(dailyGoalProgress)}% ${isEnglish ? 'Completed' : '완료'}`}</em>
+                <small className="text-xs font-bold text-gray-700 dark:text-gray-200">{t('kcal', 'kcal')}</small>
+                <em className="mt-1 not-italic text-xs font-black text-emerald-800 dark:text-emerald-200">{`${Math.round(dailyGoalProgress)}% ${isEnglish ? 'Completed' : '완료'}`}</em>
               </div>
             </div>
           </div>
 
           <div className="grid content-between gap-4 rounded-3xl border border-gray-100 bg-gray-50 p-5 dark:border-white/10 dark:bg-neutral-950">
-            <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">{t('피트니스 레벨', 'Fitness Level')}</span>
+            <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('피트니스 레벨', 'Fitness Level')}</span>
             <div className="grid gap-3">
               <strong className="text-3xl font-black leading-tight text-gray-950 dark:text-white">{`Lv.${activityLevelValue}`}</strong>
-              <span className="text-base font-black text-gray-600 dark:text-gray-300">{currentLevelLabel}</span>
+              <span className="text-base font-black text-gray-800 dark:text-gray-100">{currentLevelLabel}</span>
               <div className="h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
-                <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${activityLevelProgress}%` }} />
+                <div className="h-full rounded-full bg-emerald-700 transition-all" style={{ width: `${activityLevelProgress}%` }} />
               </div>
             </div>
-            <small className="text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
+            <small className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
               {activitySummary?.remainingXp
                 ? t(`다음 레벨까지 ${activitySummary.remainingXp}XP`, `${activitySummary.remainingXp} XP to next level`)
                 : t('오늘도 성장 중', 'Growing today')}
@@ -451,15 +451,15 @@ export default function HomeDashboard({
         >
           <div className="flex items-start justify-between gap-4">
             <div>
-              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-emerald-700 shadow-sm dark:bg-neutral-900 dark:text-emerald-300">{todayRecommendation.label}</span>
+              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-emerald-700 shadow-sm dark:bg-neutral-900 dark:text-emerald-200">{todayRecommendation.label}</span>
               <h3 className="mt-3 mb-1 text-2xl font-black leading-tight text-gray-950 dark:text-white">
                 {todayRecommendation.title}
               </h3>
-              <p className="m-0 text-sm font-semibold leading-6 text-gray-600 dark:text-gray-300">
+              <p className="m-0 text-sm font-semibold leading-6 text-gray-800 dark:text-gray-100">
                 {todayRecommendation.body}
               </p>
             </div>
-            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-emerald-500 text-lg font-black text-white shadow-sm">
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-emerald-700 text-lg font-black text-white shadow-sm">
               +{todayRecommendation.estimatedXp}
             </span>
           </div>
@@ -470,7 +470,7 @@ export default function HomeDashboard({
             <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-gray-700 shadow-sm dark:bg-neutral-900 dark:text-gray-200">
               {todayRecommendation.intensityLabel}
             </span>
-            <span className="rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-black text-white">
+            <span className="rounded-full bg-emerald-700 px-3 py-1.5 text-xs font-black text-white">
               {isEnglish ? 'Start' : '바로 기록'}
             </span>
           </div>
@@ -479,7 +479,7 @@ export default function HomeDashboard({
         <div className="grid gap-3">
           <div className="flex items-center justify-between gap-3">
             <strong className="text-base font-black text-gray-950 dark:text-white">{t('빠른 시작', 'Quick Workout')}</strong>
-            <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onOpenWorkoutComposer}>
+            <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onOpenWorkoutComposer}>
               {t('직접 입력', 'Custom')}
             </button>
           </div>
@@ -497,25 +497,25 @@ export default function HomeDashboard({
 
         <div className="grid gap-5">
           <div className="grid gap-3">
-            <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">{t('오늘 할 일', 'Today')}</span>
+            <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('오늘 할 일', 'Today')}</span>
             <div>
-              <span className={`inline-flex rounded-full px-3 py-1.5 text-xs font-black ${todayDone ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-300'}`}>{heroBadgeLabel}</span>
+              <span className={`inline-flex rounded-full px-3 py-1.5 text-xs font-black ${todayDone ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>{heroBadgeLabel}</span>
             </div>
             {homeInsight ? (
               <div className="grid gap-1 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
-                <span className="text-xs font-black uppercase text-gray-400">{homeInsight.label}</span>
+                <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">{homeInsight.label}</span>
                 <strong className="text-base font-black text-gray-950 dark:text-white">{homeInsight.title}</strong>
-                <small className="text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{homeInsight.body}</small>
+                <small className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{homeInsight.body}</small>
               </div>
             ) : null}
             <h2 className="m-0 text-3xl font-black leading-tight text-gray-950 dark:text-white">{heroTitle}</h2>
-            <p className="m-0 text-base font-semibold leading-7 text-gray-600 dark:text-gray-300">{heroDescription}</p>
+            <p className="m-0 text-base font-semibold leading-7 text-gray-800 dark:text-gray-100">{heroDescription}</p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
             <button
               type="button"
-              className="min-h-12 rounded-lg bg-emerald-500 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="min-h-12 rounded-lg bg-emerald-700 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={onOpenWorkoutComposer}
               disabled={workoutLoading}
               data-testid="home-log-workout"
@@ -530,13 +530,13 @@ export default function HomeDashboard({
             {topRoutine ? (
               <button
                 type="button"
-                className="min-h-12 rounded-lg bg-gray-100 px-5 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white"
+                className="min-h-12 rounded-lg bg-gray-100 px-5 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
                 onClick={() => onStartRoutine?.(topRoutine)}
               >
                 {t(`루틴 · ${topRoutine.name}`, `Routine · ${topRoutine.name}`)}
               </button>
             ) : !currentLevel ? (
-              <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-5 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onOpenTest}>
+              <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-5 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onOpenTest}>
                 {t('레벨 확인', 'Level test')}
               </button>
             ) : null}
@@ -553,16 +553,16 @@ export default function HomeDashboard({
             ))}
           </div>
 
-          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{recentWorkoutFootnote}</p>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{recentWorkoutFootnote}</p>
 
           {showReminderInline && (
             <div className={`flex items-center justify-between gap-4 rounded-2xl p-4 ${reminder?.due ? 'bg-rose-50 dark:bg-rose-500/15' : 'bg-gray-50 dark:bg-white/10'}`}>
               <div className="grid gap-1">
                 <strong className="text-sm font-black text-gray-950 dark:text-white">{reminderTitle}</strong>
-                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">{reminderBody}</span>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{reminderBody}</span>
               </div>
               {reminderPermission !== 'granted' && reminderPermission !== 'unsupported' && (
-                <button type="button" className="min-h-10 rounded-lg bg-white px-3 text-sm font-black text-gray-600 shadow-sm transition hover:text-gray-950 dark:bg-neutral-900 dark:text-gray-300 dark:hover:text-white" onClick={onRequestReminderPermission}>
+                <button type="button" className="min-h-10 rounded-lg bg-white px-3 text-sm font-black text-gray-800 shadow-sm transition hover:text-gray-950 dark:bg-neutral-900 dark:text-gray-100 dark:hover:text-white" onClick={onRequestReminderPermission}>
                   {t('알림 켜기', 'Enable alert')}
                 </button>
               )}
@@ -575,10 +575,10 @@ export default function HomeDashboard({
       <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">{t('피드', 'Now in feed')}</span>
+            <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('피드', 'Now in feed')}</span>
             <h3 className="m-0 mt-1 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('오늘의 피드', 'One story to see')}</h3>
           </div>
-          <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onSeeCommunity}>
+          <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onSeeCommunity}>
             {t('피드 보기', 'Community')}
           </button>
         </div>
@@ -592,19 +592,19 @@ export default function HomeDashboard({
           />
         ) : (
           <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{t('피드', 'Feed')}</span>
+            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{t('피드', 'Feed')}</span>
             <strong className="text-lg font-black text-gray-950 dark:text-white">{t('아직 조용해요', 'Feed is quiet for now.')}</strong>
-            <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
               {t(
                 '첫 기록을 남기면 피드가 살아나요.',
                 'One log or a quick visit to community starts this area.',
               )}
             </p>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              <button type="button" className="min-h-12 rounded-lg bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600" onClick={onOpenWorkoutComposer}>
+              <button type="button" className="min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800" onClick={onOpenWorkoutComposer}>
                 {t('기록하기', 'Log workout')}
               </button>
-              <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={emptyFeedSecondaryAction.onClick}>
+              <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={emptyFeedSecondaryAction.onClick}>
                 {emptyFeedSecondaryAction.label}
               </button>
             </div>

@@ -209,17 +209,17 @@ function FeedCard({
           />
           <div className="min-w-0">
             <span className="block truncate text-base font-black text-gray-950 dark:text-white">{authorName}</span>
-            <span className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+            <span className="mt-1 inline-flex max-w-full rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
               {authorLevel}
             </span>
           </div>
         </button>
 
         <div className="grid justify-items-end gap-1 text-right">
-          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-black text-gray-600 dark:bg-white/10 dark:text-gray-200">
+          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-200">
             {getTypeLabel(post.type, isEnglish)}
           </span>
-          <span className="text-xs font-bold text-gray-400">
+          <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
             {formatDateTimeByLanguage(post.created_at, language, {
               month: 'short',
               day: 'numeric',
@@ -240,7 +240,7 @@ function FeedCard({
         <div className="grid grid-cols-3 gap-2">
           {workoutStats.map((item) => (
             <span key={item.label} className="grid gap-1 rounded-2xl border border-gray-100 p-3 dark:border-white/10">
-              <small className="text-xs font-black text-gray-400">{item.label}</small>
+              <small className="text-xs font-black text-gray-700 dark:text-gray-200">{item.label}</small>
               <strong className="truncate text-sm font-black text-gray-950 dark:text-white">{item.value}</strong>
             </span>
           ))}
@@ -284,7 +284,7 @@ function FeedCard({
           className={`inline-flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm font-black transition ${
             post.likedByMe
               ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300'
-              : 'bg-gray-100 text-gray-500 hover:text-rose-500 dark:bg-white/10 dark:text-gray-300'
+              : 'bg-gray-100 text-gray-700 hover:text-rose-500 dark:bg-white/10 dark:text-gray-100'
           }`}
           onClick={() => onToggleLike(post.id, post.likedByMe)}
           aria-pressed={post.likedByMe}
@@ -303,7 +303,7 @@ function FeedCard({
 
         <button
           type="button"
-          className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white"
+          className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
           onClick={() => {
             setCommentOpen((prev) => !prev)
             setMenuOpen(false)
@@ -317,7 +317,7 @@ function FeedCard({
 
         <button
           type="button"
-          className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-emerald-600 dark:bg-white/10 dark:text-gray-300 dark:hover:text-emerald-300"
+          className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-emerald-800 dark:bg-white/10 dark:text-gray-100 dark:hover:text-emerald-300"
           onClick={handleSharePost}
         >
           {isEnglish ? 'Share card' : '공유 카드'}
@@ -327,7 +327,7 @@ function FeedCard({
           <div className="relative">
             <button
               type="button"
-              className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white"
+              className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
               onClick={() => setMenuOpen((prev) => !prev)}
               aria-expanded={menuOpen}
               aria-haspopup="menu"
@@ -340,7 +340,7 @@ function FeedCard({
               <div className="absolute right-0 top-12 z-10 grid w-36 gap-1 rounded-2xl border border-gray-100 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-neutral-900">
                 <button
                   type="button"
-                  className="rounded-lg px-3 py-2 text-left text-sm font-black text-gray-600 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/10"
+                  className="rounded-lg px-3 py-2 text-left text-sm font-black text-gray-800 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/10"
                   onClick={() => {
                     setMenuOpen(false)
                     onReportPost?.(post)
@@ -367,14 +367,14 @@ function FeedCard({
       {commentOpen && (
         <form className="grid grid-cols-[1fr_auto] gap-2" onSubmit={submitComment}>
           <input
-            className="min-h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-emerald-400 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
+            className="min-h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-950 outline-none transition placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:border-emerald-400 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
             type="text"
             value={comment}
             onChange={(event) => setComment(event.target.value)}
             placeholder={isEnglish ? 'Comment' : '댓글'}
             maxLength={120}
           />
-          <button type="submit" className="min-h-11 rounded-lg bg-emerald-500 px-4 text-sm font-black text-white transition hover:bg-emerald-600">
+          <button type="submit" className="min-h-11 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white transition hover:bg-emerald-800">
             {isEnglish ? 'Post' : '등록'}
           </button>
         </form>
@@ -387,7 +387,7 @@ function FeedCard({
               <strong className="mr-2 font-black text-gray-950 dark:text-white">
                 {shortUser(item.user_id, item.authorDisplayName, isEnglish)}
               </strong>
-              <span className="font-semibold text-gray-600 dark:text-gray-300">{item.content}</span>
+              <span className="font-semibold text-gray-800 dark:text-gray-100">{item.content}</span>
             </li>
           ))}
         </ul>
@@ -432,14 +432,14 @@ export default function FeedList({
     <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="grid gap-1">
-          <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">
+          <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">
             {isEnglish ? 'Feed' : '피드'}
           </span>
           <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">
             {isEnglish ? 'Community' : '커뮤니티'}
           </h2>
         </div>
-        <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+        <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
           {isEnglish ? `${visiblePosts.length} posts` : `${visiblePosts.length}개`}
         </span>
       </div>
@@ -451,7 +451,7 @@ export default function FeedList({
               ? `${shortUser(selectedUser.user_id, selectedUser.display_name, isEnglish)}'s posts`
               : `${shortUser(selectedUser.user_id, selectedUser.display_name, isEnglish)}님의 게시물`}
           </strong>
-          <button type="button" className="min-h-9 rounded-lg bg-white px-3 text-xs font-black text-emerald-700 shadow-sm dark:bg-neutral-900 dark:text-emerald-300" onClick={onClearSelectedUser}>
+          <button type="button" className="min-h-9 rounded-lg bg-white px-3 text-xs font-black text-emerald-700 shadow-sm dark:bg-neutral-900 dark:text-emerald-200" onClick={onClearSelectedUser}>
             {isEnglish ? 'All' : '전체'}
           </button>
         </div>
@@ -467,8 +467,8 @@ export default function FeedList({
               type="button"
               className={`min-h-10 shrink-0 rounded-lg px-3 text-sm font-black transition ${
                 isActive
-                  ? 'bg-emerald-500 text-white shadow-sm'
-                  : 'bg-gray-100 text-gray-500 hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white'
+                  ? 'bg-emerald-700 text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-700 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'
               }`}
               onClick={() => setFilter(item.key)}
               aria-pressed={isActive}
@@ -489,13 +489,13 @@ export default function FeedList({
 
       {!loading && !visiblePosts.length && (
         <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
             {filter === 'following'
               ? (isEnglish ? 'Following' : '팔로잉')
               : (isEnglish ? 'Feed' : '피드')}
           </span>
           <strong className="text-lg font-black text-gray-950 dark:text-white">{emptyTitle}</strong>
-          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{emptyBody}</p>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{emptyBody}</p>
         </div>
       )}
 
