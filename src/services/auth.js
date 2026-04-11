@@ -4,7 +4,7 @@ import { assertServiceSuccess } from './serviceErrors'
 export const AUTH_PROVIDERS = {
   GOOGLE: 'google',
   KAKAO: 'kakao',
-  NAVER: 'naver',
+  NAVER: 'custom:naver',
 }
 
 export async function getCurrentUser() {
