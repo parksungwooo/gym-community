@@ -1,18 +1,18 @@
 ﻿const LEVELS = [
-  { min: 0, max: 20, value: 1, koLabel: 'Lv1: 위험', enLabel: 'Lv1: At Risk' },
-  { min: 21, max: 40, value: 2, koLabel: 'Lv2: 낮음', enLabel: 'Lv2: Low' },
-  { min: 41, max: 60, value: 3, koLabel: 'Lv3: 보통', enLabel: 'Lv3: Average' },
-  { min: 61, max: 80, value: 4, koLabel: 'Lv4: 좋음', enLabel: 'Lv4: Good' },
-  { min: 81, max: 100, value: 5, koLabel: 'Lv5: 매우 좋음', enLabel: 'Lv5: Excellent' },
+  { min: 0, max: 20, value: 1, koLabel: 'Lv1: 시작', enLabel: 'Lv1: Starter' },
+  { min: 21, max: 40, value: 2, koLabel: 'Lv2: 워밍업', enLabel: 'Lv2: Warm-up' },
+  { min: 41, max: 60, value: 3, koLabel: 'Lv3: 탄탄함', enLabel: 'Lv3: Solid' },
+  { min: 61, max: 80, value: 4, koLabel: 'Lv4: 강함', enLabel: 'Lv4: Strong' },
+  { min: 81, max: 100, value: 5, koLabel: 'Lv5: 에이스', enLabel: 'Lv5: Ace' },
 ]
 
 const RESULT_MESSAGES = {
   ko: {
-    1: '지금은 시작점이에요. 오늘 한 번이면 충분합니다.',
-    2: '기초는 충분해요. 이제 리듬만 만들면 돼요.',
-    3: '좋은 출발이에요. 꾸준히 쌓으면 바로 달라져요.',
-    4: '페이스가 좋아요. 이번 주만 지키면 더 올라갑니다.',
-    5: '이미 강합니다. 오늘 루틴을 피드에 남겨요.',
+    1: '좋아요. 오늘 한 번부터 가요.',
+    2: '기초는 있어요. 리듬만 만들면 돼요.',
+    3: '탄탄해요. 꾸준히 쌓으면 확 달라져요.',
+    4: '페이스 좋아요. 이번 주만 지켜요.',
+    5: '이미 강해요. 오늘 기록도 남겨요.',
   },
   en: {
     1: 'This is your starting point. Today is enough to begin changing it.',

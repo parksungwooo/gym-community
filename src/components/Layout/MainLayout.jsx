@@ -18,7 +18,7 @@ export default function MainLayout({
       ) : null}
 
       <main
-        className="mx-auto grid min-h-dvh w-full max-w-3xl content-start gap-5 px-4 pb-[calc(env(safe-area-inset-bottom)+7.5rem)] pt-[calc(env(safe-area-inset-top)+5rem)] sm:gap-6 sm:px-6 sm:pt-[calc(env(safe-area-inset-top)+5.5rem)]"
+        className="mx-auto grid min-h-dvh w-full max-w-3xl content-start gap-6 px-4 pb-[calc(env(safe-area-inset-bottom)+8rem)] pt-[calc(env(safe-area-inset-top)+5rem)] sm:px-6 sm:pb-[calc(env(safe-area-inset-bottom)+8.5rem)] sm:pt-[calc(env(safe-area-inset-top)+5.5rem)]"
         id={contentId}
         aria-busy={busy || undefined}
       >
@@ -38,11 +38,11 @@ export default function MainLayout({
           </section>
         ) : null}
 
-        <div className="grid gap-6">{children}</div>
+        <div className="grid gap-6 sm:gap-7">{children}</div>
       </main>
 
       {bottomNav ? (
-        <footer className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-6" aria-label={navigationLabel}>
+        <footer className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-6" aria-label={navigationLabel || 'Primary navigation'}>
           <div className="mx-auto w-full max-w-3xl">
             {bottomNav}
           </div>

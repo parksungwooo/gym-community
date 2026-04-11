@@ -17,11 +17,11 @@ export default function AuthPanel({
       <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
         {isGuest
           ? isEnglish
-            ? 'You are using guest mode. Connect an account whenever you want.'
-            : '게스트로 사용 중이에요. 필요할 때 계정을 연결하면 됩니다.'
+            ? 'Guest mode is on. Connect anytime.'
+            : '게스트 모드예요. 원할 때 연결하세요.'
           : isEnglish
             ? 'Your account is connected.'
-            : '계정이 연결되어 있어요.'}
+            : '계정 연결 완료.'}
       </p>
 
       <div className="grid gap-2">

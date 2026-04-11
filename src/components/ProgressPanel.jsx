@@ -92,27 +92,27 @@ function formatCalories(value, isEnglish) {
 function getHeroCopy(weeklyCount, weeklyGoal, isEnglish) {
   if (weeklyCount >= weeklyGoal) {
     return {
-      title: isEnglish ? 'Weekly goal done.' : '주간 목표 완료',
-      body: isEnglish ? 'You hit the pace.' : '이번 주 페이스를 채웠어요.',
+      title: isEnglish ? 'Weekly goal done.' : '이번 주 성공',
+      body: isEnglish ? 'Keep the pace.' : '이 페이스 그대로 가요.',
     }
   }
 
   if (weeklyCount > 0) {
     return {
-      title: isEnglish ? 'Your rhythm is showing.' : '이번 주 흐름이 보여요.',
-      body: isEnglish ? 'Logs, streak, and level together.' : '기록과 레벨을 한눈에 봐요.',
+      title: isEnglish ? 'Your rhythm is showing.' : '리듬이 살아났어요.',
+      body: isEnglish ? 'Logs, streak, level.' : '기록, 스트릭, 레벨을 한눈에.',
     }
   }
 
   return {
-    title: isEnglish ? 'The first log starts here.' : '첫 기록을 남겨요.',
-    body: isEnglish ? 'One workout opens the page.' : '한 번만 저장해도 흐름이 보여요.',
+    title: isEnglish ? 'Start with one log.' : '첫 기록부터 가요.',
+    body: isEnglish ? 'One workout wakes this up.' : '운동 하나면 화면이 살아나요.',
   }
 }
 
 function getGoalMeta(targetDeltaKg, isEnglish) {
   if (targetDeltaKg == null) {
-    return isEnglish ? 'Set a goal first.' : '목표를 정하면 보여요.'
+    return isEnglish ? 'Set a goal first.' : '목표를 정해볼까요?'
   }
 
   if (targetDeltaKg === 0) {
@@ -179,7 +179,7 @@ export default function ProgressPanel({
   return (
     <section className="grid gap-6">
       <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-        <SectionHeader eyebrow={isEnglish ? 'This week' : '이번 주'} title={isEnglish ? 'Summary' : '요약'} badge={`${weeklyCount}/${weeklyGoal}`} />
+          <SectionHeader eyebrow={isEnglish ? 'This week' : '이번 주'} title={isEnglish ? 'My pace' : '내 페이스'} badge={`${weeklyCount}/${weeklyGoal}`} />
 
         <div className="grid gap-2 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
           <strong className="text-xl font-black leading-7 text-gray-950 dark:text-white">{heroCopy.title}</strong>
@@ -196,7 +196,7 @@ export default function ProgressPanel({
           <HealthStatTile
             label={isEnglish ? 'Streak' : '연속'}
             value={isEnglish ? `${stats.streak ?? 0} days` : `${stats.streak ?? 0}일`}
-            meta={isEnglish ? `Last ${lastWorkoutDateLabel}` : `마지막 ${lastWorkoutDateLabel}`}
+            meta={isEnglish ? `Last ${lastWorkoutDateLabel}` : `${lastWorkoutDateLabel} 마지막`}
             tone="warm"
           />
           <HealthStatTile
@@ -230,7 +230,7 @@ export default function ProgressPanel({
             <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
               {achievementBadges.length
                 ? (isEnglish ? `${achievementBadges.length} badges` : `배지 ${achievementBadges.length}개`)
-                : (isEnglish ? 'Badges open as you log.' : '기록하면 배지가 열려요.')}
+                : (isEnglish ? 'Badges unlock as you log.' : '기록하면 배지가 열려요.')}
             </p>
           </div>
         </section>
@@ -257,14 +257,14 @@ export default function ProgressPanel({
               })}
             </div>
           ) : (
-            <EmptyState label="XP" title={isEnglish ? 'No recent XP yet.' : '아직 XP가 없어요.'} body={isEnglish ? 'Logs and tests fill this.' : '운동을 남기면 바로 쌓여요.'} />
+            <EmptyState label="XP" title={isEnglish ? 'No XP yet.' : '아직 XP가 없어요.'} body={isEnglish ? 'Log one workout.' : '운동 하나면 바로 쌓여요.'} />
           )}
         </section>
       </section>
 
       <section className="grid gap-5 sm:grid-cols-2">
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <SectionHeader eyebrow={isEnglish ? 'Calories' : '칼로리'} title={isEnglish ? 'Burn' : '소모량'} />
+          <SectionHeader eyebrow={isEnglish ? 'Calories' : '칼로리'} title={isEnglish ? 'Burn' : '태운 만큼'} />
           <div className="grid gap-3">
             <HealthStatTile label={isEnglish ? 'Today' : '오늘'} value={formatCalories(stats.todayCalories, isEnglish)} meta={isEnglish ? 'Saved logs' : '오늘 기록'} tone="cool" />
             <HealthStatTile label={isEnglish ? 'Week' : '주간'} value={formatCalories(stats.weeklyCalories, isEnglish)} meta={isEnglish ? `${weeklyCount} logs` : `${weeklyCount}개`} tone="warm" />
@@ -293,7 +293,7 @@ export default function ProgressPanel({
         </section>
 
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <SectionHeader eyebrow={isEnglish ? 'Latest' : '최근'} title={isEnglish ? 'Workout' : '최근 운동'} />
+          <SectionHeader eyebrow={isEnglish ? 'Latest' : '최근'} title={isEnglish ? 'Last workout' : '마지막 운동'} />
           <div className="flex items-start gap-3 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
             <WorkoutMark type={stats.lastWorkoutType} />
             <div className="grid gap-1">
@@ -326,13 +326,13 @@ export default function ProgressPanel({
             <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{trendMeta}</p>
           </div>
         ) : (
-          <EmptyState label={isEnglish ? 'Weight' : '체중'} title={isEnglish ? 'The first entry starts this.' : '첫 체중을 남겨요.'} body={isEnglish ? 'Log it in Profile.' : '프로필에서 바로 기록할 수 있어요.'} />
+          <EmptyState label={isEnglish ? 'Weight' : '체중'} title={isEnglish ? 'Add your first weight.' : '첫 체중을 남겨요.'} body={isEnglish ? 'Use Profile.' : '프로필에서 바로 기록해요.'} />
         )}
       </section>
 
       <section className="grid gap-5 sm:grid-cols-2">
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <SectionHeader eyebrow={isEnglish ? 'Badges' : '배지'} title={isEnglish ? 'Unlocked' : '획득'} badge={visibleBadges.length} accent />
+          <SectionHeader eyebrow={isEnglish ? 'Badges' : '배지'} title={isEnglish ? 'Unlocked' : '열린 배지'} badge={visibleBadges.length} accent />
 
           {visibleBadges.length ? (
             <div className="flex flex-wrap gap-2">
@@ -341,12 +341,12 @@ export default function ProgressPanel({
               ))}
             </div>
           ) : (
-            <EmptyState label={isEnglish ? 'Badge' : '배지'} title={isEnglish ? 'No badges yet.' : '아직 열린 배지가 없어요.'} body={isEnglish ? 'They unlock as you log.' : '기록할수록 하나씩 열려요.'} />
+            <EmptyState label={isEnglish ? 'Badge' : '배지'} title={isEnglish ? 'No badges yet.' : '아직 배지가 없어요.'} body={isEnglish ? 'Log to unlock.' : '기록하면 하나씩 열려요.'} />
           )}
         </section>
 
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <SectionHeader eyebrow={isEnglish ? 'Pattern' : '패턴'} title={isEnglish ? 'Types' : '운동 종류'} badge={safeTypeCounts.length} />
+          <SectionHeader eyebrow={isEnglish ? 'Pattern' : '패턴'} title={isEnglish ? 'Workout mix' : '운동 취향'} badge={safeTypeCounts.length} />
 
           {safeTypeCounts.length ? (
             <div className="grid gap-3">
@@ -366,7 +366,7 @@ export default function ProgressPanel({
               ))}
             </div>
           ) : (
-            <EmptyState label={isEnglish ? 'Pattern' : '패턴'} title={isEnglish ? 'Patterns build here.' : '패턴이 여기에 쌓여요.'} body={isEnglish ? 'More logs make it clearer.' : '기록할수록 패턴이 또렷해져요.'} />
+            <EmptyState label={isEnglish ? 'Pattern' : '패턴'} title={isEnglish ? 'Patterns start soon.' : '패턴은 곧 보여요.'} body={isEnglish ? 'More logs make it clear.' : '기록할수록 선명해져요.'} />
           )}
         </section>
       </section>

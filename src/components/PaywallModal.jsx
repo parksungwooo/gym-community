@@ -1,9 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useI18n } from '../i18n.js'
 import {
+  getProComparisonRows,
+  getProFeatureDefinition,
+  getProMissionPreview,
+  getProPaywallHighlights,
+} from '../features/pro/proStrategy.js'
+import {
   PREMIUM_ACTIVATION_STEPS,
   PREMIUM_BENEFITS,
-  PREMIUM_FEATURE_TABLE,
   PREMIUM_FEATURE_SPOTLIGHTS,
   PREMIUM_LAUNCH_OFFER,
   PREMIUM_OUTCOMES,
@@ -30,6 +35,20 @@ function ProofMetric({ value, label }) {
     <article className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
       <strong className="block text-2xl font-black leading-tight text-white">{value}</strong>
       <span className="mt-1 block text-xs font-bold leading-5 text-gray-100">{label}</span>
+    </article>
+  )
+}
+
+function ProImpactCard({ item }) {
+  return (
+    <article className="grid gap-3 rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+      <span className="w-fit rounded-2xl bg-emerald-300 px-3 py-2 text-xl font-black leading-none text-emerald-950">
+        {item.metricText}
+      </span>
+      <div className="grid gap-1">
+        <strong className="text-base font-black leading-6 text-white">{item.titleText}</strong>
+        <p className="m-0 text-sm font-semibold leading-6 text-gray-100">{item.bodyText}</p>
+      </div>
     </article>
   )
 }
@@ -144,17 +163,17 @@ function PlanOption({ plan, selected, language, onSelect }) {
   )
 }
 
-function FeatureRow({ category, free, pro }) {
+function ProComparisonRow({ row }) {
   return (
-    <article className="grid gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-white/10 sm:grid-cols-[1fr_0.85fr_1fr] sm:items-start">
-      <strong className="text-sm font-black text-gray-950 dark:text-white">{category}</strong>
-      <div className="grid gap-1">
+    <article className="grid gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-white/10 sm:grid-cols-[0.7fr_1fr_1.2fr] sm:items-stretch">
+      <strong className="text-sm font-black text-gray-950 dark:text-white">{row.labelText}</strong>
+      <div className="grid gap-1 rounded-2xl bg-white p-3 shadow-sm dark:bg-neutral-950">
         <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">Free</span>
-        <span className="text-sm font-semibold leading-6 text-gray-800 dark:text-gray-100">{free}</span>
+        <span className="text-sm font-semibold leading-6 text-gray-800 dark:text-gray-100">{row.freeText}</span>
       </div>
       <div className="grid gap-1 rounded-2xl bg-emerald-700 p-3 text-white shadow-sm">
         <span className="text-xs font-black uppercase text-emerald-50">Pro</span>
-        <span className="text-sm font-black leading-6">{pro}</span>
+        <span className="text-sm font-black leading-6">{row.proText}</span>
       </div>
     </article>
   )
@@ -172,6 +191,161 @@ function ActivationStep({ title, body, index }) {
   )
 }
 
+function ProGameLoopCard({ feature }) {
+  return (
+    <article className="grid gap-3 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+      <span className="w-fit rounded-full bg-emerald-300 px-3 py-1 text-xs font-black text-emerald-950">
+        {feature.shortTitleText}
+      </span>
+      <strong className="text-base font-black leading-6 text-white">{feature.titleText}</strong>
+      <p className="m-0 text-sm font-semibold leading-6 text-gray-100">{feature.valueText}</p>
+    </article>
+  )
+}
+
+function ProMissionPill({ mission }) {
+  return (
+    <article className="rounded-2xl bg-gray-950/60 p-3">
+      <strong className="block text-sm font-black text-white">{mission.titleText}</strong>
+      <span className="mt-1 block text-xs font-bold leading-5 text-emerald-100">{mission.rewardText}</span>
+    </article>
+  )
+}
+
+function CheckoutConfirmation({
+  plan,
+  provider,
+  checkout,
+  language,
+  isEnglish,
+  loading,
+  onBack,
+  onConfirm,
+}) {
+  const t = (ko, en) => (isEnglish ? en : ko)
+  const providerLabel = provider === 'toss' ? 'Toss Payments' : 'Stripe'
+
+  return (
+    <section className="grid gap-5 rounded-3xl border border-emerald-300/25 bg-neutral-950 p-5 text-white shadow-sm sm:p-6">
+      <div className="grid gap-2">
+        <span className="w-fit rounded-full bg-emerald-300 px-3 py-1.5 text-xs font-black uppercase text-emerald-950">
+          {t('결제 확인', 'Checkout confirmation')}
+        </span>
+        <h2 className="m-0 text-3xl font-black leading-tight text-white">
+          {t('승인 즉시 Pro 혜택이 켜집니다', 'Pro unlocks as soon as payment is approved')}
+        </h2>
+        <p className="m-0 text-sm font-semibold leading-6 text-gray-100">
+          {t(
+            '지금은 결제 연동 준비 모드입니다. 실제 Stripe/Toss 승인 콜백이 들어오면 아래와 같은 흐름으로 즉시 Pro가 적용됩니다.',
+            'This is the payment-ready flow. When the live Stripe/Toss approval callback arrives, Pro will unlock through this exact path.',
+          )}
+        </p>
+      </div>
+
+      <div className="grid gap-3 rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+        <div className="grid gap-2 sm:grid-cols-3">
+          <article className="rounded-2xl bg-white p-4 text-gray-950">
+            <span className="text-xs font-black uppercase text-emerald-800">{t('플랜', 'Plan')}</span>
+            <strong className="mt-1 block text-lg font-black">{plan.title[language]}</strong>
+            <span className="text-sm font-bold text-gray-700">{plan.monthlyValue[language]}</span>
+          </article>
+          <article className="rounded-2xl bg-white p-4 text-gray-950">
+            <span className="text-xs font-black uppercase text-emerald-800">{t('결제 수단', 'Provider')}</span>
+            <strong className="mt-1 block text-lg font-black">{providerLabel}</strong>
+            <span className="text-sm font-bold text-gray-700">{checkout.couponCode}</span>
+          </article>
+          <article className="rounded-2xl bg-emerald-300 p-4 text-emerald-950">
+            <span className="text-xs font-black uppercase">{t('즉시 적용', 'Instant')}</span>
+            <strong className="mt-1 block text-lg font-black">{t('Pro ON', 'Pro ON')}</strong>
+            <span className="text-sm font-black">{t('보상 1.5배', '1.5x rewards')}</span>
+          </article>
+        </div>
+      </div>
+
+      <div className="grid gap-2 rounded-3xl bg-gray-950/70 p-4">
+        {[
+          [t('1. 결제 승인', '1. Payment approved'), providerLabel],
+          [t('2. Pro 상태 업데이트', '2. Pro state updates'), t('앱 전체 즉시 반영', 'Instant app-wide unlock')],
+          [t('3. 혜택 적용', '3. Benefits apply'), t('AI 플랜 · 리그 1.5배 · 파티 보너스', 'AI plan · 1.5x league · party perks')],
+        ].map(([label, value]) => (
+          <div key={label} className="flex items-center justify-between gap-3 rounded-2xl bg-white/10 px-4 py-3">
+            <span className="text-sm font-black text-white">{label}</span>
+            <span className="text-sm font-bold text-emerald-100">{value}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-[1fr_1.2fr]">
+        <button
+          type="button"
+          className="min-h-12 rounded-lg bg-white/10 px-4 text-sm font-black text-gray-100 transition hover:bg-white/15 disabled:opacity-50"
+          onClick={onBack}
+          disabled={loading}
+        >
+          {t('다시 선택하기', 'Back to plans')}
+        </button>
+        <button
+          type="button"
+          className="min-h-12 rounded-lg bg-emerald-300 px-5 text-sm font-black text-emerald-950 shadow-sm transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={onConfirm}
+          disabled={loading}
+        >
+          {loading ? t('Pro 활성화 중', 'Activating Pro') : t('결제 승인 완료로 Pro 활성화', 'Approve payment and activate Pro')}
+        </button>
+      </div>
+    </section>
+  )
+}
+
+function ProActivationSuccess({ result, isEnglish, onClose }) {
+  const t = (ko, en) => (isEnglish ? en : ko)
+  const copy = result?.successCopy
+
+  return (
+    <section className="grid gap-5 rounded-3xl border border-emerald-300/25 bg-neutral-950 p-5 text-white shadow-sm sm:p-6">
+      <div className="grid justify-items-start gap-4 text-left">
+        <span className="grid h-16 w-16 place-items-center rounded-3xl bg-emerald-300 text-2xl font-black text-emerald-950 shadow-sm motion-safe:animate-bounce">
+          Pro
+        </span>
+        <div className="grid gap-2">
+          <span className="w-fit rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1.5 text-xs font-black uppercase text-emerald-100">
+            {t('업그레이드 완료', 'Upgrade complete')}
+          </span>
+          <h2 className="m-0 text-3xl font-black leading-tight text-white">
+            {copy?.title ?? t('축하해요. 이제 Pro가 열렸어요.', 'Congrats. Pro is now active.')}
+          </h2>
+          <p className="m-0 text-base font-semibold leading-7 text-gray-100">
+            {copy?.body ?? t('AI 플랜, Pro 리그, 파티 혜택이 즉시 적용됐어요.', 'AI plans, Pro League, and party perks are active now.')}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        {(copy?.benefits ?? []).map((benefit) => (
+          <article key={benefit.label} className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+            <span className="text-xs font-black uppercase text-emerald-100">{benefit.label}</span>
+            <strong className="mt-1 block text-lg font-black leading-6 text-white">{benefit.value}</strong>
+          </article>
+        ))}
+      </div>
+
+      {copy?.providerLine ? (
+        <p className="m-0 rounded-2xl bg-white/10 p-4 text-sm font-semibold leading-6 text-gray-100">
+          {copy.providerLine}
+        </p>
+      ) : null}
+
+      <button
+        type="button"
+        className="min-h-12 rounded-lg bg-emerald-300 px-5 text-sm font-black text-emerald-950 shadow-sm transition hover:bg-emerald-200"
+        onClick={onClose}
+      >
+        {t('Pro 홈으로 돌아가기', 'Back to Pro home')}
+      </button>
+    </section>
+  )
+}
+
 export default function PaywallModal({
   open,
   context,
@@ -184,6 +358,9 @@ export default function PaywallModal({
   const t = (ko, en) => (isEnglish ? en : ko)
   const [provider, setProvider] = useState('stripe')
   const [selectedPlanId, setSelectedPlanId] = useState('annual')
+  const [checkoutStep, setCheckoutStep] = useState('details')
+  const [activationResult, setActivationResult] = useState(null)
+  const [checkoutError, setCheckoutError] = useState('')
 
   const selectedPlan = useMemo(
     () => PREMIUM_PLANS.find((plan) => plan.id === selectedPlanId) ?? PREMIUM_PLANS[0],
@@ -193,18 +370,61 @@ export default function PaywallModal({
     () => getCheckoutPreparation(selectedPlan.id, provider),
     [provider, selectedPlan.id],
   )
+  const proFeatureDefinitions = useMemo(() => getProFeatureDefinition(language), [language])
+  const proMissionPreview = useMemo(() => getProMissionPreview(language), [language])
+  const proPaywallHighlights = useMemo(() => getProPaywallHighlights(language), [language])
+  const proComparisonRows = useMemo(() => getProComparisonRows(language), [language])
 
   if (!open) return null
 
   const copy = getPaywallCopy(context, language)
   const triggerCopy = getPaywallTriggerCopy(context, language)
+  const busy = loading || checkoutStep === 'activating'
+
+  const resetAndClose = () => {
+    setCheckoutStep('details')
+    setActivationResult(null)
+    setCheckoutError('')
+    onClose?.()
+  }
+
+  const handleStartCheckout = () => {
+    setCheckoutError('')
+    setCheckoutStep('confirm')
+  }
+
+  const handleConfirmCheckout = async () => {
+    setCheckoutError('')
+    setCheckoutStep('activating')
+
+    try {
+      const result = await onUpgradePlan?.(selectedPlan.id, provider)
+
+      if (result?.requiresAuth) {
+        setCheckoutStep('details')
+        return
+      }
+
+      if (result?.activated) {
+        setActivationResult(result)
+        setCheckoutStep('success')
+        return
+      }
+
+      setCheckoutStep('confirm')
+      setCheckoutError(t('Pro 활성화 결과를 확인하지 못했어요. 다시 시도해 주세요.', 'Could not confirm Pro activation. Please try again.'))
+    } catch {
+      setCheckoutStep('confirm')
+      setCheckoutError(t('결제 승인 처리 중 문제가 생겼어요. 잠시 후 다시 시도해 주세요.', 'Something went wrong while approving payment. Try again in a moment.'))
+    }
+  }
 
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-end bg-gray-950/75 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-6 backdrop-blur-md sm:place-items-center sm:px-6"
       role="dialog"
       aria-modal="true"
-      onClick={onClose}
+      onClick={resetAndClose}
     >
       <section
         className="relative grid max-h-[92vh] w-full max-w-3xl gap-5 overflow-y-auto rounded-3xl border border-white/40 bg-white/95 p-4 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-neutral-950/95 sm:p-6"
@@ -213,11 +433,41 @@ export default function PaywallModal({
         <button
           type="button"
           className="absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-lg bg-white/90 text-xl font-black text-gray-900 shadow-sm transition hover:bg-white dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
-          onClick={onClose}
+          onClick={resetAndClose}
           aria-label={isEnglish ? 'Close' : '닫기'}
         >
           &times;
         </button>
+
+        {checkoutStep === 'success' ? (
+          <ProActivationSuccess
+            result={activationResult}
+            isEnglish={isEnglish}
+            onClose={resetAndClose}
+          />
+        ) : checkoutStep === 'confirm' || checkoutStep === 'activating' ? (
+          <>
+            <CheckoutConfirmation
+              plan={selectedPlan}
+              provider={provider}
+              checkout={checkout}
+              language={language}
+              isEnglish={isEnglish}
+              loading={busy}
+              onBack={() => {
+                setCheckoutError('')
+                setCheckoutStep('details')
+              }}
+              onConfirm={handleConfirmCheckout}
+            />
+            {checkoutError ? (
+              <p className="m-0 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-black leading-6 text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/15 dark:text-rose-200">
+                {checkoutError}
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <>
 
         <section className="grid gap-5 rounded-3xl border border-emerald-300/25 bg-neutral-950 p-5 text-white shadow-sm sm:p-6">
           <div className="grid gap-5 sm:grid-cols-[1fr_auto] sm:items-start">
@@ -253,6 +503,12 @@ export default function PaywallModal({
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
+            {proPaywallHighlights.map((item) => (
+              <ProImpactCard key={item.key} item={item} />
+            ))}
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
             {PREMIUM_OUTCOMES.map((item) => (
               <OutcomeCard
                 key={item.title.en}
@@ -269,6 +525,40 @@ export default function PaywallModal({
           body={triggerCopy.body}
           ctaHint={triggerCopy.ctaHint}
         />
+
+        <section className="grid gap-4 rounded-3xl border border-emerald-300/20 bg-neutral-950 p-5 text-white shadow-sm sm:p-6">
+          <div className="grid gap-2">
+            <span className="text-xs font-black uppercase text-emerald-100">
+              {t('Pro 게임 루프', 'Pro game loop')}
+            </span>
+            <h3 className="m-0 text-2xl font-black leading-tight text-white">
+              {t('Pro가 되면 보상과 코칭이 동시에 세집니다', 'Pro makes rewards and coaching stronger')}
+            </h3>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-100">
+              {t(
+                'AI 플랜은 다음 운동을 정하고, Pro 리그와 파티 혜택은 매일 기록할 이유를 더 크게 만듭니다.',
+                'AI plans decide the next workout while Pro leagues and party perks make daily logging more rewarding.',
+              )}
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            {proFeatureDefinitions.slice(0, 3).map((feature) => (
+              <ProGameLoopCard key={feature.key} feature={feature} />
+            ))}
+          </div>
+
+          <div className="grid gap-2 rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+            <span className="text-xs font-black uppercase text-emerald-100">
+              {t('Pro 전용 미션', 'Pro-only missions')}
+            </span>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {proMissionPreview.map((mission) => (
+                <ProMissionPill key={mission.key} mission={mission} />
+              ))}
+            </div>
+          </div>
+        </section>
 
         <section className="grid gap-3">
           <div className="grid gap-1">
@@ -388,18 +678,19 @@ export default function PaywallModal({
               {t('Free vs Pro', 'Free vs Pro')}
             </span>
             <h3 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">
-              {t('무료와 Pro의 차이를 명확하게', 'A clear difference between Free and Pro')}
+              {t('무료는 시작, Pro는 성장 엔진', 'Free starts it. Pro turns it into a growth engine.')}
             </h3>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-800 dark:text-gray-100">
+              {t(
+                '무료로도 운동은 시작할 수 있어요. Pro는 다음 운동, 더 큰 보상, 더 강한 경쟁까지 이어줍니다.',
+                'Free helps you start. Pro connects the next workout, stronger rewards, and sharper competition.',
+              )}
+            </p>
           </div>
 
           <div className="grid gap-2">
-            {PREMIUM_FEATURE_TABLE.map((row) => (
-              <FeatureRow
-                key={row.category.en}
-                category={row.category[language]}
-                free={row.free[language]}
-                pro={row.pro[language]}
-              />
+            {proComparisonRows.map((row) => (
+              <ProComparisonRow key={row.key} row={row} />
             ))}
           </div>
         </section>
@@ -477,15 +768,15 @@ export default function PaywallModal({
             <button
               type="button"
               className="min-h-12 rounded-lg bg-emerald-700 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
-              onClick={() => onUpgradePlan(selectedPlan.id, provider)}
-              disabled={loading || isPro}
+              onClick={handleStartCheckout}
+              disabled={busy || isPro}
             >
               {isPro ? t('이미 Pro 이용 중', 'Already on Pro') : selectedPlan.ctaLabel[language]}
             </button>
             <button
               type="button"
               className="min-h-11 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
-              onClick={onClose}
+              onClick={resetAndClose}
               disabled={loading}
             >
               {t('지금은 무료로 계속 쓰기', 'Continue with Free for now')}
@@ -499,6 +790,8 @@ export default function PaywallModal({
             'Unless canceled at least 24 hours before the trial ends, the subscription renews automatically. You can manage or cancel it anytime in settings.',
           )}
         </p>
+          </>
+        )}
       </section>
     </div>
   )

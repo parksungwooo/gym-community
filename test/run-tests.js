@@ -5,8 +5,28 @@ import { createAuthPromptState, sanitizePendingAction } from '../src/features/au
 import { getActionableErrorMessage } from '../src/features/app/appFlowUtils.js'
 import { buildCommunityAccessResult } from '../src/features/community/communityFlow.js'
 import { buildGuestWorkoutRecord } from '../src/lib/guestStorage.js'
+import { buildWeeklyLeague, getLeagueWeekKey } from '../src/features/league/leagueRules.js'
 import { buildNotificationNavigation } from '../src/features/notifications/notificationFlow.js'
+import {
+  PARTY_MAX_MEMBERS,
+  addPartyMember,
+  buildCurrentPartyMember,
+  buildPartySnapshot,
+  createParty,
+} from '../src/features/party/partyRules.js'
+import {
+  PRO_FEATURE_CATALOG,
+  PRO_LEAGUE_REWARD_MULTIPLIER,
+  applyProActivationToProfile,
+  buildProActivationResult,
+  getProComparisonRows,
+  getProFeatureDefinition,
+  getProHomeNudge,
+  getProPaywallHighlights,
+  getProWorkoutNudge,
+} from '../src/features/pro/proStrategy.js'
 import { getTodayWorkoutRecommendation } from '../src/features/workout/recommendations.js'
+import { XP_RULE_TYPES, calculateLeagueReward, calculateXpAward, getXpAmountByType } from '../src/features/xp/xpRules.js'
 import { getActivityEventMeta, getActivityLevelProgress } from '../src/utils/activityLevel.js'
 import { buildAppHistoryState, getHashForView, parseViewFromHash, shouldPushHomeBackGuard } from '../src/utils/appRouting.js'
 import { getImageSourceCandidates } from '../src/utils/imageOptimization.js'
@@ -222,6 +242,157 @@ const tests = [
       assert.equal(recommendation.label, 'First log this week')
       assert.equal(recommendation.body, 'Today works best with a low-barrier session.')
       assert.equal(recommendation.intensityLabel, 'Light')
+    },
+  },
+  {
+    name: 'XP rule engine returns total XP with expandable breakdown',
+    run() {
+      const award = calculateXpAward({
+        workoutType: '웨이트',
+        durationMinutes: 45,
+        sets: 4,
+        loadKg: 60,
+        levelValue: 5,
+        todayDone: false,
+        todayCount: 0,
+        historyCount: 0,
+        streakCount: 7,
+        weeklyCount: 3,
+        weeklyGoal: 4,
+        leagueBonus: 10,
+        leveledUp: true,
+      })
+
+      assert.ok(award.totalXP > 0)
+      assert.equal(award.totalXP, award.breakdown.reduce((total, item) => total + item.amount, 0))
+      assert.ok(getXpAmountByType(award, XP_RULE_TYPES.WORKOUT_BASE) >= 10)
+      assert.equal(getXpAmountByType(award, XP_RULE_TYPES.FIRST_RECORD), 25)
+      assert.equal(getXpAmountByType(award, XP_RULE_TYPES.STREAK), 25)
+      assert.equal(getXpAmountByType(award, XP_RULE_TYPES.WEEKLY_GOAL), 40)
+      assert.equal(getXpAmountByType(award, XP_RULE_TYPES.LEAGUE), 10)
+      assert.equal(getXpAmountByType(award, XP_RULE_TYPES.LEVEL_UP), 50)
+    },
+  },
+  {
+    name: 'league reward gives stronger XP to weekly top ranks',
+    run() {
+      assert.equal(calculateLeagueReward(1, 20), 120)
+      assert.equal(calculateLeagueReward(2, 20), 80)
+      assert.equal(calculateLeagueReward(5, 20), 35)
+      assert.equal(calculateLeagueReward(10, 20), 0)
+    },
+  },
+  {
+    name: 'pro league reward applies the stronger paid reward multiplier',
+    run() {
+      assert.equal(calculateLeagueReward(1, 20, { isProLeague: true }), Math.round(120 * PRO_LEAGUE_REWARD_MULTIPLIER))
+      assert.equal(calculateLeagueReward(2, 20, { isProLeague: true }), Math.round(80 * PRO_LEAGUE_REWARD_MULTIPLIER))
+      assert.equal(calculateLeagueReward(10, 20, { isProLeague: true }), 0)
+    },
+  },
+  {
+    name: 'weekly league auto-joins current user and resets on Monday key',
+    run() {
+      const league = buildWeeklyLeague({
+        now: new Date('2026-04-12T10:00:00'),
+        currentUserId: 'me',
+        profile: { id: 'me', display_name: '나', weekly_points: 120, total_xp: 900 },
+        activitySummary: { weeklyPoints: 120, totalXp: 900, levelValue: 7 },
+        stats: { weeklyCount: 4 },
+        leaderboard: [
+          { user_id: 'leader', display_name: '챔피언', weekly_points: 240, total_xp: 2000 },
+          { user_id: 'mate', display_name: '메이트', weekly_points: 80, total_xp: 300 },
+        ],
+      })
+
+      assert.equal(getLeagueWeekKey(new Date('2026-04-12T10:00:00')), '2026-04-06')
+      assert.equal(league.participantCount, 3)
+      assert.equal(league.currentUser.user_id, 'me')
+      assert.equal(league.rank, 2)
+      assert.equal(league.leader.user_id, 'leader')
+      assert.equal(league.tier.key, 'bronze')
+      assert.ok(league.xpToTopTen > 0)
+    },
+  },
+  {
+    name: 'pro strategy exposes paid features and upgrade nudges',
+    run() {
+      const definitions = getProFeatureDefinition('ko')
+      const lockedHome = getProHomeNudge({ isPro: false, language: 'ko' })
+      const activeWorkout = getProWorkoutNudge({ isPro: true, estimatedXp: 72, language: 'en' })
+      const highlights = getProPaywallHighlights('ko')
+      const comparisonRows = getProComparisonRows('en')
+
+      assert.equal(PRO_FEATURE_CATALOG.length, 5)
+      assert.equal(definitions[0].key, 'ai-plan')
+      assert.match(definitions[0].titleText, /AI/)
+      assert.equal(lockedHome.state, 'locked')
+      assert.equal(lockedHome.metrics[1].value, '1.5x')
+      assert.match(lockedHome.bonusCallout, /Pro/)
+      assert.equal(activeWorkout.state, 'active')
+      assert.match(activeWorkout.body, /72/)
+      assert.equal(activeWorkout.previewItems.length, 3)
+      assert.equal(highlights.length, 3)
+      assert.match(highlights[1].metricText, /1.5/)
+      assert.equal(comparisonRows.length, 5)
+      assert.match(comparisonRows[0].proText, /AI/)
+    },
+  },
+  {
+    name: 'pro activation result patches profile immediately',
+    run() {
+      const result = buildProActivationResult({
+        planId: 'annual',
+        provider: 'stripe',
+        language: 'ko',
+        now: new Date('2026-04-12T00:00:00Z'),
+      })
+      const profile = applyProActivationToProfile({
+        id: 'me',
+        display_name: '러너',
+        subscription_tier: 'free',
+      }, result.activation)
+
+      assert.equal(result.activated, true)
+      assert.equal(result.activation.profilePatch.is_pro, true)
+      assert.equal(result.activation.profilePatch.subscription_plan, 'annual')
+      assert.equal(profile.is_pro, true)
+      assert.equal(profile.isPremium, true)
+      assert.equal(profile.subscription_tier, 'pro')
+      assert.match(result.successCopy.title, /Pro/)
+      assert.equal(result.successCopy.benefits.length, 3)
+    },
+  },
+  {
+    name: 'party rules create a six-member group with shared missions',
+    run() {
+      const owner = buildCurrentPartyMember({
+        currentUserId: 'me',
+        profile: { display_name: '리더', weekly_points: 30, total_xp: 200 },
+        activitySummary: { weeklyPoints: 30, totalXp: 200 },
+        stats: { weeklyCount: 2 },
+      })
+      let party = createParty({ name: '새벽 헬스팟', owner, now: new Date('2026-04-12T00:00:00Z') })
+
+      Array.from({ length: 8 }).forEach((_, index) => {
+        party = addPartyMember(party, {
+          user_id: `mate-${index}`,
+          display_name: `메이트 ${index}`,
+          weekly_points: 20,
+          weekly_count: 1,
+          total_xp: 100,
+        })
+      })
+
+      const snapshot = buildPartySnapshot({ party, currentMember: owner })
+
+      assert.equal(snapshot.party.name, '새벽 헬스팟')
+      assert.equal(snapshot.members.length, PARTY_MAX_MEMBERS)
+      assert.equal(snapshot.totalWeeklyLogs, 7)
+      assert.equal(snapshot.totalWeeklyXp, 130)
+      assert.equal(snapshot.missions.length, 2)
+      assert.equal(snapshot.missions[0].target, 100)
+      assert.equal(snapshot.missions[1].target, 500000)
     },
   },
   {

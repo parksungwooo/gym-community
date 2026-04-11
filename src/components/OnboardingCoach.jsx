@@ -1,9 +1,9 @@
 const STEPS = {
   ko: [
-    ['1', '레벨 체크', '3분 테스트로 내 운동 기준을 잡아요.'],
-    ['2', '오늘 운동 추천', '레벨과 최근 기록에 맞는 운동을 바로 골라줘요.'],
-    ['3', '기록하고 성장', '운동 종류와 시간만 남기면 XP와 스트릭이 쌓여요.'],
-    ['4', '함께 이어가기', '비슷한 페이스의 사람을 피드와 랭킹에서 만나요.'],
+    ['1', '레벨 체크', '3분이면 기준 끝.'],
+    ['2', '오늘 운동', '뭘 할지 바로 보여줘요.'],
+    ['3', 'XP 쌓기', '종류와 시간만 남겨요.'],
+    ['4', '같이 가기', '피드에서 힘을 받아요.'],
   ],
   en: [
     ['1', 'Take the level test', 'Set your training baseline in three minutes.'],
@@ -54,13 +54,13 @@ export default function OnboardingCoach({
         <div className="grid gap-2">
           <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white sm:text-3xl">
             {isEnglish
-              ? 'Know what to do today in one quick check.'
-              : '오늘 뭘 하면 되는지, 한 번에 정리해드릴게요.'}
+              ? 'Know today’s workout fast.'
+              : '오늘 뭐 할지 바로 보여드릴게요.'}
           </h2>
           <p className="m-0 text-base font-semibold leading-7 text-gray-800 dark:text-gray-100">
             {isEnglish
-              ? 'Gym Community turns a level test into today’s workout, XP progress, and a shareable fitness story.'
-              : 'Gym Community는 레벨 테스트를 오늘의 운동, XP 성장, 공유할 수 있는 기록으로 이어주는 앱이에요.'}
+              ? 'Test, train, earn XP, share progress.'
+              : '체크하고, 운동하고, XP 쌓고, 자랑해요.'}
           </p>
         </div>
 
@@ -88,14 +88,14 @@ export default function OnboardingCoach({
             className="min-h-12 rounded-lg bg-emerald-700 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800"
             onClick={onStartTest}
           >
-            {isEnglish ? 'Start 3-min level test' : '3분 레벨 체크 시작'}
+            {isEnglish ? 'Start level test' : '레벨 체크 시작'}
           </button>
           <button
             type="button"
             className="min-h-12 rounded-lg bg-gray-100 px-5 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
             onClick={onStartWorkout}
           >
-            {isEnglish ? 'Log today’s workout' : '오늘 운동 바로 기록'}
+            {isEnglish ? 'Log today’s workout' : '오늘 운동 기록'}
           </button>
         </div>
       </section>

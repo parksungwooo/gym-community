@@ -66,7 +66,7 @@ export default function TestForm({ onSubmit, loading }) {
         <div
           className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10"
           role="progressbar"
-          aria-label={isEnglish ? 'Fitness test progress' : '체력 테스트 진행률'}
+        aria-label={isEnglish ? 'Fitness test progress' : '레벨 체크 진행률'}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(progressPercent)}
@@ -76,7 +76,7 @@ export default function TestForm({ onSubmit, loading }) {
         <div className="mt-3 flex items-center justify-between text-xs font-black text-gray-700 dark:text-gray-100">
           <span>{currentIndex + 1} / {questions.length}</span>
           <span className="text-emerald-800 dark:text-emerald-200">
-            {isEnglish ? `${answeredCount} answered` : `${answeredCount}개 응답`}
+            {isEnglish ? `${answeredCount} done` : `${answeredCount}개 완료`}
           </span>
         </div>
       </section>
@@ -87,7 +87,7 @@ export default function TestForm({ onSubmit, loading }) {
       >
         <div className="mb-6 grid gap-2">
           <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">
-            {isEnglish ? `Question ${currentIndex + 1}` : `체크 ${currentIndex + 1}`}
+            {isEnglish ? `Check ${currentIndex + 1}` : `체크 ${currentIndex + 1}`}
           </span>
           <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">
             {currentQuestion.question}
@@ -115,7 +115,7 @@ export default function TestForm({ onSubmit, loading }) {
             data-testid="test-prev-question"
             className="min-h-12 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10"
           >
-            {isEnglish ? 'Previous' : '이전'}
+            {isEnglish ? 'Back' : '이전'}
           </button>
         ) : (
           <span aria-hidden="true" />
@@ -128,7 +128,7 @@ export default function TestForm({ onSubmit, loading }) {
             data-testid="test-submit"
             className="min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? (isEnglish ? 'Calculating...' : '계산 중') : (isEnglish ? 'See my level' : '결과 보기')}
+            {loading ? (isEnglish ? 'Checking...' : '확인 중') : (isEnglish ? 'See my level' : '내 레벨 보기')}
           </button>
         ) : (
           <button

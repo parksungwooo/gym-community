@@ -22,7 +22,7 @@ function FollowButton({ isFollowing, disabled, onClick, isEnglish }) {
       onClick={onClick}
       disabled={disabled}
     >
-      {isFollowing ? (isEnglish ? 'Following' : '팔로잉') : (isEnglish ? 'Follow' : '팔로우')}
+      {isFollowing ? (isEnglish ? 'Following' : '팔로잉') : (isEnglish ? 'Follow' : '응원하기')}
     </button>
   )
 }
@@ -52,7 +52,7 @@ export default function RankingBoard({
             {t('랭킹', 'Ranking')}
           </span>
           <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">
-            {t('이번 주', 'This week')}
+            {t('이번 주 TOP', 'This week')}
           </h2>
         </div>
         <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">
@@ -62,8 +62,8 @@ export default function RankingBoard({
 
       <div className="grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-white/10">
         {[
-          ['week', t('주간', 'Weekly')],
-          ['month', t('월간', 'Monthly')],
+          ['week', t('이번 주', 'Weekly')],
+          ['month', t('이번 달', 'Monthly')],
         ].map(([key, label]) => {
           const isActive = timeframe === key
 
@@ -87,7 +87,7 @@ export default function RankingBoard({
 
       <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
         {t(
-          '이번 주 기록 기준이에요.',
+          '운동하면 바로 올라가요.',
           timeframe === 'week' ? 'Based on weekly activity points.' : 'Monthly view blends total XP with recent weekly points.',
         )}
       </p>
@@ -103,13 +103,13 @@ export default function RankingBoard({
       {!loading && !rows.length && (
         <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
           <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">
-            {t('랭킹 대기 중', 'Ranking loading up')}
+            {t('아직 준비 중', 'Ranking loading up')}
           </span>
           <strong className="text-lg font-black text-gray-950 dark:text-white">
-            {t('아직 랭킹이 비었어요.', 'Ranking is still empty.')}
+            {t('첫 주인공을 기다려요.', 'Ranking is still empty.')}
           </strong>
           <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
-            {t('첫 기록을 남기면 바로 채워져요.', 'Logs will show here.')}
+            {t('운동 하나면 바로 올라갑니다.', 'Logs will show here.')}
           </p>
         </div>
       )}
@@ -186,7 +186,7 @@ export default function RankingBoard({
           onClick={() => setExpanded((prev) => !prev)}
         >
           {expanded
-            ? t('상위 3명', 'Top 3')
+            ? t('TOP 3만 보기', 'Top 3')
             : t(`전체 ${rows.length}`, `All ${rows.length}`)}
         </button>
       )}

@@ -21,6 +21,7 @@ const badgeLabels = {
 }
 
 const workoutTypeLabels = {
+  걷기: { ko: '걷기', en: 'Walk' },
   러닝: { ko: '러닝', en: 'Run' },
   웨이트: { ko: '웨이트', en: 'Weights' },
   스트레칭: { ko: '스트레칭', en: 'Stretch' },

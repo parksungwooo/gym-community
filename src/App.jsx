@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AppTopActions from './components/AppTopActions'
 import AuthRequiredModal from './components/AuthRequiredModal'
 import BottomTabNav from './components/BottomTabNav'
@@ -19,11 +19,26 @@ import {
 import { buildCommunityAccessResult } from './features/community/communityFlow'
 import { buildNotificationNavigation } from './features/notifications/notificationFlow'
 import {
+  PARTY_MAX_MEMBERS,
+  PARTY_STORAGE_KEY,
+  addPartyMember,
+  buildCurrentPartyMember,
+  buildPartyInviteCandidates,
+  buildPartySnapshot,
+  createParty,
+  getPartyInviteText,
+  hydrateParty,
+} from './features/party/partyRules'
+import {
   INITIAL_STATS,
   LAST_REMINDER_STORAGE_KEY,
   getReminderStatus,
   validateDisplayName,
 } from './features/profile/profileFlow'
+import {
+  applyProActivationToProfile,
+  buildProActivationResult,
+} from './features/pro/proStrategy'
 import { useAppBootstrap } from './hooks/useAppBootstrap'
 import { useAppDerivedState } from './hooks/useAppDerivedState'
 import { useAppError } from './hooks/useAppError'
@@ -34,6 +49,7 @@ import RouteSuspenseFallback from './routes/RouteSuspenseFallback'
 import { AUTH_PROVIDERS, signInWithOAuth, signOutUser } from './services/auth'
 import {
   addComment,
+  activateUserPremium,
   blockUser,
   completeWorkout,
   createFeedPost,
@@ -71,6 +87,7 @@ import {
   parseViewFromHash,
   shouldPushHomeBackGuard,
 } from './utils/appRouting'
+import { getActivityLevelProgress } from './utils/activityLevel'
 import { getLevelByScore } from './utils/level'
 import { FREE_WORKOUT_LOG_LIMIT, getCheckoutPreparation, PREMIUM_CONTEXT } from './utils/premium'
 import { getNextThemeMode, resolveThemeMode, THEME_STORAGE_KEY } from './utils/theme'
@@ -85,6 +102,19 @@ const VIEW = {
   COMMUNITY: 'community',
   PROGRESS: 'progress',
   PROFILE: 'profile',
+}
+
+function loadStoredParty() {
+  if (typeof window === 'undefined') return null
+
+  const rawParty = window.localStorage.getItem(PARTY_STORAGE_KEY)
+  if (!rawParty) return null
+
+  try {
+    return JSON.parse(rawParty)
+  } catch {
+    return null
+  }
 }
 
 export default function App() {
@@ -113,6 +143,7 @@ export default function App() {
   const [weightLogs, setWeightLogs] = useState([])
   const [recentActivityEvents, setRecentActivityEvents] = useState([])
   const [achievementBadges, setAchievementBadges] = useState([])
+  const [party, setParty] = useState(loadStoredParty)
   const [followingIds, setFollowingIds] = useState([])
   const [blockedIds, setBlockedIds] = useState([])
   const [followStats, setFollowStats] = useState({ followerCount: 0, followingCount: 0 })
@@ -292,6 +323,107 @@ export default function App() {
     setSuccessState({ message, accent })
   }, [])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    if (!party) {
+      window.localStorage.removeItem(PARTY_STORAGE_KEY)
+      return
+    }
+
+    window.localStorage.setItem(PARTY_STORAGE_KEY, JSON.stringify(party))
+  }, [party])
+
+  const currentPartyMember = useMemo(() => buildCurrentPartyMember({
+    currentUserId: user?.id,
+    profile: effectiveProfile,
+    activitySummary,
+    stats: workoutStats,
+  }), [activitySummary, effectiveProfile, user?.id, workoutStats])
+  const hydratedParty = useMemo(
+    () => hydrateParty(party, currentPartyMember),
+    [currentPartyMember, party],
+  )
+  const partySnapshot = useMemo(
+    () => buildPartySnapshot({ party: hydratedParty, currentMember: currentPartyMember }),
+    [currentPartyMember, hydratedParty],
+  )
+  const partyInviteCandidates = useMemo(
+    () => buildPartyInviteCandidates({
+      leaderboard: visibleLeaderboard,
+      followingIds,
+      currentUserId: user?.id,
+      party: hydratedParty,
+    }),
+    [followingIds, hydratedParty, user?.id, visibleLeaderboard],
+  )
+
+  const handleCreateParty = useCallback(() => {
+    const partyName = isEnglish
+      ? `${currentPartyMember.display_name}'s crew`
+      : `${currentPartyMember.display_name} 파티`
+    const nextParty = createParty({ name: partyName, owner: currentPartyMember })
+
+    setParty(nextParty)
+    showSuccess(
+      isEnglish ? 'Party created. Invite up to 5 mates.' : '파티를 만들었어요. 친구 5명까지 초대할 수 있어요.',
+      'success',
+    )
+  }, [currentPartyMember, isEnglish, showSuccess])
+
+  const handleInvitePartyMember = useCallback(() => {
+    if (!hydratedParty) {
+      handleCreateParty()
+      return
+    }
+
+    if ((hydratedParty.members?.length ?? 0) >= PARTY_MAX_MEMBERS) {
+      showSuccess(isEnglish ? 'Party is full.' : '파티가 가득 찼어요.', 'info')
+      return
+    }
+
+    const nextCandidate = partyInviteCandidates[0]
+    if (!nextCandidate) {
+      showSuccess(isEnglish ? 'No invite candidate yet. Share the invite code.' : '초대할 친구가 아직 없어요. 초대 코드를 공유해요.', 'info')
+      return
+    }
+
+    setParty((currentParty) => addPartyMember(
+      hydrateParty(currentParty, currentPartyMember),
+      nextCandidate,
+    ))
+    showSuccess(
+      isEnglish ? `${nextCandidate.display_name} joined the party.` : `${nextCandidate.display_name}님이 파티에 합류했어요.`,
+      'success',
+    )
+  }, [currentPartyMember, handleCreateParty, hydratedParty, isEnglish, partyInviteCandidates, showSuccess])
+
+  const handleSharePartyInvite = useCallback(async () => {
+    if (!hydratedParty) {
+      handleCreateParty()
+      return
+    }
+
+    const appUrl = typeof window === 'undefined' ? '' : window.location.origin
+    const inviteText = getPartyInviteText(hydratedParty, appUrl)
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({
+          title: hydratedParty.name,
+          text: inviteText,
+        })
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(inviteText)
+      }
+
+      showSuccess(isEnglish ? 'Party invite is ready.' : '파티 초대장을 준비했어요.', 'info')
+    } catch (error) {
+      if (error?.name === 'AbortError') return
+      captureError(error, isEnglish ? 'Failed to share party invite.' : '파티 초대를 공유하지 못했어요.')
+    }
+  }, [captureError, handleCreateParty, hydratedParty, isEnglish, showSuccess])
+
   const refreshGuestSyncState = useCallback(async (nextIsAuthenticated = isAuthenticated) => {
     try {
       const pendingGuestLogs = await getGuestWorkouts()
@@ -394,7 +526,7 @@ export default function App() {
       showSuccess(
         isEnglish
           ? `Synced ${syncedIds.length} local workout${syncedIds.length === 1 ? '' : 's'}.`
-          : `로컬 운동 기록 ${syncedIds.length}개를 동기화했어요.`,
+          : `기록 ${syncedIds.length}개를 옮겼어요.`,
         'info',
       )
     }
@@ -403,7 +535,7 @@ export default function App() {
       setErrorMessage(
         isEnglish
           ? `${failedCount} local workout ${failedCount === 1 ? 'is' : 'are'} still waiting to sync. Sign in again or refresh and try once more.`
-          : `로컬 운동 기록 ${failedCount}개는 아직 동기화되지 않았어요. 로그인하거나 새로고침 후 다시 시도해 주세요.`,
+          : `기록 ${failedCount}개는 다시 시도해 주세요.`,
       )
     }
   }, [isEnglish, refreshFeed, refreshUserSummary, setErrorMessage, showSuccess])
@@ -483,7 +615,7 @@ export default function App() {
           showSuccess(
             isEnglish
               ? `Synced ${syncedIds.length} local workout${syncedIds.length === 1 ? '' : 's'}.`
-              : `로컬 운동 기록 ${syncedIds.length}개를 계정으로 옮겼어요.`,
+              : `기록 ${syncedIds.length}개를 계정으로 옮겼어요.`,
             'info',
           )
         }
@@ -537,36 +669,90 @@ export default function App() {
         error,
         isEnglish
           ? 'Could not sync local workouts. Try again in a moment.'
-          : '로컬 운동 기록을 동기화하지 못했어요. 잠시 후 다시 시도해 주세요.',
+          : '기록 동기화에 실패했어요. 다시 해볼게요.',
       )
     }
   }, [captureError, isEnglish, openAuthPrompt, setErrorMessage, syncGuestWorkoutsToAccount, user])
 
-  const handleUpgradePlan = useCallback((planId, provider = 'stripe') => {
+  const handleUpgradePlan = useCallback(async (planId, provider = 'stripe') => {
     if (isPro) {
       showSuccess(
         isEnglish ? 'You are already on Pro.' : '이미 Pro 플랜을 사용 중이에요.',
         'info',
       )
-      closePaywall()
-      return
+      return {
+        activated: true,
+        alreadyPro: true,
+        successCopy: {
+          title: isEnglish ? 'Pro is already active.' : '이미 Pro가 활성화되어 있어요.',
+          body: isEnglish ? 'AI plans, Pro rewards, and party perks are already on.' : 'AI 플랜, Pro 보상, 파티 혜택이 이미 켜져 있어요.',
+          benefits: [],
+        },
+      }
     }
 
     if (!isAuthenticated) {
       closePaywall()
       openAuthPrompt('premium_upgrade')
-      return
+      return { activated: false, requiresAuth: true }
     }
 
     const checkout = getCheckoutPreparation(planId, provider)
-    showSuccess(
+    const activationResult = buildProActivationResult({
+      planId: checkout.planId,
+      provider,
+      language,
+    })
+    const immediateProfile = applyProActivationToProfile(effectiveProfile, activationResult.activation)
+
+    setLoadingAction(true)
+    setProfile(immediateProfile)
+    setLeaderboard((items) => items.map((item) => (
+      item.user_id === user?.id
+        ? { ...item, ...activationResult.activation.profilePatch }
+        : item
+    )))
+    setFeedPosts((items) => items.map((item) => (
+      item.user_id === user?.id
+        ? { ...item, ...activationResult.activation.profilePatch }
+        : item
+    )))
+    showSuccess(activationResult.successCopy.toast, 'success')
+
+    try {
+      const savedProfile = await activateUserPremium(user.id, activationResult.activation.profilePatch)
+
+      if (savedProfile) {
+        setProfile((current) => ({
+          ...(current ?? immediateProfile),
+          ...savedProfile,
+          ...activationResult.activation.profilePatch,
+        }))
+      }
+    } catch (error) {
+      captureError(
+        error,
         isEnglish
-          ? `${provider === 'stripe' ? 'Stripe' : 'Toss Payments'} Pro upgrade flow is ready. In live payments, Pro unlocks immediately after approval.`
-          : `${provider === 'stripe' ? 'Stripe' : 'Toss Payments'} ${checkout.planId === 'annual' ? '연간' : '월간'} Pro 업그레이드 화면이 준비됐어요. 실제 결제가 연결되면 승인 완료 즉시 Pro 혜택이 적용됩니다.`,
-      'info',
-    )
-    closePaywall()
-  }, [closePaywall, isAuthenticated, isEnglish, isPro, openAuthPrompt, showSuccess])
+          ? 'Pro is active in this session. Server confirmation will retry when billing is connected.'
+          : '현재 세션에서는 Pro가 켜졌어요. 결제 서버 저장은 연동 후 다시 확인됩니다.',
+      )
+    } finally {
+      setLoadingAction(false)
+    }
+
+    return activationResult
+  }, [
+    captureError,
+    closePaywall,
+    effectiveProfile,
+    isAuthenticated,
+    isEnglish,
+    isPro,
+    language,
+    openAuthPrompt,
+    showSuccess,
+    user?.id,
+  ])
 
   useEffect(() => {
     initializeApp()
@@ -592,7 +778,7 @@ export default function App() {
               syncErr,
               isEnglish
                 ? 'Local workouts are still waiting to sync. Sign in again or refresh and try once more.'
-                : '로컬 운동 기록이 아직 동기화되지 않았어요. 로그인하거나 새로고침 후 다시 시도해 주세요.',
+                : '아직 옮기지 못한 기록이 있어요.',
               isEnglish,
             ))
           }
@@ -657,7 +843,7 @@ export default function App() {
         error,
         isEnglish
           ? 'Could not sync local workouts right now. You can retry below.'
-          : '로컬 운동 기록을 지금 동기화하지 못했어요. 아래에서 다시 시도해 주세요.',
+          : '지금은 기록을 못 옮겼어요. 다시 시도해 주세요.',
       )
     })
 
@@ -1026,11 +1212,18 @@ export default function App() {
         await saveGuestWorkout(workoutPayload)
         await refreshGuestSyncState(false)
         setTodayDone(true)
+        const guestLevelProgress = getActivityLevelProgress(activitySummary.totalXp)
         setCelebration({
           workoutType: workoutPayload.workoutType || (isEnglish ? 'Workout' : '운동'),
           durationMinutes: Number(workoutPayload.durationMinutes) || 0,
           nextWeeklyCount: (Number(workoutStats.weeklyCount) || 0) + 1,
           gainedXp: 0,
+          previousTotalXp: activitySummary.totalXp,
+          totalXp: activitySummary.totalXp,
+          previousLevelValue: guestLevelProgress.levelValue,
+          levelValue: guestLevelProgress.levelValue,
+          remainingXp: guestLevelProgress.remainingXp,
+          leveledUp: false,
         })
         showSuccess(
           isEnglish
@@ -1066,7 +1259,7 @@ export default function App() {
       showSuccess(
         isEnglish
           ? `Free includes ${FREE_WORKOUT_LOG_LIMIT} saved workouts. Pro unlocks unlimited history.`
-          : `Free는 운동 기록 ${FREE_WORKOUT_LOG_LIMIT}개까지 저장돼요. Pro로 무제한 히스토리를 열 수 있어요.`,
+          : `Free는 ${FREE_WORKOUT_LOG_LIMIT}개까지. Pro는 무제한이에요.`,
         'info',
       )
       return false
@@ -1087,7 +1280,10 @@ export default function App() {
         await refreshFeed(user.id)
       }
 
-      const gainedXp = Math.max((Number(summary.profile?.total_xp) || 0) - previousTotalXp, 0)
+      const nextTotalXp = Number(summary.profile?.total_xp) || previousTotalXp
+      const gainedXp = Math.max(nextTotalXp - previousTotalXp, 0)
+      const previousLevelProgress = getActivityLevelProgress(previousTotalXp)
+      const nextLevelProgress = getActivityLevelProgress(nextTotalXp)
       showSuccess(
         gainedXp > 0
           ? (isEnglish ? `${workoutPayload.workoutType || 'Workout'} +${gainedXp} XP` : `${workoutPayload.workoutType || '운동'} +${gainedXp} XP`)
@@ -1099,13 +1295,19 @@ export default function App() {
         durationMinutes: Number(workoutPayload.durationMinutes) || 0,
         nextWeeklyCount: summary.stats.weeklyCount,
         gainedXp,
+        previousTotalXp,
+        totalXp: nextTotalXp,
+        previousLevelValue: previousLevelProgress.levelValue,
+        levelValue: nextLevelProgress.levelValue,
+        remainingXp: nextLevelProgress.remainingXp,
+        leveledUp: nextLevelProgress.levelValue > previousLevelProgress.levelValue,
       })
       setShowWorkoutPanel(false)
       setWorkoutPreset(null)
       navigateToView(VIEW.HOME)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (error) {
-      captureError(error, isEnglish ? 'Failed to save workout.' : '운동 기록을 저장하지 못했어요.')
+      captureError(error, isEnglish ? 'Failed to save workout.' : '운동 저장에 실패했어요.')
     } finally {
       setLoadingAction(false)
     }
@@ -1155,7 +1357,7 @@ export default function App() {
       })
       await refreshUserSummary(user.id)
       showSuccess(isEnglish ? 'Workout updated.' : '운동 수정.', 'info')
-    }, isEnglish ? 'Failed to update workout.' : '운동 기록을 수정하지 못했어요.')
+    }, isEnglish ? 'Failed to update workout.' : '수정에 실패했어요.')
   }
 
   const handleDeleteWorkout = async (workoutLogId) => {
@@ -1167,7 +1369,7 @@ export default function App() {
       const doneToday = await hasWorkoutCompleted(user.id, getTodayDateString())
       setTodayDone(doneToday)
       showSuccess(isEnglish ? 'Workout deleted.' : '운동 삭제.', 'danger-soft')
-    }, isEnglish ? 'Failed to delete workout.' : '운동 기록을 삭제하지 못했어요.')
+    }, isEnglish ? 'Failed to delete workout.' : '삭제에 실패했어요.')
   }
 
   const handleToggleLike = async (postId, isLiked) => {
@@ -1902,30 +2104,30 @@ export default function App() {
 
   const tabs = [
     { key: VIEW.HOME, label: isEnglish ? 'Home' : '홈' },
-    { key: VIEW.COMMUNITY, label: isEnglish ? 'Community' : '커뮤니티' },
+    { key: VIEW.COMMUNITY, label: isEnglish ? 'Crew' : '피드' },
     { key: VIEW.PROGRESS, label: isEnglish ? 'Records' : '기록' },
-    { key: VIEW.PROFILE, label: isEnglish ? 'Profile' : '프로필' },
+    { key: VIEW.PROFILE, label: isEnglish ? 'Profile' : '나' },
   ]
   const viewHeader = {
     [VIEW.HOME]: {
       eyebrow: isEnglish ? 'Gym Community' : 'Gym Community',
-      title: isEnglish ? 'Today\'s Training' : '오늘 운동',
-      body: isEnglish ? 'Pick one action and keep your momentum visible.' : '짧게라도 남기면 리듬이 이어져요.',
+      title: isEnglish ? 'Today\'s Training' : '오늘 뭐 하지?',
+      body: isEnglish ? 'Pick one action. Keep the rhythm.' : '하나만 해도 리듬은 이어져요.',
     },
     [VIEW.COMMUNITY]: {
       eyebrow: isEnglish ? 'Crew Feed' : '크루 피드',
-      title: isEnglish ? 'Train Together' : '함께 뛰는 공간',
-      body: isEnglish ? 'See logs, rankings, and teammates in one clean feed.' : '피드와 랭킹에서 서로의 운동을 응원해요.',
+      title: isEnglish ? 'Train Together' : '같이 하면 더 가요',
+      body: isEnglish ? 'Cheer, rank, repeat.' : '응원하고, 겨루고, 다시 움직여요.',
     },
     [VIEW.PROGRESS]: {
       eyebrow: isEnglish ? 'Progress Lab' : '성장 기록',
       title: isEnglish ? 'Your Records' : '내 기록',
-      body: isEnglish ? 'Check your level, XP, body data, and workout history.' : '레벨, XP, 운동 흐름을 한눈에 확인해요.',
+      body: isEnglish ? 'Level, XP, workouts.' : '레벨, XP, 운동 흐름을 한눈에.',
     },
     [VIEW.PROFILE]: {
       eyebrow: isEnglish ? 'Profile' : '프로필',
-      title: isEnglish ? 'Your Fitness Identity' : '내 프로필',
-      body: isEnglish ? 'Tune your goals, nickname, reminders, and community settings.' : '목표와 알림, 커뮤니티 설정을 정리해요.',
+      title: isEnglish ? 'Your Fitness Identity' : '내 운동 프로필',
+      body: isEnglish ? 'Goals, reminders, identity.' : '목표와 알림을 가볍게 정리해요.',
     },
   }[view]
   /*
@@ -2213,6 +2415,10 @@ export default function App() {
                   stats={workoutStats}
                   challenge={challenge}
                   activitySummary={activitySummary}
+                  leaderboard={visibleLeaderboard}
+                  currentUserId={user?.id}
+                  partySnapshot={partySnapshot}
+                  partyInviteCandidates={partyInviteCandidates}
                   homeInsight={homeInsight}
                   achievementBadges={achievementBadges}
                   reminder={reminderStatus}
@@ -2242,6 +2448,9 @@ export default function App() {
                     handleChangeView(VIEW.COMMUNITY)
                   }}
                   onRequestReminderPermission={handleRequestReminderPermission}
+                  onCreateParty={handleCreateParty}
+                  onInvitePartyMember={handleInvitePartyMember}
+                  onSharePartyInvite={handleSharePartyInvite}
                   showWorkoutPanel={showWorkoutPanel}
                   workoutPreset={workoutPreset}
                   onCompleteWorkout={handleWorkoutComplete}

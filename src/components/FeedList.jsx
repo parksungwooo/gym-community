@@ -42,11 +42,11 @@ function shortUser(userId, displayName, isEnglish) {
 
 function getTypeLabel(type, isEnglish) {
   const labels = {
-    workout_complete: isEnglish ? 'Workout' : '운동',
+    workout_complete: isEnglish ? 'Workout' : '운동 완료',
     level_up: isEnglish ? 'Level Up' : '레벨업',
     profile_update: isEnglish ? 'Profile' : '프로필',
     challenge_complete: isEnglish ? 'Challenge' : '챌린지',
-    test_result: isEnglish ? 'Test' : '테스트',
+    test_result: isEnglish ? 'Test' : '레벨 체크',
   }
 
   return labels[type] ?? (isEnglish ? 'Update' : '업데이트')
@@ -59,7 +59,7 @@ function getPostContent(post, language) {
   switch (post.type) {
     case 'workout_complete': {
       if (note) return note
-      return isEnglish ? 'Workout logged.' : '운동 완료.'
+      return isEnglish ? 'Workout done.' : '오늘도 완료.'
     }
     case 'test_result':
       return isEnglish
@@ -68,9 +68,9 @@ function getPostContent(post, language) {
     case 'level_up':
       return isEnglish
         ? `${localizeLevelText(post.metadata?.to, language)} reached`
-        : `${localizeLevelText(post.metadata?.to, language)} 도달`
+        : `${localizeLevelText(post.metadata?.to, language)} 달성`
     case 'profile_update':
-      return isEnglish ? 'Profile updated.' : '프로필 업데이트'
+      return isEnglish ? 'Profile updated.' : '프로필 새로 정리.'
     case 'challenge_complete':
       return isEnglish
         ? `Goal done · ${post.metadata?.goal ?? 0}`
@@ -143,7 +143,7 @@ function getSharePayloadForPost(post, language, isEnglish) {
     title,
     metric: primaryStat,
     detail,
-    footer: isEnglish ? 'Shared workout story' : '운동 공유 카드',
+    footer: isEnglish ? 'Shared workout story' : '운동 자랑 카드',
   }
 }
 
@@ -170,7 +170,7 @@ function FeedCard({
   const authorName = shortUser(post.user_id, post.authorDisplayName, isEnglish)
   const authorLevel = post.authorLevel
     ? localizeLevelText(post.authorLevel, language)
-    : isEnglish ? 'Level pending' : '레벨 미정'
+    : isEnglish ? 'Level pending' : '레벨 대기'
 
   const submitComment = async (event) => {
     event.preventDefault()
@@ -298,7 +298,7 @@ function FeedCard({
           aria-label={
             isEnglish
               ? `${post.likedByMe ? 'Unlike' : 'Like'} post. ${post.likeCount} likes`
-              : `게시물 ${post.likedByMe ? '좋아요 취소' : '좋아요'}. 좋아요 ${post.likeCount}개`
+              : `좋아요 ${post.likeCount}개`
           }
         >
           <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -326,7 +326,7 @@ function FeedCard({
           className="min-h-11 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-emerald-800 dark:bg-white/10 dark:text-gray-100 dark:hover:text-emerald-300"
           onClick={handleSharePost}
         >
-          {isPro ? (isEnglish ? 'Kakao Pro card' : '카카오 Pro 카드') : (isEnglish ? 'Kakao share' : '카카오 공유')}
+          {isPro ? (isEnglish ? 'Kakao Pro card' : 'Pro 카드 공유') : (isEnglish ? 'Kakao share' : '카톡 공유')}
         </button>
 
         {!isPro && (
@@ -335,7 +335,7 @@ function FeedCard({
             className="min-h-11 rounded-lg bg-emerald-50 px-4 text-sm font-black text-emerald-800 transition hover:bg-emerald-100 dark:bg-emerald-700/20 dark:text-emerald-200"
             onClick={() => onOpenPaywall?.(PREMIUM_CONTEXT.SHARE_CARDS)}
           >
-            {isEnglish ? 'Pro image card' : 'Pro 이미지 카드'}
+            {isEnglish ? 'Pro image card' : 'Pro 카드 만들기'}
           </button>
         )}
 
@@ -349,8 +349,8 @@ function FeedCard({
               aria-haspopup="menu"
             >
               {menuOpen
-                ? (isEnglish ? 'Close options' : '옵션 닫기')
-                : (isEnglish ? 'Options' : '옵션')}
+                ? (isEnglish ? 'Close' : '닫기')
+                : (isEnglish ? 'Options' : '더보기')}
             </button>
             {menuOpen && (
               <div className="absolute right-0 top-12 z-10 grid w-36 gap-1 rounded-2xl border border-gray-100 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-neutral-900">
@@ -387,11 +387,11 @@ function FeedCard({
             type="text"
             value={comment}
             onChange={(event) => setComment(event.target.value)}
-            placeholder={isEnglish ? 'Comment' : '댓글'}
+            placeholder={isEnglish ? 'Cheer them on' : '응원 한마디'}
             maxLength={120}
           />
           <button type="submit" className="min-h-11 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white transition hover:bg-emerald-800">
-            {isEnglish ? 'Post' : '등록'}
+            {isEnglish ? 'Post' : '남기기'}
           </button>
         </form>
       )}
@@ -441,10 +441,10 @@ export default function FeedList({
   })
   const emptyTitle = filter === 'following'
     ? (isEnglish ? 'No following posts yet.' : '팔로우 피드가 비었어요.')
-    : (isEnglish ? 'Start the community with your first workout.' : '첫 기록으로 피드를 열어요.')
+    : (isEnglish ? 'Start with your first workout.' : '첫 기록으로 피드를 열어요.')
   const emptyBody = filter === 'following'
-    ? (isEnglish ? 'Follow more people to build your crew feed.' : '마음에 드는 사람을 팔로우하면 여기가 채워져요.')
-    : (isEnglish ? 'Save a workout, add a photo, or cheer on a teammate from here.' : '운동을 저장하면 응원과 댓글이 여기서 시작돼요.')
+    ? (isEnglish ? 'Follow people you like.' : '마음에 드는 사람을 팔로우해요.')
+    : (isEnglish ? 'Save a workout and get cheers.' : '운동을 남기면 응원이 따라와요.')
 
   return (
     <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
@@ -454,7 +454,7 @@ export default function FeedList({
             {isEnglish ? 'Feed' : '피드'}
           </span>
           <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">
-            {isEnglish ? 'Community' : '커뮤니티'}
+            {isEnglish ? 'Community' : '같이 운동해요'}
           </h2>
         </div>
         <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">

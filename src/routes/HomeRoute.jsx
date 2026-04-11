@@ -11,6 +11,10 @@ export default function HomeRoute({
   stats,
   challenge,
   activitySummary,
+  leaderboard,
+  currentUserId,
+  partySnapshot,
+  partyInviteCandidates,
   homeInsight,
   achievementBadges,
   reminder,
@@ -28,6 +32,9 @@ export default function HomeRoute({
   onSeeCommunity,
   onSelectFeedPreviewUser,
   onRequestReminderPermission,
+  onCreateParty,
+  onInvitePartyMember,
+  onSharePartyInvite,
   showWorkoutPanel,
   workoutPreset,
   onCompleteWorkout,
@@ -73,6 +80,10 @@ export default function HomeRoute({
         stats={stats}
         challenge={challenge}
         activitySummary={activitySummary}
+        leaderboard={leaderboard}
+        currentUserId={currentUserId}
+        partySnapshot={partySnapshot}
+        partyInviteCandidates={partyInviteCandidates}
         homeInsight={homeInsight}
         achievementBadges={achievementBadges}
         reminder={reminder}
@@ -91,6 +102,9 @@ export default function HomeRoute({
         onSeeCommunity={onSeeCommunity}
         onSelectFeedPreviewUser={onSelectFeedPreviewUser}
         onRequestReminderPermission={onRequestReminderPermission}
+        onCreateParty={onCreateParty}
+        onInvitePartyMember={onInvitePartyMember}
+        onSharePartyInvite={onSharePartyInvite}
       />
 
       {showWorkoutPanel && (
@@ -123,6 +137,11 @@ export default function HomeRoute({
                 loading={workoutLoading}
                 todayDone={todayDone}
                 todayCount={stats.todayCount}
+                streakCount={activitySummary?.currentStreak ?? stats.streak}
+                weeklyCount={challenge?.current ?? stats.weeklyCount}
+                weeklyGoal={challenge?.goal ?? profile?.weekly_goal}
+                levelValue={activitySummary?.levelValue}
+                historyCount={workoutHistory.length}
                 recentWorkout={{
                   workoutType: stats.lastWorkoutType,
                   durationMinutes: stats.lastWorkoutDuration,
@@ -130,6 +149,8 @@ export default function HomeRoute({
                 }}
                 routineTemplates={routineTemplates}
                 initialSelection={workoutPreset}
+                isPro={isPro}
+                onOpenPaywall={onOpenPaywall}
               />
             </div>
           </div>

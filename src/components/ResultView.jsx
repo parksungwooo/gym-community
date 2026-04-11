@@ -48,7 +48,7 @@ export default function ResultView({ score, level, isPro = false, onOpenPaywall,
   const handleShare = async () => {
     const shareText = isEnglish
       ? `My result: ${score} points, ${displayLevel}.`
-      : `내 결과: ${score}점, ${displayLevel}.`
+      : `내 레벨 ${displayLevel}, ${score}점.`
 
     try {
       await navigator.clipboard.writeText(`${shareText} ${window.location.href}`)
@@ -58,13 +58,13 @@ export default function ResultView({ score, level, isPro = false, onOpenPaywall,
         contentType: 'level_result',
         filename: 'fitness-result-kakao-card.png',
         payload: {
-          eyebrow: isEnglish ? 'Fitness Result' : '내 레벨',
+          eyebrow: isEnglish ? 'Fitness Result' : '레벨 체크',
           title: displayLevel,
           metric: isEnglish ? `${score} pts` : `${score}점`,
           detail: message,
           footer: isPro
-            ? (isEnglish ? 'Premium level card' : '프리미엄 레벨 카드')
-            : (isEnglish ? 'Level test complete' : '레벨 체크 완료'),
+            ? (isEnglish ? 'Pro level card' : 'Pro 레벨 카드')
+            : (isEnglish ? 'Level check done' : '레벨 체크 완료'),
         },
       })
     } catch {
@@ -101,8 +101,8 @@ export default function ResultView({ score, level, isPro = false, onOpenPaywall,
         </p>
         <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
           {isEnglish
-            ? "Now turn this level into today's workout log."
-            : '이제 오늘 운동 하나만 남겨볼까요?'}
+            ? "Now log one workout."
+            : '이제 운동 하나만 남겨요.'}
         </p>
       </div>
 
@@ -113,7 +113,7 @@ export default function ResultView({ score, level, isPro = false, onOpenPaywall,
           onClick={handleShare}
         >
           <ShareIcon />
-          {isEnglish ? 'Share' : '결과 공유'}
+          {isEnglish ? 'Share' : '공유하기'}
         </button>
         <button
           type="button"
@@ -121,7 +121,7 @@ export default function ResultView({ score, level, isPro = false, onOpenPaywall,
           onClick={onStartWorkout}
         >
           <DumbbellIcon />
-          {isEnglish ? 'Log workout' : '운동 기록'}
+          {isEnglish ? 'Log workout' : '운동 남기기'}
         </button>
       </div>
       {!isPro && (
@@ -130,7 +130,7 @@ export default function ResultView({ score, level, isPro = false, onOpenPaywall,
           className="min-h-11 rounded-lg bg-emerald-50 px-4 text-sm font-black text-emerald-800 transition hover:bg-emerald-100 dark:bg-emerald-700/20 dark:text-emerald-200"
           onClick={() => onOpenPaywall?.(PREMIUM_CONTEXT.SHARE_CARDS)}
         >
-          {isEnglish ? 'Make this a Pro image card' : '이 결과를 Pro 이미지 카드로 만들기'}
+          {isEnglish ? 'Make a Pro card' : 'Pro 카드로 자랑하기'}
         </button>
       )}
     </section>

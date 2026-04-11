@@ -1,14 +1,16 @@
+import { calculateXpAward } from '../xp/xpRules.js'
+
 const LEVEL_RECOMMENDATIONS = [
   {
     maxLevel: 1,
     workoutType: '걷기',
     mainExercise: '빠른 걷기',
     durationMinutes: 15,
-    setsLabel: '호흡 열기 1회',
+    setsLabel: '가볍게 1회',
     intensity: { ko: '가볍게', en: 'Light' },
-    focus: { ko: '습관 시작', en: 'Habit start' },
-    title: { ko: '가벼운 걷기 15분', en: '15-min easy walk' },
-    reason: { ko: '몸을 깨우는 정도만으로도 오늘 루프는 충분히 시작돼요.', en: 'A small start is enough to build rhythm.' },
+    focus: { ko: '습관 만들기', en: 'Habit start' },
+    title: { ko: '빠른 걷기 15분', en: '15-min easy walk' },
+    reason: { ko: '몸만 깨워도 오늘은 성공이에요.', en: 'A small start is enough to build rhythm.' },
     exercises: ['빠른 걷기 15분', '종아리 스트레칭 2분'],
   },
   {
@@ -18,9 +20,9 @@ const LEVEL_RECOMMENDATIONS = [
     durationMinutes: 20,
     setsLabel: '러닝 20분',
     intensity: { ko: '편하게', en: 'Easy pace' },
-    focus: { ko: '심폐 리듬', en: 'Cardio rhythm' },
+    focus: { ko: '유산소 리듬', en: 'Cardio rhythm' },
     title: { ko: '편한 러닝 20분', en: '20-min easy run' },
-    reason: { ko: '숨이 살짝 차는 정도로 리듬을 만들기 좋아요.', en: 'A low-friction cardio block that keeps progress moving.' },
+    reason: { ko: '살짝 숨차면 딱 좋아요.', en: 'A low-friction cardio block that keeps progress moving.' },
     exercises: ['이지 러닝 20분', '걷기 쿨다운 3분'],
   },
   {
@@ -32,8 +34,8 @@ const LEVEL_RECOMMENDATIONS = [
     intensity: { ko: '중간 강도', en: 'Moderate' },
     focus: { ko: '전신 균형', en: 'Full-body balance' },
     title: { ko: '전신 근력 25분', en: '25-min full-body strength' },
-    reason: { ko: '큰 근육을 골고루 깨우면 XP와 체감 성장이 같이 올라가요.', en: 'A balanced strength block for XP and consistency.' },
-    exercises: ['스쿼트 3세트', '푸시업 3세트', '힙힌지 3세트'],
+    reason: { ko: '큰 근육부터 깨워볼게요.', en: 'A balanced strength block for XP and consistency.' },
+    exercises: ['스쿼트 3세트', '푸시업 3세트', '런지 3세트'],
   },
   {
     maxLevel: 5,
@@ -44,8 +46,8 @@ const LEVEL_RECOMMENDATIONS = [
     intensity: { ko: '강하게', en: 'Strong' },
     focus: { ko: '하체 볼륨', en: 'Lower-body volume' },
     title: { ko: '하체 근력 35분', en: '35-min lower-body strength' },
-    reason: { ko: '지난 기록보다 볼륨을 조금만 올려도 하체 성장 신호가 또렷해져요.', en: 'A controlled overload day for visible lower-body progress.' },
-    exercises: ['스쿼트 4세트', '런지 3세트', '힙힌지 3세트'],
+    reason: { ko: '지난번보다 5%만 더 가요.', en: 'A controlled overload day for visible lower-body progress.' },
+    exercises: ['스쿼트 4세트', '힙힌지 3세트', '런지 3세트'],
   },
   {
     maxLevel: 10,
@@ -56,7 +58,7 @@ const LEVEL_RECOMMENDATIONS = [
     intensity: { ko: '꾸준하게', en: 'Steady pace' },
     focus: { ko: '지구력 볼륨', en: 'Endurance volume' },
     title: { ko: '템포 러닝 35분', en: '35-min tempo run' },
-    reason: { ko: '높은 레벨은 꾸준한 볼륨에서 가장 안정적으로 성장해요.', en: 'Higher levels grow best from steady volume.' },
+    reason: { ko: '꾸준한 볼륨이 실력을 만듭니다.', en: 'Higher levels grow best from steady volume.' },
     exercises: ['워밍업 5분', '템포 러닝 25분', '쿨다운 5분'],
   },
 ]
@@ -92,6 +94,12 @@ function getWorkoutType(item) {
 
 function getWorkoutDuration(item) {
   return Number(item?.duration_minutes ?? item?.durationMinutes) || 0
+}
+
+function getSetCountFromLabel(label) {
+  const match = String(label ?? '').match(/(\d+)/)
+  const parsed = Number(match?.[1])
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1
 }
 
 function getDaysSince(dateValue, today = new Date()) {
@@ -144,38 +152,26 @@ function getWeeklyProgressLabel(weeklyCount, weeklyGoal, language) {
 
 function buildRecoverySignal({ daysSinceLastWorkout, streak, todayDone, language }) {
   if (todayDone) {
-    return language === 'en'
-      ? 'Recovery-first bonus only'
-      : '오늘은 보너스만 가볍게'
+    return language === 'en' ? 'Bonus only today' : '오늘은 보너스만 가볍게'
   }
 
   if (daysSinceLastWorkout === 0) {
-    return language === 'en'
-      ? 'Already trained today'
-      : '오늘 운동 기록 있음'
+    return language === 'en' ? 'Already trained today' : '오늘 기록은 이미 완료'
   }
 
   if (daysSinceLastWorkout === 1) {
-    return language === 'en'
-      ? 'Recovered enough for a clean push'
-      : '회복이 좋아서 깔끔하게 밀어도 좋아요'
+    return language === 'en' ? 'Recovered enough to push' : '회복 좋음. 오늘은 밀어도 돼요'
   }
 
   if (daysSinceLastWorkout >= 3) {
-    return language === 'en'
-      ? 'Ease back in and rebuild rhythm'
-      : '무리보다 리듬 회복이 먼저예요'
+    return language === 'en' ? 'Ease back in today' : '무리 말고 리듬부터'
   }
 
   if (streak >= 3) {
-    return language === 'en'
-      ? `Protect the ${streak}-day streak`
-      : `${streak}일 스트릭을 지키는 날`
+    return language === 'en' ? `Protect the ${streak}-day streak` : `${streak}일 스트릭 지키는 날`
   }
 
-  return language === 'en'
-    ? 'Good day to move the weekly goal'
-    : '주간 목표를 밀어 올리기 좋은 날'
+  return language === 'en' ? 'Good day to move' : '주간 목표 올리기 좋은 날'
 }
 
 function buildContext({ recommendation, weeklyCount, streak, todayDone, language }) {
@@ -183,8 +179,8 @@ function buildContext({ recommendation, weeklyCount, streak, todayDone, language
     return {
       label: language === 'en' ? 'Bonus session' : '보너스 운동',
       body: language === 'en'
-        ? 'You already logged today, so keep this optional and short.'
-        : '오늘 핵심 기록은 끝났어요. 더 한다면 회복을 해치지 않는 보너스로 가요.',
+        ? 'You already logged today. Keep this short.'
+        : '이미 기록했어요. 더 한다면 짧게만 가요.',
     }
   }
 
@@ -193,7 +189,7 @@ function buildContext({ recommendation, weeklyCount, streak, todayDone, language
       label: language === 'en' ? 'First log this week' : '이번 주 첫 기록',
       body: language === 'en'
         ? 'Today works best with a low-barrier session.'
-        : '시작 장벽을 낮춘 운동으로 이번 주 리듬을 먼저 만들어요.',
+        : '작게 시작하면 이번 주가 움직여요.',
     }
   }
 
@@ -201,8 +197,8 @@ function buildContext({ recommendation, weeklyCount, streak, todayDone, language
     return {
       label: language === 'en' ? 'Protect the streak' : '스트릭 지키기',
       body: language === 'en'
-        ? `A good fit to protect your ${streak}-day streak.`
-        : `${streak}일 흐름을 끊지 않도록 짧고 확실하게 가져가요.`,
+        ? `Keep your ${streak}-day rhythm alive.`
+        : `${streak}일 흐름, 오늘도 이어가요.`,
     }
   }
 
@@ -224,7 +220,7 @@ function buildProgression({ baseDuration, lastDuration, isPremium, daysSinceLast
   if (daysSinceLastWorkout >= 3) {
     return {
       durationMinutes: Math.max(15, Math.round(baseDuration * 0.9)),
-      progressionLabel: language === 'en' ? 'Recovery-adjusted' : '회복 우선 조정',
+      progressionLabel: language === 'en' ? 'Recovery adjusted' : '회복 우선 조정',
       overloadPercent: -10,
     }
   }
@@ -236,9 +232,7 @@ function buildProgression({ baseDuration, lastDuration, isPremium, daysSinceLast
 
   return {
     durationMinutes,
-    progressionLabel: language === 'en'
-      ? 'Progressive overload +5%'
-      : '지난 기록 대비 볼륨 +5%',
+    progressionLabel: language === 'en' ? 'Progressive overload +5%' : '볼륨 +5%',
     overloadPercent: 5,
   }
 }
@@ -288,20 +282,31 @@ export function getTodayWorkoutRecommendation({
   const durationMinutes = todayDone
     ? Math.max(10, Math.round(progression.durationMinutes * 0.65))
     : progression.durationMinutes
+  const xpAward = calculateXpAward({
+    workoutType: recommendation.workoutType,
+    durationMinutes,
+    sets: getSetCountFromLabel(recommendation.setsLabel),
+    levelValue,
+    todayDone,
+    todayCount: stats?.todayCount,
+    historyCount: workoutHistory.length,
+    streakCount: streak,
+    weeklyCount,
+    weeklyGoal,
+  })
+  const estimatedXp = xpAward.totalXP
   const title = getLocalizedText(recommendation.title, resolvedLanguage)
   const goalLine = resolvedLanguage === 'en'
-    ? `${recommendation.setsLabel} • +${Math.max(10, Math.round(durationMinutes * (levelValue >= 4 ? 1.4 : 1.1)))} XP • ${getWeeklyProgressLabel(weeklyCount, weeklyGoal, resolvedLanguage)}`
-    : `${recommendation.setsLabel} • +${Math.max(10, Math.round(durationMinutes * (levelValue >= 4 ? 1.4 : 1.1)))} XP • ${getWeeklyProgressLabel(weeklyCount, weeklyGoal, resolvedLanguage)}`
+    ? `${recommendation.setsLabel} • +${estimatedXp} XP • ${getWeeklyProgressLabel(weeklyCount, weeklyGoal, resolvedLanguage)}`
+    : `${recommendation.setsLabel} • +${estimatedXp} XP • ${getWeeklyProgressLabel(weeklyCount, weeklyGoal, resolvedLanguage)}`
   const personalizedLine = isPremium
-    ? (resolvedLanguage === 'en'
-        ? `${progression.progressionLabel}. ${recoverySignal}.`
-        : `${progression.progressionLabel}로 잡았어요. ${recoverySignal}.`)
-    : (resolvedLanguage === 'en'
-        ? `${recoverySignal}. Pro unlocks recovery and overload tuning.`
-        : `${recoverySignal}. Pro에서는 회복과 볼륨까지 자동으로 조정해요.`)
+    ? `${progression.progressionLabel}. ${recoverySignal}.`
+    : resolvedLanguage === 'en'
+      ? `${recoverySignal}. Pro tunes recovery and volume.`
+      : `${recoverySignal}. Pro는 회복과 볼륨까지 맞춰줘요.`
   const nextPreview = resolvedLanguage === 'en'
     ? `Next: ${recommendation.workoutType === '웨이트' ? 'mobility and core' : 'strength support'} based on how today feels.`
-    : `다음 추천: 오늘 체감에 따라 ${recommendation.workoutType === '웨이트' ? '회복 스트레칭과 코어' : '근력 보강'}으로 이어갈게요.`
+    : `다음: ${recommendation.workoutType === '웨이트' ? '회복 스트레칭과 코어' : '근력 보강'}로 이어가요.`
 
   return {
     ...recommendation,
@@ -325,15 +330,12 @@ export function getTodayWorkoutRecommendation({
     overloadPercent: progression.overloadPercent,
     weeklyProgressLabel: getWeeklyProgressLabel(weeklyCount, weeklyGoal, resolvedLanguage),
     durationMinutes,
-    estimatedXp: Math.max(10, Math.round(durationMinutes * (levelValue >= 4 ? 1.4 : 1.1))),
+    estimatedXp,
+    xpAward,
     exercises: recommendation.exercises,
     nextPreview,
     isPremiumRecommendation: Boolean(isPremium),
-    note: [
-      title,
-      personalizedLine,
-      goalLine,
-    ].filter(Boolean).join('\n'),
+    note: [title, personalizedLine, goalLine].filter(Boolean).join('\n'),
     sharePayload: {
       title: resolvedLanguage === 'en' ? 'Today workout complete' : '오늘 운동 완료',
       metric: resolvedLanguage === 'en'
@@ -342,7 +344,7 @@ export function getTodayWorkoutRecommendation({
       detail: personalizedLine,
       planSummary: goalLine,
       level: `Lv.${levelValue}`,
-      xp: `${Math.max(10, Math.round(durationMinutes * (levelValue >= 4 ? 1.4 : 1.1)))} XP`,
+      xp: `${estimatedXp} XP`,
       streak: resolvedLanguage === 'en' ? `${streak} days` : `${streak}일 스트릭`,
       accent: '#10b981',
     },
