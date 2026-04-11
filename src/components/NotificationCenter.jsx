@@ -79,7 +79,7 @@ export default function NotificationCenter({
 
   return (
     <div className="notification-center-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
-      <section className="notification-center-card" onClick={(event) => event.stopPropagation()}>
+      <section className="grid w-full max-w-md gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6" onClick={(event) => event.stopPropagation()}>
         <div className="notification-center-header">
           <div>
             <span className="auth-modal-kicker">{isEnglish ? 'Inbox' : '알림함'}</span>
@@ -90,18 +90,18 @@ export default function NotificationCenter({
                 : (isEnglish ? 'All caught up.' : '모두 확인했어요.')}
             </p>
           </div>
-          <button type="button" className="ghost-btn" onClick={onClose}>
+          <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onClose}>
             {isEnglish ? 'Close' : '닫기'}
           </button>
         </div>
 
         <div className="notification-center-actions">
-          <button type="button" className="ghost-btn" onClick={onRefresh} disabled={loading}>
+          <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onRefresh} disabled={loading}>
             {loading ? (isEnglish ? 'Refreshing...' : '새로고침 중...') : (isEnglish ? 'Refresh' : '새로고침')}
           </button>
           <button
             type="button"
-            className="secondary-btn"
+            className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
             onClick={onMarkAllRead}
             disabled={loading || unreadCount === 0}
           >
@@ -112,7 +112,7 @@ export default function NotificationCenter({
         {loading ? (
           <div className="skeleton-stack">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="skeleton-card feed">
+              <div key={index} className="grid gap-3 rounded-2xl bg-gray-100 p-4 dark:bg-white/10">
                 <div className="skeleton-row spread">
                   <div className="skeleton-copy">
                     <span className="skeleton-line medium" />
@@ -132,16 +132,16 @@ export default function NotificationCenter({
             ))}
           </div>
         ) : (
-          <div className="empty-state-card cool notification-empty">
-            <span className="empty-state-badge">{isEnglish ? 'Quiet' : '조용함'}</span>
-            <strong>{isEnglish ? 'No notifications yet.' : '알림이 아직 없어요.'}</strong>
-            <p>
+          <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'Quiet' : '조용함'}</span>
+            <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No notifications yet.' : '알림이 아직 없어요.'}</strong>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
               {isEnglish
                 ? 'Follows, likes, and comments appear here.'
                 : '팔로우, 좋아요, 댓글이 여기에 와요.'}
             </p>
             <div className="state-action-row notification-empty-actions">
-              <button type="button" className="ghost-btn" onClick={onRefresh} disabled={loading}>
+              <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onRefresh} disabled={loading}>
                 {loading ? (isEnglish ? 'Refreshing...' : '새로고침 중...') : (isEnglish ? 'Refresh' : '새로고침')}
               </button>
             </div>

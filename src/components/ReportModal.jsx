@@ -33,7 +33,7 @@ export default function ReportModal({
 
   return (
     <div className="auth-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
-      <section className="auth-modal-card report-modal-card" onClick={(event) => event.stopPropagation()}>
+      <section className="grid w-full max-w-md gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6" onClick={(event) => event.stopPropagation()}>
         <button type="button" className="modal-close-x" onClick={onClose} aria-label={isEnglish ? 'Close' : '닫기'}>&times;</button>
         <span className="auth-modal-kicker">{isEnglish ? 'Safety' : '안전 센터'}</span>
         <h2>{isEnglish ? 'Report' : '신고'}</h2>
@@ -70,7 +70,7 @@ export default function ReportModal({
         <div className="auth-modal-actions">
           <button
             type="button"
-            className="primary-btn"
+            className="min-h-12 rounded-lg bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:opacity-50"
             onClick={() => onSubmit({ reason, details })}
             disabled={loading}
           >
@@ -78,7 +78,7 @@ export default function ReportModal({
           </button>
         </div>
 
-        <button type="button" className="ghost-btn auth-modal-close" onClick={onClose} disabled={loading}>
+        <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onClose} disabled={loading}>
           {isEnglish ? 'Cancel' : '취소'}
         </button>
       </section>

@@ -26,7 +26,7 @@ export default function OnboardingCoach({
 
   return (
     <div className="product-onboarding-backdrop" role="dialog" aria-modal="true" aria-label={isEnglish ? 'Getting started guide' : '시작 가이드'}>
-      <section className="product-onboarding-card compact">
+      <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
         <div className="product-onboarding-head">
           <span className="product-pill">{isEnglish ? 'Start Here' : '시작 가이드'}</span>
           <button type="button" className="product-onboarding-close" onClick={onClose}>

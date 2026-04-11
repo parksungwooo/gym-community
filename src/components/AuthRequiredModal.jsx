@@ -75,14 +75,14 @@ export default function AuthRequiredModal({
 
   return (
     <div className="auth-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
-      <section className="auth-modal-card" onClick={(event) => event.stopPropagation()}>
+      <section className="grid w-full max-w-md gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6" data-testid="auth-required-modal" onClick={(event) => event.stopPropagation()}>
         <button type="button" className="modal-close-x" onClick={onClose} aria-label={isEnglish ? 'Close' : '닫기'}>&times;</button>
         <span className="auth-modal-kicker">{isEnglish ? 'Account Needed' : '로그인 필요'}</span>
         <h2>{copy.title}</h2>
         <p>{copy.body}</p>
 
         <div className="auth-modal-actions">
-          <button type="button" className="social-btn google compact" onClick={onGoogleSignIn} disabled={loading}>
+          <button type="button" className="social-btn google compact" data-testid="auth-google" onClick={onGoogleSignIn} disabled={loading}>
             {loading ? (isEnglish ? 'Connecting...' : '연결 중...') : 'Google'}
           </button>
           <button type="button" className="social-btn kakao compact" onClick={onKakaoSignIn} disabled={loading}>
@@ -90,7 +90,7 @@ export default function AuthRequiredModal({
           </button>
         </div>
 
-        <button type="button" className="ghost-btn auth-modal-close" onClick={onClose} disabled={loading}>
+        <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" data-testid="auth-modal-close" onClick={onClose} disabled={loading}>
           {isEnglish ? 'Maybe later' : '나중에'}
         </button>
       </section>

@@ -27,7 +27,7 @@ export default class AppCrashBoundary extends Component {
 
     return (
       <main className="app-shell" style={{ padding: '24px' }}>
-        <section className="card" style={{ maxWidth: '960px', margin: '0 auto', display: 'grid', gap: '16px' }}>
+        <section className="mx-auto grid max-w-3xl gap-4 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900">
           <div>
             <span className="app-section-kicker">Crash Report</span>
             <h2 style={{ marginTop: '8px' }}>앱이 렌더링 중에 멈췄어요.</h2>
@@ -42,13 +42,13 @@ export default class AppCrashBoundary extends Component {
           </section>
 
           {error.stack ? (
-            <pre className="card" style={{ margin: 0, overflowX: 'auto', whiteSpace: 'pre-wrap' }}>
+            <pre className="m-0 overflow-x-auto whitespace-pre-wrap rounded-2xl border border-gray-100 bg-gray-50 p-4 text-sm dark:border-white/10 dark:bg-neutral-950">
               {error.stack}
             </pre>
           ) : null}
 
           {info?.componentStack ? (
-            <pre className="card" style={{ margin: 0, overflowX: 'auto', whiteSpace: 'pre-wrap' }}>
+            <pre className="m-0 overflow-x-auto whitespace-pre-wrap rounded-2xl border border-gray-100 bg-gray-50 p-4 text-sm dark:border-white/10 dark:bg-neutral-950">
               {info.componentStack}
             </pre>
           ) : null}

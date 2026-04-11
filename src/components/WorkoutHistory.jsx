@@ -105,7 +105,7 @@ function PhotoGrid({ items, isEnglish, onOpen, onRemove, onMove, editable = fals
   return (
     <div className={`history-photo-grid ${items.length > 1 ? 'multi' : ''}`}>
       {items.map((item, index) => (
-        <article key={item.id} className="history-photo-card">
+        <article key={item.id} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-neutral-950">
           <button type="button" className="image-open-btn" onClick={() => onOpen?.(item.previewUrl)}>
             <div className="history-photo-preview">
               <OptimizedImage
@@ -243,7 +243,7 @@ function HistoryItem({ item, onUpdate, onDelete, loading, onOpenImage }) {
         <span>{formatTime(item.created_at, language) || (isEnglish ? 'Log' : '기록')}</span>
       </div>
 
-      <div className="history-card">
+      <div className="grid gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950">
         {!editing ? (
           <>
             <div className="history-header">
@@ -353,7 +353,7 @@ function HistoryItem({ item, onUpdate, onDelete, loading, onOpenImage }) {
               <div className="photo-proof-actions">
                 <button
                   type="button"
-                  className="secondary-btn photo-proof-btn"
+                  className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={loading || photoItems.length >= MAX_PHOTOS}
                 >
@@ -361,7 +361,7 @@ function HistoryItem({ item, onUpdate, onDelete, loading, onOpenImage }) {
                 </button>
                 <button
                   type="button"
-                  className="ghost-btn photo-proof-btn"
+                  className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white"
                   onClick={() => cameraInputRef.current?.click()}
                   disabled={loading || photoItems.length >= MAX_PHOTOS}
                 >
@@ -460,7 +460,7 @@ export default function WorkoutHistory({ history, onUpdate, onDelete, loading })
   }, [history])
 
   return (
-    <section className="card record-module-card compact">
+    <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Timeline' : '타임라인'}</span>
@@ -490,7 +490,7 @@ export default function WorkoutHistory({ history, onUpdate, onDelete, loading })
         {loading && (
           <div className="skeleton-stack">
             {Array.from({ length: 2 }).map((_, index) => (
-              <div key={index} className="skeleton-card history">
+              <div key={index} className="grid gap-3 rounded-2xl bg-gray-100 p-4 dark:bg-white/10">
                 <span className="skeleton-line short" />
                 <div className="skeleton-row">
                   <span className="skeleton-avatar small" />
@@ -505,10 +505,10 @@ export default function WorkoutHistory({ history, onUpdate, onDelete, loading })
         )}
 
         {!loading && history.length === 0 && (
-          <div className="empty-state-card cool">
-            <span className="empty-state-badge">{isEnglish ? 'First log' : '첫 기록'}</span>
-            <strong>{isEnglish ? 'No history yet.' : '아직 기록이 없어요.'}</strong>
-            <p>
+          <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'First log' : '첫 기록'}</span>
+            <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No history yet.' : '아직 기록이 없어요.'}</strong>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">
               {isEnglish
                 ? 'Save one workout above to start this view.'
                 : '위에서 운동 한 번 저장하면 여기부터 채워져요.'}
@@ -543,7 +543,7 @@ export default function WorkoutHistory({ history, onUpdate, onDelete, loading })
 
       {openImageUrl && (
         <div className="lightbox-backdrop" role="dialog" aria-modal="true" onClick={() => setOpenImageUrl('')}>
-          <div className="lightbox-card" onClick={(event) => event.stopPropagation()}>
+          <div className="grid max-h-[86dvh] w-full max-w-2xl gap-3 overflow-hidden rounded-3xl bg-white p-3 shadow-sm dark:bg-neutral-900" onClick={(event) => event.stopPropagation()}>
             <button type="button" className="lightbox-close" onClick={() => setOpenImageUrl('')}>
               {isEnglish ? 'Close' : '닫기'}
             </button>

@@ -120,7 +120,7 @@ export default function ProgressRoute({
         </div>
       </section>
 
-      <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 record-weight-log-card">
+      <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900" data-testid="record-weight-log">
         <div className="app-section-heading compact">
           <div>
             <span className="app-section-kicker">{isEnglish ? 'Weight' : '체중'}</span>

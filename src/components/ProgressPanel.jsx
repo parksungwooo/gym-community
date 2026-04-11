@@ -30,10 +30,10 @@ function getWorkoutMark(type) {
 
 function HealthStatTile({ label, value, meta, tone = 'default' }) {
   return (
-    <article className={`health-stat-tile compact ${tone}`}>
-      <span className="health-stat-label">{label}</span>
-      <strong className="health-stat-value">{value}</strong>
-      <span className="health-stat-meta">{meta}</span>
+    <article className={`rounded-2xl p-4 ${tone === 'cool' ? 'bg-cyan-50 dark:bg-cyan-500/15' : tone === 'warm' ? 'bg-amber-50 dark:bg-amber-500/15' : 'bg-gray-50 dark:bg-white/10'}`}>
+      <span className="block text-xs font-black uppercase text-gray-400">{label}</span>
+      <strong className="mt-1 block text-lg font-black text-gray-950 dark:text-white">{value}</strong>
+      <span className="mt-1 block text-xs font-bold text-gray-500 dark:text-gray-400">{meta}</span>
     </article>
   )
 }
@@ -137,8 +137,8 @@ export default function ProgressPanel({
     : `직전 ${formatWeightChange(bodyMetrics?.changeFromPreviousKg, isEnglish)} · 처음 ${formatWeightChange(bodyMetrics?.changeFromStartKg, isEnglish)}`
 
   return (
-    <section className="record-health-screen compact-record-screen">
-      <section className="card record-health-hero compact">
+    <section className="grid gap-6">
+      <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
         <div className="app-section-heading compact">
           <div>
             <span className="app-section-kicker">{isEnglish ? 'This week' : '이번 주'}</span>
@@ -174,7 +174,7 @@ export default function ProgressPanel({
       </section>
 
       <section className="record-health-grid compact">
-        <section className="card record-module-card compact activity-card">
+        <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">XP</span>
@@ -218,7 +218,7 @@ export default function ProgressPanel({
           </div>
         </section>
 
-        <section className="card record-module-card compact activity-card">
+        <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Recent' : '최근'}</span>
@@ -245,17 +245,17 @@ export default function ProgressPanel({
               })}
             </div>
           ) : (
-            <div className="empty-state-card cool">
-              <span className="empty-state-badge">XP</span>
-              <strong>{isEnglish ? 'No recent XP yet.' : '아직 XP가 없어요.'}</strong>
-              <p>{isEnglish ? 'Logs and tests fill this.' : '운동을 남기면 바로 쌓여요.'}</p>
+            <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+              <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">XP</span>
+              <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No recent XP yet.' : '아직 XP가 없어요.'}</strong>
+              <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'Logs and tests fill this.' : '운동을 남기면 바로 쌓여요.'}</p>
             </div>
           )}
         </section>
       </section>
 
       <section className="record-health-grid compact">
-        <section className="card record-module-card compact">
+        <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Calories' : '칼로리'}</span>
@@ -283,7 +283,7 @@ export default function ProgressPanel({
           </div>
         </section>
 
-        <section className="card record-module-card compact">
+        <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Body' : '몸'}</span>
@@ -300,7 +300,7 @@ export default function ProgressPanel({
       </section>
 
       <section className="record-health-grid compact body-metrics-grid">
-        <section className="card record-module-card compact">
+        <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Goal' : '목표'}</span>
@@ -321,7 +321,7 @@ export default function ProgressPanel({
           </div>
         </section>
 
-        <section className="card record-module-card compact">
+        <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Latest' : '최근'}</span>
@@ -337,7 +337,7 @@ export default function ProgressPanel({
         </section>
       </section>
 
-      <section className="card record-module-card compact">
+      <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
         <div className="app-section-heading compact">
           <div>
             <span className="app-section-kicker">{isEnglish ? 'Trend' : '추이'}</span>
@@ -367,16 +367,16 @@ export default function ProgressPanel({
             <p className="record-highlight-meta">{trendMeta}</p>
           </div>
         ) : (
-          <div className="empty-state-card cool">
-            <span className="empty-state-badge">{isEnglish ? 'Weight' : '체중'}</span>
-            <strong>{isEnglish ? 'The first entry starts this.' : '첫 체중을 남겨요.'}</strong>
-            <p>{isEnglish ? 'Log it in Profile.' : '프로필에서 바로 기록할 수 있어요.'}</p>
+          <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'Weight' : '체중'}</span>
+            <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'The first entry starts this.' : '첫 체중을 남겨요.'}</strong>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'Log it in Profile.' : '프로필에서 바로 기록할 수 있어요.'}</p>
           </div>
         )}
       </section>
 
       <section className="record-health-grid compact">
-        <section className="card record-module-card compact">
+        <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Badges' : '배지'}</span>
@@ -392,15 +392,15 @@ export default function ProgressPanel({
               ))}
             </div>
           ) : (
-            <div className="empty-state-card cool">
-              <span className="empty-state-badge">{isEnglish ? 'Badge' : '배지'}</span>
-              <strong>{isEnglish ? 'No badges yet.' : '아직 열린 배지가 없어요.'}</strong>
-              <p>{isEnglish ? 'They unlock as you log.' : '기록할수록 하나씩 열려요.'}</p>
+            <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+              <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'Badge' : '배지'}</span>
+              <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No badges yet.' : '아직 열린 배지가 없어요.'}</strong>
+              <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'They unlock as you log.' : '기록할수록 하나씩 열려요.'}</p>
             </div>
           )}
         </section>
 
-        <section className="card record-module-card compact">
+        <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{isEnglish ? 'Pattern' : '패턴'}</span>
@@ -412,7 +412,7 @@ export default function ProgressPanel({
           <div className="type-stats-list compact">
             {safeTypeCounts.length ? (
               safeTypeCounts.map((item) => (
-                <article key={item.type} className="type-stat-card record-type-card compact">
+                <article key={item.type} className="grid gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950">
                   <div className="type-stat-copy">
                     <div className="type-stat-title-row">
                       <span className="workout-mark">{getWorkoutMark(item.type)}</span>
@@ -426,10 +426,10 @@ export default function ProgressPanel({
                 </article>
               ))
             ) : (
-              <div className="empty-state-card cool">
-                <span className="empty-state-badge">{isEnglish ? 'Pattern' : '패턴'}</span>
-                <strong>{isEnglish ? 'Patterns build here.' : '패턴이 여기에 쌓여요.'}</strong>
-                <p>{isEnglish ? 'More logs make it clearer.' : '기록할수록 패턴이 또렷해져요.'}</p>
+              <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+                <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'Pattern' : '패턴'}</span>
+                <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'Patterns build here.' : '패턴이 여기에 쌓여요.'}</strong>
+                <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'More logs make it clearer.' : '기록할수록 패턴이 또렷해져요.'}</p>
               </div>
             )}
           </div>

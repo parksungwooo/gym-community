@@ -39,7 +39,7 @@ export default function MonthlyCalendar({ history }) {
   const completedDays = cells.filter((cell) => cell.done).length
 
   return (
-    <section className="card record-module-card compact">
+    <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Calendar' : '캘린더'}</span>

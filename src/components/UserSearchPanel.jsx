@@ -30,7 +30,7 @@ export default function UserSearchPanel({
   const trimmedQuery = query.trim()
 
   return (
-    <section className="card community-block-card compact">
+    <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Search' : '검색'}</span>
@@ -54,23 +54,23 @@ export default function UserSearchPanel({
           placeholder={isEnglish ? 'Nickname' : '닉네임'}
         />
         {!!trimmedQuery && (
-          <button type="button" className="ghost-btn" onClick={() => onQueryChange('')}>
+          <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={() => onQueryChange('')}>
             {isEnglish ? 'Clear' : '지우기'}
           </button>
         )}
       </div>
 
       {trimmedQuery.length > 0 && trimmedQuery.length < 2 && (
-        <div className="empty-state-card cool user-search-empty">
-          <span className="empty-state-badge">{isEnglish ? 'Tip' : '팁'}</span>
-          <strong>{isEnglish ? 'Type 2+ characters.' : '2글자 이상 입력해요.'}</strong>
+        <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'Tip' : '팁'}</span>
+          <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'Type 2+ characters.' : '2글자 이상 입력해요.'}</strong>
         </div>
       )}
 
       {loading && trimmedQuery.length >= 2 && (
         <div className="skeleton-stack compact">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="skeleton-card">
+            <div key={index} className="grid gap-3 rounded-2xl bg-gray-100 p-4 dark:bg-white/10">
               <div className="skeleton-row">
                 <span className="skeleton-avatar" />
                 <div className="skeleton-copy">
@@ -84,10 +84,10 @@ export default function UserSearchPanel({
       )}
 
       {!loading && trimmedQuery.length >= 2 && !rows.length && (
-        <div className="empty-state-card cool user-search-empty">
-          <span className="empty-state-badge">{isEnglish ? 'No Match' : '없음'}</span>
-          <strong>{isEnglish ? 'No matching users.' : '일치하는 사람이 없어요.'}</strong>
-          <p>{isEnglish ? 'Try another keyword.' : '다른 키워드로 찾아요.'}</p>
+        <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'No Match' : '없음'}</span>
+          <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No matching users.' : '일치하는 사람이 없어요.'}</strong>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'Try another keyword.' : '다른 키워드로 찾아요.'}</p>
         </div>
       )}
 
@@ -98,7 +98,7 @@ export default function UserSearchPanel({
             const isFollowing = followingIds.includes(item.user_id)
 
             return (
-              <article key={item.user_id} className="suggested-user-card compact">
+              <article key={item.user_id} className="grid gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950">
                 <button type="button" className="suggested-user-select-btn" onClick={() => onSelectUser?.(item)}>
                   <div className="suggested-user-top">
                     <UserAvatar

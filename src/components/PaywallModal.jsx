@@ -8,9 +8,9 @@ import {
 
 function BenefitCard({ title, body }) {
   return (
-    <article className="paywall-benefit-card">
-      <strong>{title}</strong>
-      <p>{body}</p>
+    <article className="rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+      <strong className="text-sm font-black text-gray-950 dark:text-white">{title}</strong>
+      <p className="m-0 mt-1 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{body}</p>
     </article>
   )
 }
@@ -42,7 +42,7 @@ export default function PaywallModal({
 
   return (
     <div className="auth-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
-      <section className="auth-modal-card paywall-modal-card" onClick={(event) => event.stopPropagation()}>
+      <section className="grid w-full max-w-2xl gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6" onClick={(event) => event.stopPropagation()}>
         <button type="button" className="modal-close-x" onClick={onClose} aria-label={isEnglish ? 'Close' : '닫기'}>&times;</button>
         <div className="paywall-hero">
           <div className="paywall-hero-copy">
@@ -69,7 +69,7 @@ export default function PaywallModal({
           {PREMIUM_PLANS.map((plan) => (
             <article
               key={plan.id}
-              className={`paywall-plan-card ${plan.highlighted ? 'highlighted' : ''}`}
+              className={`grid gap-4 rounded-2xl border p-4 ${plan.highlighted ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-400/20 dark:bg-emerald-500/15' : 'border-gray-100 bg-gray-50 dark:border-white/10 dark:bg-neutral-950'}`}
             >
               <div className="paywall-plan-head">
                 <div>
@@ -86,7 +86,9 @@ export default function PaywallModal({
 
               <button
                 type="button"
-                className={plan.highlighted ? 'primary-btn' : 'secondary-btn'}
+                className={plan.highlighted
+                  ? 'min-h-12 rounded-lg bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:opacity-50'
+                  : 'min-h-12 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10'}
                 onClick={() => onUpgradePlan(plan.id)}
                 disabled={loading || isPro}
               >
@@ -130,7 +132,7 @@ export default function PaywallModal({
           </p>
         </div>
 
-        <button type="button" className="ghost-btn auth-modal-close" onClick={onClose} disabled={loading}>
+        <button type="button" className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onClose} disabled={loading}>
           {t('무료로 계속 쓰기', 'Continue with Free')}
         </button>
       </section>

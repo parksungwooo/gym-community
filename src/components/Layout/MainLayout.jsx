@@ -24,7 +24,7 @@ export default function MainLayout({
       >
         {pageHeader ? (
           <section className="grid gap-2 pr-24" aria-label={pageHeader.title}>
-            <span className="text-xs font-black uppercase text-emerald-600">
+            <span className="text-xs font-black uppercase text-emerald-600 dark:text-emerald-400">
               {pageHeader.eyebrow}
             </span>
             <h1 className="m-0 text-3xl font-black leading-tight text-gray-950 dark:text-white">

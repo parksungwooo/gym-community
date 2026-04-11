@@ -4,9 +4,9 @@ import { localizeLevelText } from '../utils/level'
 
 function StatChip({ label, value }) {
   return (
-    <article className="public-profile-stat">
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <article className="rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+      <span className="block text-xs font-black uppercase text-gray-400">{label}</span>
+      <strong className="mt-1 block text-base font-black text-gray-950 dark:text-white">{value}</strong>
     </article>
   )
 }
@@ -56,10 +56,10 @@ export default function PublicProfileCard({
   ]
 
   return (
-    <section className="card public-profile-card community-profile-spotlight">
+    <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
       {loading ? (
         <div className="skeleton-stack">
-          <div className="skeleton-card">
+          <div className="grid gap-3 rounded-2xl bg-gray-100 p-4 dark:bg-white/10">
             <div className="skeleton-row">
               <span className="skeleton-avatar" />
               <div className="skeleton-copy">
@@ -114,7 +114,7 @@ export default function PublicProfileCard({
                   </button>
                 </>
               )}
-              <button type="button" className="ghost-btn" onClick={onClear}>
+              <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={onClear}>
                 {t('닫기', 'Close')}
               </button>
             </div>

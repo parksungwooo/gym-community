@@ -519,7 +519,7 @@ async function run() {
     await waitForCondition(session, "!document.querySelector('[data-testid=\"workout-sheet\"]')", 'saved guest workout sheet')
     await waitForCondition(
       session,
-      "!document.querySelector('.auth-modal-card')",
+      "!document.querySelector('[data-testid=\"auth-required-modal\"]')",
       'guest workout save without auth prompt',
     )
     await waitForCondition(session, "Boolean(document.querySelector('.app-toast'))", 'guest save toast')
@@ -564,13 +564,13 @@ async function run() {
     await click(session, '[data-testid^="feed-like-"]')
     await waitForCondition(
       session,
-      "Boolean(document.querySelector('.auth-modal-card')) && Boolean(document.querySelector('.auth-modal-card .social-btn.google'))",
+      "Boolean(document.querySelector('[data-testid=\"auth-required-modal\"]')) && Boolean(document.querySelector('[data-testid=\"auth-google\"]'))",
       'auth required modal',
     )
-    await click(session, '.auth-modal-close')
+    await click(session, '[data-testid="auth-modal-close"]')
     await waitForCondition(
       session,
-      "!document.querySelector('.auth-modal-card')",
+      "!document.querySelector('[data-testid=\"auth-required-modal\"]')",
       'closed auth required modal',
     )
     await click(session, '[data-testid="community-tab-mate"]')
@@ -583,7 +583,7 @@ async function run() {
     await click(session, '[data-testid="tab-progress"]')
     await waitForCondition(
       session,
-      "Boolean(document.querySelector('.record-weight-log-card'))",
+      "Boolean(document.querySelector('[data-testid=\"record-weight-log\"]'))",
       'progress screen',
     )
     await click(session, '[data-testid="progress-open-level-test"]')

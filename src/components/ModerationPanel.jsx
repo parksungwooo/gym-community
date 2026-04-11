@@ -57,7 +57,7 @@ export default function ModerationPanel({
   const getResolutionNote = (report) => resolutionNotes[report.id] ?? report.resolution_note ?? ''
 
   return (
-    <section className="card moderation-panel-card">
+    <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Admin' : '운영'}</span>
@@ -85,7 +85,7 @@ export default function ModerationPanel({
         </select>
         <button
           type="button"
-          className="ghost-btn"
+          className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white"
           onClick={onRefresh}
           disabled={loading || actionLoading}
         >
@@ -96,7 +96,7 @@ export default function ModerationPanel({
       {loading ? (
         <div className="skeleton-stack">
           {Array.from({ length: 2 }).map((_, index) => (
-            <div key={index} className="skeleton-card feed">
+            <div key={index} className="grid gap-3 rounded-2xl bg-gray-100 p-4 dark:bg-white/10">
               <span className="skeleton-line medium" />
               <span className="skeleton-line long" />
               <span className="skeleton-line long" />
@@ -104,10 +104,10 @@ export default function ModerationPanel({
           ))}
         </div>
       ) : !reports.length ? (
-        <div className="empty-state-card cool">
-          <span className="empty-state-badge">{isEnglish ? 'Clear' : '조용함'}</span>
-          <strong>{isEnglish ? 'No reports.' : '신고 없음'}</strong>
-          <p>{isEnglish ? 'New ones show here.' : '새 신고가 보여요.'}</p>
+        <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{isEnglish ? 'Clear' : '조용함'}</span>
+          <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No reports.' : '신고 없음'}</strong>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-500 dark:text-gray-400">{isEnglish ? 'New ones show here.' : '새 신고가 보여요.'}</p>
         </div>
       ) : (
         <div className="moderation-report-list">
@@ -117,7 +117,7 @@ export default function ModerationPanel({
             const nextVisibility = report.post_visibility_status === 'visible' ? 'hidden_by_admin' : 'visible'
 
             return (
-              <article key={report.id} className="moderation-report-card">
+              <article key={report.id} className="grid gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950">
                 <div className="moderation-report-head">
                   <div>
                     <strong>{report.reason_label}</strong>
@@ -176,7 +176,7 @@ export default function ModerationPanel({
                   )}
                   <button
                     type="button"
-                    className="secondary-btn"
+                    className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                     onClick={() => onResolve(report.id, 'reviewed', resolutionNote)}
                     disabled={actionLoading}
                   >

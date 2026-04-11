@@ -268,8 +268,8 @@ export default function ProfilePanel({
   }
 
   return (
-    <section className="profile-settings-screen compact-profile-screen profile-menu-screen">
-      <section className="card profile-settings-hero compact profile-settings-hero-simple">
+    <section className="grid gap-6">
+      <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
         <div className="profile-settings-top compact profile-settings-top-simple">
           <div className="profile-photo-stack">
             <UserAvatar
@@ -303,7 +303,7 @@ export default function ProfilePanel({
       </section>
 
       {setupCard && (
-        <section className="card profile-next-step-card compact">
+        <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{t('다음', 'Next')}</span>
@@ -328,7 +328,7 @@ export default function ProfilePanel({
           <div className="profile-next-step-actions">
             <button
               type="button"
-              className="primary-btn"
+              className="min-h-12 rounded-lg bg-emerald-500 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:opacity-50"
               onClick={handleSetupAction}
               disabled={loading || authLoading}
             >
@@ -338,7 +338,7 @@ export default function ProfilePanel({
         </section>
       )}
 
-      <section className="card settings-card compact profile-menu-launcher">
+      <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
         <div className="app-section-heading compact">
           <div>
             <span className="app-section-kicker">{t('마이페이지', 'My page')}</span>
@@ -356,7 +356,7 @@ export default function ProfilePanel({
               </div>
               <button
                 type="button"
-                className="secondary-btn profile-setup-inline-btn"
+                className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                 onClick={handleSetupAction}
                 disabled={loading || authLoading}
               >
@@ -398,8 +398,8 @@ export default function ProfilePanel({
         />
 
         {activeSection === 'profile' && (
-          <section className="card settings-card compact">
-            <div className="settings-card-header compact">
+          <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
+            <div className="grid gap-1">
               <span className="app-section-kicker">{t('내 정보', 'Identity')}</span>
               <h2 className="app-section-title small">{t('프로필 기본 정보', 'Profile basics')}</h2>
             </div>
@@ -444,14 +444,14 @@ export default function ProfilePanel({
                 <div className="profile-photo-field-actions">
                   <button
                     type="button"
-                    className="secondary-btn"
+                    className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={loading}
                   >
                     {t('사진 업로드', 'Upload photo')}
                   </button>
                   {!!draftAvatarUrl && (
-                    <button type="button" className="ghost-btn" onClick={clearAvatarImage} disabled={loading}>
+                    <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white" onClick={clearAvatarImage} disabled={loading}>
                       {t('삭제', 'Remove')}
                     </button>
                   )}
@@ -518,8 +518,8 @@ export default function ProfilePanel({
         )}
 
         {activeSection === 'activity' && (
-          <section className="card settings-card compact">
-            <div className="settings-card-header compact">
+          <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
+            <div className="grid gap-1">
               <span className="app-section-kicker">{t('내 활동', 'Activity')}</span>
               <h2 className="app-section-title small">{t('목표', 'Goals')}</h2>
             </div>
@@ -591,8 +591,8 @@ export default function ProfilePanel({
         )}
 
         {activeSection === 'community' && (
-          <section className="card settings-card compact">
-            <div className="settings-card-header compact">
+          <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
+            <div className="grid gap-1">
               <span className="app-section-kicker">{t('커뮤니티', 'Community')}</span>
               <h2 className="app-section-title small">{t('공개', 'Sharing')}</h2>
             </div>
@@ -618,16 +618,16 @@ export default function ProfilePanel({
               </button>
             </SettingRow>
 
-            <div className="profile-menu-note-card">
-              <strong>{t('닉네임과 사진이 보여요.', 'Nickname and photo show.')}</strong>
-              <p>{t('짧을수록 좋아요.', 'Short looks better.')}</p>
+            <div className="grid gap-1 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+              <strong className="text-sm font-black text-gray-950 dark:text-white">{t('닉네임과 사진이 보여요.', 'Nickname and photo show.')}</strong>
+              <p className="m-0 text-sm font-semibold text-gray-500 dark:text-gray-400">{t('짧을수록 좋아요.', 'Short looks better.')}</p>
             </div>
           </section>
         )}
 
         {activeSection === 'settings' && (
-          <section className="card settings-card compact">
-            <div className="settings-card-header compact">
+          <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
+            <div className="grid gap-1">
               <span className="app-section-kicker">{t('설정', 'Settings')}</span>
               <h2 className="app-section-title small">{t('설정', 'Settings')}</h2>
             </div>
@@ -661,7 +661,7 @@ export default function ProfilePanel({
                       {reminderPermission !== 'granted' && reminderPermission !== 'unsupported' && (
                         <button
                           type="button"
-                          className="ghost-btn"
+                          className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-600 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-300 dark:hover:text-white"
                           onClick={onRequestReminderPermission}
                           disabled={loading}
                         >
@@ -710,7 +710,7 @@ export default function ProfilePanel({
                 {isGuest ? (
                   <button
                     type="button"
-                    className="secondary-btn settings-signout-btn compact"
+                    className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                     onClick={onRequestAuth}
                     disabled={authLoading}
                   >
@@ -719,7 +719,7 @@ export default function ProfilePanel({
                 ) : (
                   <button
                     type="button"
-                    className="secondary-btn settings-signout-btn compact"
+                    className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                     onClick={onSignOut}
                     disabled={authLoading}
                   >
@@ -731,7 +731,7 @@ export default function ProfilePanel({
           </section>
         )}
 
-        <button type="submit" className="primary-btn settings-save-btn compact" disabled={loading || nicknameMissing}>
+        <button type="submit" className="min-h-14 rounded-lg bg-emerald-500 px-5 text-base font-black text-white shadow-sm transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50" disabled={loading || nicknameMissing}>
           {loading ? t('저장 중', 'Saving...') : t('저장하기', 'Save')}
         </button>
       </form>
