@@ -33,10 +33,10 @@ export default function OnboardingCoach({
     >
       <section className="grid w-full max-w-3xl gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-2xl dark:border-white/10 dark:bg-neutral-900 sm:p-6">
         <div className="flex items-center justify-between gap-3">
-          <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200">{isEnglish ? 'Start Here' : '시작 가이드'}</span>
+          <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase text-emerald-800 dark:bg-emerald-700/20 dark:text-emerald-200">{isEnglish ? 'Start Here' : '시작 가이드'}</span>
           <button
             type="button"
-            className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
+            className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
             onClick={onClose}
           >
             {isEnglish ? 'Later' : '나중에'}

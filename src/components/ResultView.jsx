@@ -66,7 +66,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
   return (
     <section className="mx-auto grid w-full max-w-xl gap-6 rounded-3xl border border-gray-100 bg-white p-5 text-center shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
       <div className="mx-auto grid justify-items-center gap-4">
-        <div className="relative grid h-28 w-28 place-items-center rounded-3xl bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-200 dark:ring-emerald-400/20">
+        <div className="relative grid h-28 w-28 place-items-center rounded-3xl bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100 dark:bg-emerald-700/20 dark:text-emerald-200 dark:ring-emerald-400/20">
           <TrophyIcon />
           <span className="absolute -right-2 -top-2 rounded-lg bg-yellow-300 px-3 py-1 text-xs font-black text-gray-950 shadow-sm">
             LV.{levelValue}
@@ -74,7 +74,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
         </div>
 
         <div className="grid gap-2">
-          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">
             {isEnglish ? 'Fitness Result' : '내 레벨'}
           </span>
           <h2 className="m-0 text-3xl font-black leading-tight text-gray-950 dark:text-white sm:text-4xl">

@@ -112,7 +112,7 @@ export default function MateBoard({
           </span>
           <button
             type="button"
-            className={`min-h-10 rounded-lg px-4 text-sm font-black shadow-sm transition disabled:opacity-50 ${showComposer ? 'bg-emerald-700 text-white' : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10'}`}
+            className={`min-h-11 rounded-lg px-4 text-sm font-black shadow-sm transition disabled:opacity-50 ${showComposer ? 'bg-emerald-700 text-white' : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10'}`}
             onClick={() => setShowComposer((prev) => !prev)}
             disabled={actionLoading}
           >
@@ -272,7 +272,7 @@ export default function MateBoard({
 
       {!loading && !filteredPosts.length && (
         <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{t('첫 모집글', 'First post')}</span>
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{t('첫 모집글', 'First post')}</span>
           <strong className="text-lg font-black text-gray-950 dark:text-white">{t('맞는 글이 없어요.', 'No matching posts.')}</strong>
           <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
             {t(
@@ -350,7 +350,7 @@ export default function MateBoard({
                   {canShowInterest && (
                     <button
                       type="button"
-                      className={`min-h-10 rounded-lg px-3 text-sm font-black transition disabled:opacity-50 ${post.interested_by_me ? 'bg-emerald-700 text-white' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
+                      className={`min-h-11 rounded-lg px-3 text-sm font-black transition disabled:opacity-50 ${post.interested_by_me ? 'bg-emerald-700 text-white' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                       disabled={actionLoading}
                       onClick={() => onToggleInterest?.(post.id, post.interested_by_me)}
                     >
@@ -363,7 +363,7 @@ export default function MateBoard({
                   {isMine && !isClosed && (
                     <button
                       type="button"
-                      className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
+                      className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
                       disabled={actionLoading}
                       onClick={() => onToggleStatus?.(post.id, 'closed')}
                     >

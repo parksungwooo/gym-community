@@ -99,7 +99,7 @@ function QuickWorkoutCard({ item, isEnglish, onStart }) {
         }
     >
       <span className="text-sm font-black text-gray-950 dark:text-white">{title}</span>
-      <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200 [&_svg]:h-5 [&_svg]:w-5 [&_svg]:fill-none [&_svg]:stroke-current [&_svg]:stroke-2">
+      <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-emerald-800 dark:bg-emerald-700/20 dark:text-emerald-200 [&_svg]:h-5 [&_svg]:w-5 [&_svg]:fill-none [&_svg]:stroke-current [&_svg]:stroke-2">
         <QuickWorkoutIcon type={item.iconType ?? item.key} />
       </span>
       <span className="text-xs font-black text-gray-700 dark:text-gray-200">
@@ -198,7 +198,7 @@ function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }
           />
           <div className="min-w-0">
             <strong className="block truncate text-base font-black text-gray-950 dark:text-white">{authorName}</strong>
-            <span className="mt-1 inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{authorLevel}</span>
+            <span className="mt-1 inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{authorLevel}</span>
           </div>
         </button>
 
@@ -240,7 +240,7 @@ function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }
           <span>{t(`좋아요 ${post.likeCount ?? 0}`, `${post.likeCount ?? 0} likes`)}</span>
           <span>{t(`댓글 ${post.comments?.length ?? 0}`, `${post.comments?.length ?? 0} comments`)}</span>
         </div>
-        <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onSeeCommunity}>
+        <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onSeeCommunity}>
           {t('더 보기', 'Open')}
         </button>
       </div>
@@ -441,7 +441,7 @@ export default function HomeDashboard({
 
         <button
           type="button"
-          className="grid gap-4 rounded-3xl border border-emerald-100 bg-emerald-50 p-5 text-left shadow-sm transition hover:-translate-y-0.5 dark:border-emerald-400/20 dark:bg-emerald-500/15"
+          className="grid gap-4 rounded-3xl border border-emerald-100 bg-emerald-50 p-5 text-left shadow-sm transition hover:-translate-y-0.5 dark:border-emerald-400/20 dark:bg-emerald-700/20"
           onClick={() => onStartRoutine?.({
             name: todayRecommendation.title,
             workoutType: todayRecommendation.workoutType,
@@ -479,7 +479,7 @@ export default function HomeDashboard({
         <div className="grid gap-3">
           <div className="flex items-center justify-between gap-3">
             <strong className="text-base font-black text-gray-950 dark:text-white">{t('빠른 시작', 'Quick Workout')}</strong>
-            <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onOpenWorkoutComposer}>
+            <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onOpenWorkoutComposer}>
               {t('직접 입력', 'Custom')}
             </button>
           </div>
@@ -499,7 +499,7 @@ export default function HomeDashboard({
           <div className="grid gap-3">
             <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('오늘 할 일', 'Today')}</span>
             <div>
-              <span className={`inline-flex rounded-full px-3 py-1.5 text-xs font-black ${todayDone ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>{heroBadgeLabel}</span>
+              <span className={`inline-flex rounded-full px-3 py-1.5 text-xs font-black ${todayDone ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>{heroBadgeLabel}</span>
             </div>
             {homeInsight ? (
               <div className="grid gap-1 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
@@ -562,7 +562,7 @@ export default function HomeDashboard({
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{reminderBody}</span>
               </div>
               {reminderPermission !== 'granted' && reminderPermission !== 'unsupported' && (
-                <button type="button" className="min-h-10 rounded-lg bg-white px-3 text-sm font-black text-gray-800 shadow-sm transition hover:text-gray-950 dark:bg-neutral-900 dark:text-gray-100 dark:hover:text-white" onClick={onRequestReminderPermission}>
+                <button type="button" className="min-h-11 rounded-lg bg-white px-3 text-sm font-black text-gray-800 shadow-sm transition hover:text-gray-950 dark:bg-neutral-900 dark:text-gray-100 dark:hover:text-white" onClick={onRequestReminderPermission}>
                   {t('알림 켜기', 'Enable alert')}
                 </button>
               )}
@@ -578,7 +578,7 @@ export default function HomeDashboard({
             <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('피드', 'Now in feed')}</span>
             <h3 className="m-0 mt-1 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('오늘의 피드', 'One story to see')}</h3>
           </div>
-          <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onSeeCommunity}>
+          <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={onSeeCommunity}>
             {t('피드 보기', 'Community')}
           </button>
         </div>
@@ -592,7 +592,7 @@ export default function HomeDashboard({
           />
         ) : (
           <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{t('피드', 'Feed')}</span>
+            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{t('피드', 'Feed')}</span>
             <strong className="text-lg font-black text-gray-950 dark:text-white">{t('아직 조용해요', 'Feed is quiet for now.')}</strong>
             <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
               {t(

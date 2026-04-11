@@ -28,13 +28,53 @@ function getWorkoutMark(type) {
   return 'ET'
 }
 
-function HealthStatTile({ label, value, meta, tone = 'default' }) {
+function SectionHeader({ eyebrow, title, badge, accent = false }) {
   return (
-    <article className={`rounded-2xl p-4 ${tone === 'cool' ? 'bg-cyan-50 dark:bg-cyan-500/15' : tone === 'warm' ? 'bg-amber-50 dark:bg-amber-500/15' : 'bg-gray-50 dark:bg-white/10'}`}>
+    <div className="flex items-start justify-between gap-4">
+      <div className="grid gap-1">
+        <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{eyebrow}</span>
+        <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{title}</h2>
+      </div>
+      {badge != null ? (
+        <span className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-black ${accent ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-700/20 dark:text-emerald-200' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>
+          {badge}
+        </span>
+      ) : null}
+    </div>
+  )
+}
+
+function WorkoutMark({ type }) {
+  return (
+    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-emerald-700 text-xs font-black text-white shadow-sm">
+      {getWorkoutMark(type)}
+    </span>
+  )
+}
+
+function HealthStatTile({ label, value, meta, tone = 'default' }) {
+  const toneClass = {
+    cool: 'bg-cyan-50 dark:bg-cyan-500/15',
+    warm: 'bg-amber-50 dark:bg-amber-500/15',
+    default: 'bg-gray-50 dark:bg-white/10',
+  }[tone]
+
+  return (
+    <article className={`rounded-2xl p-4 ${toneClass}`}>
       <span className="block text-xs font-black uppercase text-gray-700 dark:text-gray-200">{label}</span>
       <strong className="mt-1 block text-lg font-black text-gray-950 dark:text-white">{value}</strong>
       <span className="mt-1 block text-xs font-bold text-gray-700 dark:text-gray-200">{meta}</span>
     </article>
+  )
+}
+
+function EmptyState({ label, title, body }) {
+  return (
+    <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+      <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{label}</span>
+      <strong className="text-lg font-black text-gray-950 dark:text-white">{title}</strong>
+      <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{body}</p>
+    </div>
   )
 }
 
@@ -102,7 +142,7 @@ export default function ProgressPanel({
   const visibleActivityEvents = recentActivityEvents.slice(0, 4)
   const visibleBadges = achievementBadges.length
     ? achievementBadges.map((item) => item.badge_key)
-    : badges
+    : (badges ?? [])
   const latestWorkoutName = stats.lastWorkoutType
     ? getWorkoutTypeLabel(stats.lastWorkoutType, language)
     : (isEnglish ? 'No workout yet' : '기록 없음')
@@ -139,20 +179,14 @@ export default function ProgressPanel({
   return (
     <section className="grid gap-6">
       <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-        <div className="app-section-heading compact">
-          <div>
-            <span className="app-section-kicker">{isEnglish ? 'This week' : '이번 주'}</span>
-            <h2 className="app-section-title small">{isEnglish ? 'Summary' : '요약'}</h2>
-          </div>
-          <span className="community-mini-pill">{`${weeklyCount}/${weeklyGoal}`}</span>
+        <SectionHeader eyebrow={isEnglish ? 'This week' : '이번 주'} title={isEnglish ? 'Summary' : '요약'} badge={`${weeklyCount}/${weeklyGoal}`} />
+
+        <div className="grid gap-2 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+          <strong className="text-xl font-black leading-7 text-gray-950 dark:text-white">{heroCopy.title}</strong>
+          <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{heroCopy.body}</p>
         </div>
 
-        <div className="record-health-headline compact">
-          <strong>{heroCopy.title}</strong>
-          <p className="subtext compact">{heroCopy.body}</p>
-        </div>
-
-        <div className="health-stat-grid compact">
+        <div className="grid gap-3 sm:grid-cols-3">
           <HealthStatTile
             label={isEnglish ? 'Today' : '오늘'}
             value={isEnglish ? `${stats.todayCount ?? 0} logs` : `${stats.todayCount ?? 0}개`}
@@ -173,28 +207,13 @@ export default function ProgressPanel({
         </div>
       </section>
 
-      <section className="record-health-grid compact">
+      <section className="grid gap-5 sm:grid-cols-2">
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <div className="app-section-heading compact">
-            <div>
-              <span className="app-section-kicker">XP</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Activity XP' : '활동 XP'}</h2>
-            </div>
-            <span className="community-mini-pill accent">{`${activitySummary?.totalXp ?? 0} XP`}</span>
-          </div>
-          <div className="health-stat-grid compact">
-            <HealthStatTile
-              label={isEnglish ? 'Board' : '보드'}
-              value={String(activitySummary?.weeklyPoints ?? 0)}
-              meta={isEnglish ? 'This week' : '이번 주'}
-              tone="cool"
-            />
-            <HealthStatTile
-              label={isEnglish ? 'Today' : '오늘'}
-              value={`${activitySummary?.todayXp ?? 0} XP`}
-              meta={isEnglish ? 'Earned' : '획득'}
-              tone="warm"
-            />
+          <SectionHeader eyebrow="XP" title={isEnglish ? 'Activity XP' : '활동 XP'} badge={`${activitySummary?.totalXp ?? 0} XP`} accent />
+
+          <div className="grid gap-3">
+            <HealthStatTile label={isEnglish ? 'Board' : '보드'} value={String(activitySummary?.weeklyPoints ?? 0)} meta={isEnglish ? 'This week' : '이번 주'} tone="cool" />
+            <HealthStatTile label={isEnglish ? 'Today' : '오늘'} value={`${activitySummary?.todayXp ?? 0} XP`} meta={isEnglish ? 'Earned' : '획득'} tone="warm" />
             <HealthStatTile
               label={isEnglish ? 'Level' : '레벨'}
               value={`Lv ${activitySummary?.levelValue ?? 1}`}
@@ -203,14 +222,12 @@ export default function ProgressPanel({
                 : (isEnglish ? 'Max' : '최고')}
             />
           </div>
-          <div className="goal-progress-block">
-            <div className="goal-progress-bar activity-progress-bar">
-              <div
-                className="goal-progress-fill activity-progress-fill"
-                style={{ width: `${activitySummary?.progressPercent ?? 0}%` }}
-              />
+
+          <div className="grid gap-3">
+            <div className="h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
+              <div className="h-full rounded-full bg-emerald-700" style={{ width: `${activitySummary?.progressPercent ?? 0}%` }} />
             </div>
-            <p className="record-highlight-meta">
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
               {achievementBadges.length
                 ? (isEnglish ? `${achievementBadges.length} badges` : `배지 ${achievementBadges.length}개`)
                 : (isEnglish ? 'Badges open as you log.' : '기록하면 배지가 열려요.')}
@@ -219,220 +236,138 @@ export default function ProgressPanel({
         </section>
 
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <div className="app-section-heading compact">
-            <div>
-              <span className="app-section-kicker">{isEnglish ? 'Recent' : '최근'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Recent XP' : '최근 XP'}</h2>
-            </div>
-            <span className="community-mini-pill">{visibleActivityEvents.length}</span>
-          </div>
+          <SectionHeader eyebrow={isEnglish ? 'Recent' : '최근'} title={isEnglish ? 'Recent XP' : '최근 XP'} badge={visibleActivityEvents.length} />
+
           {visibleActivityEvents.length ? (
-            <div className="activity-event-list">
+            <div className="grid gap-3">
               {visibleActivityEvents.map((event) => {
                 const eventMeta = getActivityEventMeta(event, language)
                 return (
-                  <article key={event.id} className="activity-event-item">
-                    <div className="activity-event-copy">
-                      <strong>{eventMeta.label}</strong>
-                      <span>{eventMeta.description}</span>
+                  <article key={event.id} className="grid grid-cols-[1fr_auto] gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950">
+                    <div className="grid gap-1">
+                      <strong className="text-sm font-black text-gray-950 dark:text-white">{eventMeta.label}</strong>
+                      <span className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{eventMeta.description}</span>
                     </div>
-                    <div className="activity-event-score">
-                      <strong>{`+${event.xp_amount} XP`}</strong>
-                      <span>{event.weekly_points ? `+${event.weekly_points}P` : '-'}</span>
+                    <div className="grid justify-items-end gap-1 text-right">
+                      <strong className="text-sm font-black text-emerald-800 dark:text-emerald-200">{`+${event.xp_amount} XP`}</strong>
+                      <span className="text-xs font-bold text-gray-700 dark:text-gray-200">{event.weekly_points ? `+${event.weekly_points}P` : '-'}</span>
                     </div>
                   </article>
                 )
               })}
             </div>
           ) : (
-            <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-              <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">XP</span>
-              <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No recent XP yet.' : '아직 XP가 없어요.'}</strong>
-              <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{isEnglish ? 'Logs and tests fill this.' : '운동을 남기면 바로 쌓여요.'}</p>
-            </div>
+            <EmptyState label="XP" title={isEnglish ? 'No recent XP yet.' : '아직 XP가 없어요.'} body={isEnglish ? 'Logs and tests fill this.' : '운동을 남기면 바로 쌓여요.'} />
           )}
         </section>
       </section>
 
-      <section className="record-health-grid compact">
+      <section className="grid gap-5 sm:grid-cols-2">
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <div className="app-section-heading compact">
-            <div>
-              <span className="app-section-kicker">{isEnglish ? 'Calories' : '칼로리'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Burn' : '소모량'}</h2>
-            </div>
-          </div>
-          <div className="health-stat-grid compact">
-            <HealthStatTile
-              label={isEnglish ? 'Today' : '오늘'}
-              value={formatCalories(stats.todayCalories, isEnglish)}
-              meta={isEnglish ? 'Saved logs' : '오늘 기록'}
-              tone="cool"
-            />
-            <HealthStatTile
-              label={isEnglish ? 'Week' : '주간'}
-              value={formatCalories(stats.weeklyCalories, isEnglish)}
-              meta={isEnglish ? `${weeklyCount} logs` : `${weeklyCount}개`}
-              tone="warm"
-            />
-            <HealthStatTile
-              label={isEnglish ? 'Total' : '누적'}
-              value={formatCalories(stats.totalCalories, isEnglish)}
-              meta={isEnglish ? 'All logs' : '누적 기록'}
-            />
+          <SectionHeader eyebrow={isEnglish ? 'Calories' : '칼로리'} title={isEnglish ? 'Burn' : '소모량'} />
+          <div className="grid gap-3">
+            <HealthStatTile label={isEnglish ? 'Today' : '오늘'} value={formatCalories(stats.todayCalories, isEnglish)} meta={isEnglish ? 'Saved logs' : '오늘 기록'} tone="cool" />
+            <HealthStatTile label={isEnglish ? 'Week' : '주간'} value={formatCalories(stats.weeklyCalories, isEnglish)} meta={isEnglish ? `${weeklyCount} logs` : `${weeklyCount}개`} tone="warm" />
+            <HealthStatTile label={isEnglish ? 'Total' : '누적'} value={formatCalories(stats.totalCalories, isEnglish)} meta={isEnglish ? 'All logs' : '누적 기록'} />
           </div>
         </section>
 
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <div className="app-section-heading compact">
-            <div>
-              <span className="app-section-kicker">{isEnglish ? 'Body' : '몸'}</span>
-              <h2 className="app-section-title small">BMI</h2>
-            </div>
-          </div>
-          <div className="record-highlight-block compact">
-            <strong className="record-highlight-title">
-              {bodyMetrics?.bmi != null ? bodyMetrics.bmi : '--'}
-            </strong>
-            <p className="record-highlight-meta">{bmiMeta}</p>
+          <SectionHeader eyebrow={isEnglish ? 'Body' : '몸'} title="BMI" />
+          <div className="grid gap-2 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+            <strong className="text-4xl font-black leading-none text-gray-950 dark:text-white">{bodyMetrics?.bmi != null ? bodyMetrics.bmi : '--'}</strong>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{bmiMeta}</p>
           </div>
         </section>
       </section>
 
-      <section className="record-health-grid compact body-metrics-grid">
+      <section className="grid gap-5 sm:grid-cols-2">
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <div className="app-section-heading compact">
-            <div>
-              <span className="app-section-kicker">{isEnglish ? 'Goal' : '목표'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Progress' : '진행'}</h2>
+          <SectionHeader eyebrow={isEnglish ? 'Goal' : '목표'} title={isEnglish ? 'Progress' : '진행'} badge={bodyMetrics?.goalProgressPercent != null ? `${bodyMetrics.goalProgressPercent}%` : '--'} accent />
+          <div className="grid gap-3">
+            <div className="h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
+              <div className="h-full rounded-full bg-emerald-700" style={{ width: `${bodyMetrics?.goalProgressPercent ?? 0}%` }} />
             </div>
-            <span className="community-mini-pill accent">
-              {bodyMetrics?.goalProgressPercent != null ? `${bodyMetrics.goalProgressPercent}%` : '--'}
-            </span>
-          </div>
-          <div className="goal-progress-block">
-            <div className="goal-progress-bar">
-              <div
-                className="goal-progress-fill"
-                style={{ width: `${bodyMetrics?.goalProgressPercent ?? 0}%` }}
-              />
-            </div>
-            <p className="record-highlight-meta">{getGoalMeta(bodyMetrics?.targetDeltaKg, isEnglish)}</p>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{getGoalMeta(bodyMetrics?.targetDeltaKg, isEnglish)}</p>
           </div>
         </section>
 
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <div className="app-section-heading compact">
-            <div>
-              <span className="app-section-kicker">{isEnglish ? 'Latest' : '최근'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Workout' : '최근 운동'}</h2>
+          <SectionHeader eyebrow={isEnglish ? 'Latest' : '최근'} title={isEnglish ? 'Workout' : '최근 운동'} />
+          <div className="flex items-start gap-3 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+            <WorkoutMark type={stats.lastWorkoutType} />
+            <div className="grid gap-1">
+              <strong className="text-xl font-black leading-7 text-gray-950 dark:text-white">{latestWorkoutName}</strong>
+              <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{latestWorkoutMeta}</p>
             </div>
-            <span className="workout-mark">{getWorkoutMark(stats.lastWorkoutType)}</span>
-          </div>
-
-          <div className="record-highlight-block compact">
-            <strong className="record-highlight-title">{latestWorkoutName}</strong>
-            <p className="record-highlight-meta">{latestWorkoutMeta}</p>
           </div>
         </section>
       </section>
 
       <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-        <div className="app-section-heading compact">
-          <div>
-            <span className="app-section-kicker">{isEnglish ? 'Trend' : '추이'}</span>
-            <h2 className="app-section-title small">{isEnglish ? 'Weight trend' : '체중 추이'}</h2>
-          </div>
-          <span className="community-mini-pill">
-            {bodyMetrics?.latestWeightKg != null ? `${bodyMetrics.latestWeightKg} kg` : '--'}
-          </span>
-        </div>
+        <SectionHeader eyebrow={isEnglish ? 'Trend' : '추이'} title={isEnglish ? 'Weight trend' : '체중 추이'} badge={bodyMetrics?.latestWeightKg != null ? `${bodyMetrics.latestWeightKg} kg` : '--'} />
 
         {trendPoints.length ? (
-          <div className="weight-trend-shell">
-            <div className="weight-trend-chart">
+          <div className="grid gap-4">
+            <div className="grid grid-cols-6 items-end gap-2 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
               {trendPoints.map((point) => {
                 const heightPercent = ((point.weightKg - minWeight) / range) * 100
                 return (
-                  <div key={point.id} className="weight-trend-point">
-                    <div className="weight-trend-bar">
-                      <span style={{ height: `${Math.max(heightPercent, 12)}%` }} />
+                  <div key={point.id} className="grid gap-2 text-center">
+                    <div className="flex h-28 items-end justify-center rounded-xl bg-white p-1 dark:bg-neutral-950">
+                      <span className="w-full rounded-lg bg-emerald-700" style={{ height: `${Math.max(heightPercent, 12)}%` }} />
                     </div>
-                    <strong>{point.weightKg}</strong>
-                    <small>{formatDate(point.recordedAt, language)}</small>
+                    <strong className="text-xs font-black text-gray-950 dark:text-white">{point.weightKg}</strong>
+                    <small className="text-xs font-bold text-gray-700 dark:text-gray-200">{formatDate(point.recordedAt, language)}</small>
                   </div>
                 )
               })}
             </div>
-            <p className="record-highlight-meta">{trendMeta}</p>
+            <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{trendMeta}</p>
           </div>
         ) : (
-          <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{isEnglish ? 'Weight' : '체중'}</span>
-            <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'The first entry starts this.' : '첫 체중을 남겨요.'}</strong>
-            <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{isEnglish ? 'Log it in Profile.' : '프로필에서 바로 기록할 수 있어요.'}</p>
-          </div>
+          <EmptyState label={isEnglish ? 'Weight' : '체중'} title={isEnglish ? 'The first entry starts this.' : '첫 체중을 남겨요.'} body={isEnglish ? 'Log it in Profile.' : '프로필에서 바로 기록할 수 있어요.'} />
         )}
       </section>
 
-      <section className="record-health-grid compact">
+      <section className="grid gap-5 sm:grid-cols-2">
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <div className="app-section-heading compact">
-            <div>
-              <span className="app-section-kicker">{isEnglish ? 'Badges' : '배지'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Unlocked' : '획득'}</h2>
-            </div>
-            <span className="community-mini-pill accent">{visibleBadges.length}</span>
-          </div>
+          <SectionHeader eyebrow={isEnglish ? 'Badges' : '배지'} title={isEnglish ? 'Unlocked' : '획득'} badge={visibleBadges.length} accent />
 
           {visibleBadges.length ? (
-            <div className="badge-row record-badge-row compact">
+            <div className="flex flex-wrap gap-2">
               {visibleBadges.map((badge) => (
-                <span key={badge} className="badge-pill profile-badge">{getBadgeLabel(badge, language)}</span>
+                <span key={badge} className="rounded-full bg-gray-100 px-3 py-2 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{getBadgeLabel(badge, language)}</span>
               ))}
             </div>
           ) : (
-            <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-              <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{isEnglish ? 'Badge' : '배지'}</span>
-              <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No badges yet.' : '아직 열린 배지가 없어요.'}</strong>
-              <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{isEnglish ? 'They unlock as you log.' : '기록할수록 하나씩 열려요.'}</p>
-            </div>
+            <EmptyState label={isEnglish ? 'Badge' : '배지'} title={isEnglish ? 'No badges yet.' : '아직 열린 배지가 없어요.'} body={isEnglish ? 'They unlock as you log.' : '기록할수록 하나씩 열려요.'} />
           )}
         </section>
 
         <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <div className="app-section-heading compact">
-            <div>
-              <span className="app-section-kicker">{isEnglish ? 'Pattern' : '패턴'}</span>
-              <h2 className="app-section-title small">{isEnglish ? 'Types' : '운동 종류'}</h2>
-            </div>
-            <span className="community-mini-pill">{safeTypeCounts.length}</span>
-          </div>
+          <SectionHeader eyebrow={isEnglish ? 'Pattern' : '패턴'} title={isEnglish ? 'Types' : '운동 종류'} badge={safeTypeCounts.length} />
 
-          <div className="type-stats-list compact">
-            {safeTypeCounts.length ? (
-              safeTypeCounts.map((item) => (
+          {safeTypeCounts.length ? (
+            <div className="grid gap-3">
+              {safeTypeCounts.map((item) => (
                 <article key={item.type} className="grid gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950">
-                  <div className="type-stat-copy">
-                    <div className="type-stat-title-row">
-                      <span className="workout-mark">{getWorkoutMark(item.type)}</span>
-                      <strong>{getWorkoutTypeLabel(item.type, language)}</strong>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <WorkoutMark type={item.type} />
+                      <strong className="truncate text-base font-black text-gray-950 dark:text-white">{getWorkoutTypeLabel(item.type, language)}</strong>
                     </div>
-                    <span>{isEnglish ? `${item.count}x` : `${item.count}회`}</span>
+                    <span className="text-sm font-black text-gray-700 dark:text-gray-200">{isEnglish ? `${item.count}x` : `${item.count}회`}</span>
                   </div>
-                  <div className="type-stat-bar">
-                    <div className="type-stat-fill" style={{ width: `${Math.max((item.count / maxCount) * 100, 18)}%` }} />
+                  <div className="h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
+                    <div className="h-full rounded-full bg-emerald-700" style={{ width: `${Math.max((item.count / maxCount) * 100, 18)}%` }} />
                   </div>
                 </article>
-              ))
-            ) : (
-              <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-                <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{isEnglish ? 'Pattern' : '패턴'}</span>
-                <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'Patterns build here.' : '패턴이 여기에 쌓여요.'}</strong>
-                <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{isEnglish ? 'More logs make it clearer.' : '기록할수록 패턴이 또렷해져요.'}</p>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState label={isEnglish ? 'Pattern' : '패턴'} title={isEnglish ? 'Patterns build here.' : '패턴이 여기에 쌓여요.'} body={isEnglish ? 'More logs make it clearer.' : '기록할수록 패턴이 또렷해져요.'} />
+          )}
         </section>
       </section>
     </section>

@@ -52,7 +52,7 @@ export default function BottomTabNav({ tabs, currentView, onChangeView }) {
           <button
             key={tab.key}
             type="button"
-            className={`grid min-h-14 place-items-center gap-1 rounded-lg px-2 py-2 text-xs font-black transition ${
+            className={`grid min-h-14 place-items-center gap-1 rounded-lg px-2 py-2 text-xs font-black leading-none transition sm:text-sm ${
               isActive
                 ? 'bg-emerald-700 text-white shadow-sm'
                 : 'text-gray-700 hover:bg-gray-50 hover:text-gray-950 dark:text-gray-100 dark:hover:bg-white/10 dark:hover:text-white'

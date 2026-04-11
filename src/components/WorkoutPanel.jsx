@@ -86,13 +86,13 @@ function PhotoProofList({ items, isEnglish, onRemove, onMove }) {
           <div className="grid gap-2 p-3">
             <span className="truncate text-xs font-bold text-gray-700 dark:text-gray-200">{item.label}</span>
             <div className="grid grid-cols-3 gap-1">
-              <button type="button" className="rounded-lg bg-gray-100 px-2 py-1 text-xs font-black text-gray-800 disabled:opacity-40 dark:bg-white/10 dark:text-gray-100" onClick={() => onMove(index, index - 1)} disabled={index === 0}>
+              <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-2 text-xs font-black text-gray-800 disabled:opacity-40 dark:bg-white/10 dark:text-gray-100" onClick={() => onMove(index, index - 1)} disabled={index === 0}>
                 {isEnglish ? 'Up' : '앞'}
               </button>
-              <button type="button" className="rounded-lg bg-gray-100 px-2 py-1 text-xs font-black text-gray-800 disabled:opacity-40 dark:bg-white/10 dark:text-gray-100" onClick={() => onMove(index, index + 1)} disabled={index === items.length - 1}>
+              <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-2 text-xs font-black text-gray-800 disabled:opacity-40 dark:bg-white/10 dark:text-gray-100" onClick={() => onMove(index, index + 1)} disabled={index === items.length - 1}>
                 {isEnglish ? 'Down' : '뒤'}
               </button>
-              <button type="button" className="rounded-lg bg-rose-50 px-2 py-1 text-xs font-black text-rose-600 dark:bg-rose-500/15 dark:text-rose-300" onClick={() => onRemove(index)}>
+              <button type="button" className="min-h-11 rounded-lg bg-rose-50 px-2 text-xs font-black text-rose-600 dark:bg-rose-500/15 dark:text-rose-300" onClick={() => onRemove(index)}>
                 {isEnglish ? 'Remove' : '제거'}
               </button>
             </div>
@@ -362,13 +362,13 @@ export default function WorkoutPanel({
         </div>
 
         <div className="grid justify-items-end gap-2">
-          <span className={`rounded-full px-3 py-1 text-xs font-black ${todayDone ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>
+          <span className={`rounded-full px-3 py-1 text-xs font-black ${todayDone ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>
             {todayDone ? (isEnglish ? 'More available' : '추가 가능') : (isEnglish ? 'Ready' : '준비 완료')}
           </span>
           {onClose ? (
             <button
               type="button"
-              className="min-h-9 rounded-lg border border-gray-200 bg-white px-3 text-xs font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10"
+              className="min-h-11 rounded-lg border border-gray-200 bg-white px-3 text-xs font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10"
               onClick={onClose}
               disabled={loading}
               data-testid="workout-sheet-close"
@@ -379,11 +379,11 @@ export default function WorkoutPanel({
         </div>
       </div>
 
-      <form className="grid gap-5" onSubmit={handleSubmit}>
+      <form className="grid gap-5 sm:gap-6" onSubmit={handleSubmit}>
         <section className="grid gap-3 sm:grid-cols-2">
           <button
             type="button"
-            className={`grid min-h-20 gap-1 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 disabled:opacity-50 ${showOptionalFields ? 'border-emerald-400 bg-emerald-50 text-emerald-950 shadow-sm dark:bg-emerald-500/15 dark:text-emerald-50' : 'border-gray-100 bg-white text-gray-950 shadow-sm dark:border-white/10 dark:bg-neutral-950 dark:text-white'}`}
+            className={`grid min-h-20 gap-1 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 disabled:opacity-50 ${showOptionalFields ? 'border-emerald-400 bg-emerald-50 text-emerald-950 shadow-sm dark:bg-emerald-700/20 dark:text-emerald-50' : 'border-gray-100 bg-white text-gray-950 shadow-sm dark:border-white/10 dark:bg-neutral-950 dark:text-white'}`}
             onClick={() => setShowOptionalFields((prev) => !prev)}
             disabled={loading}
             data-testid="workout-toggle-extras"
@@ -400,7 +400,7 @@ export default function WorkoutPanel({
 
           <button
             type="button"
-            className={`grid min-h-20 gap-1 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 disabled:opacity-50 ${showRoutineTools ? 'border-emerald-400 bg-emerald-50 text-emerald-950 shadow-sm dark:bg-emerald-500/15 dark:text-emerald-50' : 'border-gray-100 bg-white text-gray-950 shadow-sm dark:border-white/10 dark:bg-neutral-950 dark:text-white'}`}
+            className={`grid min-h-20 gap-1 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 disabled:opacity-50 ${showRoutineTools ? 'border-emerald-400 bg-emerald-50 text-emerald-950 shadow-sm dark:bg-emerald-700/20 dark:text-emerald-50' : 'border-gray-100 bg-white text-gray-950 shadow-sm dark:border-white/10 dark:bg-neutral-950 dark:text-white'}`}
             onClick={() => setShowRoutineTools((prev) => !prev)}
             disabled={loading}
             data-testid="workout-toggle-routines"
@@ -423,7 +423,7 @@ export default function WorkoutPanel({
               <button
                 key={option}
                 type="button"
-                className={`min-h-12 rounded-lg border px-3 text-sm font-black transition disabled:opacity-50 ${workoutType === option ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm dark:bg-emerald-500/15 dark:text-emerald-200' : 'border-gray-200 bg-white text-gray-800 hover:border-emerald-300 hover:text-gray-950 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:text-white'}`}
+                className={`min-h-12 rounded-lg border px-3 text-sm font-black transition disabled:opacity-50 ${workoutType === option ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm dark:bg-emerald-700/20 dark:text-emerald-200' : 'border-gray-200 bg-white text-gray-800 hover:border-emerald-300 hover:text-gray-950 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:text-white'}`}
                 onClick={() => handleQuickWorkoutTypePick(option)}
                 disabled={loading}
               >
@@ -441,7 +441,7 @@ export default function WorkoutPanel({
               <button
                 key={value}
                 type="button"
-                className={`min-h-12 rounded-lg border px-3 text-sm font-black transition disabled:opacity-50 ${Number(durationMinutes) === value ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm dark:bg-emerald-500/15 dark:text-emerald-200' : 'border-gray-200 bg-white text-gray-800 hover:border-emerald-300 hover:text-gray-950 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:text-white'}`}
+                className={`min-h-12 rounded-lg border px-3 text-sm font-black transition disabled:opacity-50 ${Number(durationMinutes) === value ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm dark:bg-emerald-700/20 dark:text-emerald-200' : 'border-gray-200 bg-white text-gray-800 hover:border-emerald-300 hover:text-gray-950 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:text-white'}`}
                 onClick={() => handleQuickDurationPick(value)}
                 disabled={loading}
               >
@@ -454,7 +454,7 @@ export default function WorkoutPanel({
         <section className="grid gap-3 rounded-2xl border border-gray-100 p-4 dark:border-white/10">
           <button
             type="button"
-            className="flex items-center justify-between gap-3 text-left"
+            className="flex min-h-11 w-full items-center justify-between gap-3 text-left"
             aria-expanded={showManualEditor}
             onClick={() => setShowManualEditor((prev) => !prev)}
             disabled={loading}
@@ -500,7 +500,7 @@ export default function WorkoutPanel({
             <strong className="mt-1 block text-2xl font-black text-gray-950 dark:text-white">{todayCount}</strong>
           </div>
 
-          <div className="rounded-2xl bg-emerald-50 p-4 dark:bg-emerald-500/15">
+          <div className="rounded-2xl bg-emerald-50 p-4 dark:bg-emerald-700/20">
             <span className="block text-xs font-black text-emerald-700 dark:text-emerald-200">{isEnglish ? 'XP preview' : '예상 XP'}</span>
             <strong className="mt-1 block text-2xl font-black text-emerald-700 dark:text-emerald-200">{`+${estimatedXp}`}</strong>
           </div>
@@ -547,7 +547,7 @@ export default function WorkoutPanel({
               <div className="grid gap-2">
                 {routineTemplates.map((routine) => (
                   <div key={routine.id} className="grid grid-cols-[1fr_auto] gap-2 rounded-2xl bg-gray-50 p-2 dark:bg-white/10">
-                    <button type="button" className="grid gap-1 rounded-lg p-2 text-left hover:bg-white dark:hover:bg-neutral-950" onClick={() => handleApplyRoutine(routine)} disabled={loading}>
+                    <button type="button" className="grid min-h-11 gap-1 rounded-lg p-2 text-left hover:bg-white dark:hover:bg-neutral-950" onClick={() => handleApplyRoutine(routine)} disabled={loading}>
                       <strong className="text-sm font-black text-gray-950 dark:text-white">{routine.name}</strong>
                       <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
                             {getWorkoutTypeLabel(routine.workout_type, language)}
@@ -556,7 +556,7 @@ export default function WorkoutPanel({
                       {routine.note && <p className="m-0 text-xs font-semibold text-gray-700 dark:text-gray-200">{routine.note}</p>}
                     </button>
 
-                    <button type="button" className="self-start rounded-lg bg-rose-50 px-3 py-2 text-xs font-black text-rose-600 disabled:opacity-50 dark:bg-rose-500/15 dark:text-rose-300" onClick={() => onDeleteRoutine(routine.id)} disabled={loading}>
+                    <button type="button" className="min-h-11 self-start rounded-lg bg-rose-50 px-3 text-xs font-black text-rose-600 disabled:opacity-50 dark:bg-rose-500/15 dark:text-rose-300" onClick={() => onDeleteRoutine(routine.id)} disabled={loading}>
                       {isEnglish ? 'Delete' : '삭제'}
                     </button>
                   </div>
@@ -576,7 +576,7 @@ export default function WorkoutPanel({
             <label className="grid gap-2">
               <span className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Note' : '메모'}</span>
               <textarea
-                className="min-h-24 resize-none rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm font-semibold leading-6 text-gray-950 outline-none transition placeholder:text-gray-600 dark:placeholder:text-gray-400 focus:border-emerald-400 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
+                className="min-h-24 resize-none rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm font-semibold leading-6 text-gray-950 outline-none transition placeholder:text-gray-600 dark:placeholder:text-gray-300 focus:border-emerald-400 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
                 rows="3"
                 maxLength="120"
                 placeholder={noteHint}
@@ -596,10 +596,10 @@ export default function WorkoutPanel({
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <button type="button" className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10" onClick={() => galleryInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
+                <button type="button" className="min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10" onClick={() => galleryInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
                   {isEnglish ? 'Photos' : '사진'}
                 </button>
-                <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={() => cameraInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
+                <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={() => cameraInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>
                   {isEnglish ? 'Camera' : '카메라'}
                 </button>
                 <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-black text-gray-700 dark:bg-white/10 dark:text-gray-100">{isEnglish ? `${photoItems.length}/${MAX_PHOTOS}` : `${photoItems.length}/${MAX_PHOTOS}장`}</span>
@@ -622,7 +622,7 @@ export default function WorkoutPanel({
               </div>
               <button
                 type="button"
-                className={`min-h-10 rounded-lg px-4 text-sm font-black transition disabled:opacity-50 ${shareToFeed ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}
+                className={`min-h-11 rounded-lg px-4 text-sm font-black transition disabled:opacity-50 ${shareToFeed ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}
                 onClick={() => setShareToFeed((prev) => !prev)}
                 disabled={loading}
                 data-testid="share-toggle"

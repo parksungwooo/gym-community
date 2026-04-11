@@ -99,15 +99,41 @@ function revokeNewPhotoItems(items) {
   })
 }
 
+function WorkoutMark({ type }) {
+  return (
+    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-emerald-700 text-xs font-black text-white shadow-sm">
+      {getWorkoutMark(type)}
+    </span>
+  )
+}
+
+function SmallButton({ children, tone = 'default', ...props }) {
+  const toneClass = tone === 'danger'
+    ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-500/15 dark:text-rose-200 dark:hover:bg-rose-500/25'
+    : tone === 'primary'
+      ? 'bg-emerald-700 text-white shadow-sm hover:bg-emerald-800'
+      : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'
+
+  return (
+    <button
+      type="button"
+      className={`min-h-11 rounded-lg px-3 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${toneClass}`}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+}
+
 function PhotoGrid({ items, isEnglish, onOpen, onRemove, onMove, editable = false }) {
   if (!items.length) return null
 
   return (
-    <div className={`history-photo-grid ${items.length > 1 ? 'multi' : ''}`}>
+    <div className={`grid gap-3 ${items.length > 1 ? 'grid-cols-2' : ''}`}>
       {items.map((item, index) => (
         <article key={item.id} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-neutral-950">
-          <button type="button" className="image-open-btn" onClick={() => onOpen?.(item.previewUrl)}>
-            <div className="history-photo-preview">
+          <button type="button" className="block w-full" onClick={() => onOpen?.(item.previewUrl)}>
+            <div className="aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-white/10">
               <OptimizedImage
                 imageUrl={item.previewUrl}
                 preset={editable ? 'panelThumbnail' : 'historyThumbnail'}
@@ -120,36 +146,16 @@ function PhotoGrid({ items, isEnglish, onOpen, onRemove, onMove, editable = fals
             </div>
           </button>
 
-          {editable && (
-            <div className="photo-proof-meta edit">
-              <span>{item.label}</span>
-              <div className="photo-proof-meta-actions">
-                <button
-                  type="button"
-                  className="mini-btn"
-                  onClick={() => onMove(index, index - 1)}
-                  disabled={index === 0}
-                >
-                  {isEnglish ? 'Up' : '위로'}
-                </button>
-                <button
-                  type="button"
-                  className="mini-btn"
-                  onClick={() => onMove(index, index + 1)}
-                  disabled={index === items.length - 1}
-                >
-                  {isEnglish ? 'Down' : '아래로'}
-                </button>
-                <button
-                  type="button"
-                  className="mini-btn danger"
-                  onClick={() => onRemove(index)}
-                >
-                  {isEnglish ? 'Remove' : '제거'}
-                </button>
+          {editable ? (
+            <div className="grid gap-2 border-t border-gray-100 p-3 dark:border-white/10">
+              <span className="truncate text-xs font-bold text-gray-700 dark:text-gray-200">{item.label}</span>
+              <div className="grid grid-cols-3 gap-1">
+                <SmallButton onClick={() => onMove(index, index - 1)} disabled={index === 0}>{isEnglish ? 'Up' : '위로'}</SmallButton>
+                <SmallButton onClick={() => onMove(index, index + 1)} disabled={index === items.length - 1}>{isEnglish ? 'Down' : '아래로'}</SmallButton>
+                <SmallButton tone="danger" onClick={() => onRemove(index)}>{isEnglish ? 'Remove' : '제거'}</SmallButton>
               </div>
             </div>
-          )}
+          ) : null}
         </article>
       ))}
     </div>
@@ -231,197 +237,144 @@ function HistoryItem({ item, onUpdate, onDelete, loading, onOpenImage }) {
 
   const displayPhotoItems = editing ? photoItems : buildExistingPhotoItems(item)
   const xpLabel = formatXp(item.xp_amount)
+  const metaItems = [
+    formatDuration(item.duration_minutes, isEnglish),
+    formatCalories(item.estimated_calories, isEnglish),
+    xpLabel,
+  ].filter(Boolean)
+
+  if (editing) {
+    return (
+      <form className="grid gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950" onSubmit={handleSave}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="grid gap-1">
+            <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{isEnglish ? 'Edit' : '수정'}</span>
+            <strong className="text-lg font-black leading-6 text-gray-950 dark:text-white">{isEnglish ? 'Edit Workout' : '운동 기록 수정'}</strong>
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{formatTime(item.created_at, language) || (isEnglish ? 'Saved' : '저장')}</span>
+          </div>
+          <WorkoutMark type={workoutType} />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="grid gap-2 text-sm font-black text-gray-950 dark:text-white">
+            {isEnglish ? 'Workout Type' : '운동 종류'}
+            <select
+              className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-900 dark:text-white"
+              value={workoutType}
+              onChange={(event) => setWorkoutType(event.target.value)}
+              disabled={loading}
+            >
+              {WORKOUT_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {getWorkoutTypeLabel(option, language)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2 text-sm font-black text-gray-950 dark:text-white">
+            {isEnglish ? 'Duration (min)' : '운동 시간 (분)'}
+            <input
+              className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-900 dark:text-white"
+              type="number"
+              min="0"
+              max="300"
+              step="5"
+              value={durationMinutes}
+              onChange={(event) => setDurationMinutes(event.target.value)}
+              disabled={loading}
+            />
+          </label>
+
+          <label className="grid gap-2 text-sm font-black text-gray-950 dark:text-white sm:col-span-2">
+            {isEnglish ? 'Note' : '메모'}
+            <textarea
+              className="min-h-24 resize-none rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm font-semibold leading-6 text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-900 dark:text-white dark:placeholder:text-gray-300"
+              rows="3"
+              maxLength="120"
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              disabled={loading}
+            />
+          </label>
+        </div>
+
+        <section className="grid gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm font-black text-gray-950 dark:text-white">{isEnglish ? 'Photos' : '사진'}</span>
+            <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
+              {isEnglish ? `Up to ${MAX_PHOTOS}.` : `최대 ${MAX_PHOTOS}장`}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+            <SmallButton onClick={() => fileInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>{isEnglish ? 'Photos' : '사진'}</SmallButton>
+            <SmallButton onClick={() => cameraInputRef.current?.click()} disabled={loading || photoItems.length >= MAX_PHOTOS}>{isEnglish ? 'Camera' : '카메라'}</SmallButton>
+            <span className="grid min-h-11 place-items-center rounded-lg bg-gray-100 px-3 text-xs font-black text-gray-700 dark:bg-white/10 dark:text-gray-100">
+              {isEnglish ? `${photoItems.length}/${MAX_PHOTOS}` : `${photoItems.length}/${MAX_PHOTOS}장`}
+            </span>
+          </div>
+
+          <input ref={fileInputRef} className="sr-only" type="file" accept="image/*" multiple onChange={handleAddPhotos} />
+          <input ref={cameraInputRef} className="sr-only" type="file" accept="image/*" capture="environment" multiple onChange={handleAddPhotos} />
+
+          <PhotoGrid
+            items={photoItems}
+            isEnglish={isEnglish}
+            onOpen={onOpenImage}
+            onRemove={handleRemovePhoto}
+            onMove={(from, to) => setPhotoItems((prev) => moveItem(prev, from, to))}
+            editable
+          />
+        </section>
+
+        <div className="grid gap-3 border-t border-gray-100 pt-4 dark:border-white/10 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div className="grid gap-1">
+            <strong className="text-sm font-black text-gray-950 dark:text-white">{getWorkoutTypeLabel(workoutType, language)}</strong>
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+              {Number(durationMinutes)
+                ? (isEnglish ? `${durationMinutes} min` : `${durationMinutes}분`)
+                : (isEnglish ? 'No time' : '시간 없음')}
+              {' · '}
+              {formatCalories(item.estimated_calories, isEnglish)}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <SmallButton onClick={closeEditor} disabled={loading}>{isEnglish ? 'Cancel' : '취소'}</SmallButton>
+            <button type="submit" className="min-h-11 rounded-lg bg-emerald-700 px-3 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50" disabled={loading}>
+              {isEnglish ? 'Save' : '저장'}
+            </button>
+          </div>
+        </div>
+      </form>
+    )
+  }
 
   return (
-    <article className="history-timeline-item">
-      <div className="history-timeline-rail">
-        <span className="history-timeline-dot" />
-        <span className="history-timeline-line" />
-      </div>
+    <article className="grid gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950">
+      <header className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start">
+        <div className="flex min-w-0 items-start gap-3">
+          <WorkoutMark type={item.workout_type} />
+          <div className="min-w-0">
+            <strong className="block truncate text-lg font-black leading-6 text-gray-950 dark:text-white">{getWorkoutTypeLabel(item.workout_type, language)}</strong>
+            <span className="mt-1 block text-sm font-semibold text-gray-700 dark:text-gray-200">{formatTime(item.created_at, language) || (isEnglish ? 'Log' : '기록')}</span>
+          </div>
+        </div>
 
-      <div className="history-timeline-time">
-        <span>{formatTime(item.created_at, language) || (isEnglish ? 'Log' : '기록')}</span>
-      </div>
+        <div className="flex flex-wrap gap-2 sm:justify-end">
+          {metaItems.map((meta) => (
+            <span key={meta} className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-gray-800 shadow-sm dark:bg-white/10 dark:text-gray-100">{meta}</span>
+          ))}
+        </div>
+      </header>
 
-      <div className="grid gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950">
-        {!editing ? (
-          <>
-            <div className="history-header">
-              <div className="history-title-row">
-                <span className={`workout-mark ${item.workout_type === '빠른 체크인' ? 'quick' : ''}`}>
-                  {getWorkoutMark(item.workout_type)}
-                </span>
-                <div>
-                  <strong>{getWorkoutTypeLabel(item.workout_type, language)}</strong>
-                  <span className="history-duration-inline">
-                    {formatDuration(item.duration_minutes, isEnglish)}
-                  </span>
-                </div>
-              </div>
+      <PhotoGrid items={displayPhotoItems} isEnglish={isEnglish} onOpen={onOpenImage} />
 
-              <div className="history-header-meta">
-                <span className="history-time-badge">{formatDuration(item.duration_minutes, isEnglish)}</span>
-                <span className="history-time-badge subtle">
-                  {formatCalories(item.estimated_calories, isEnglish)}
-                </span>
-                {xpLabel ? <span className="history-time-badge accent">{xpLabel}</span> : null}
-              </div>
-            </div>
+      {item.note ? <p className="m-0 rounded-2xl bg-white p-3 text-sm font-semibold leading-6 text-gray-800 dark:bg-white/10 dark:text-gray-100">{item.note}</p> : null}
 
-            <PhotoGrid items={displayPhotoItems} isEnglish={isEnglish} onOpen={onOpenImage} />
-
-            {item.note ? <p className="history-note">{item.note}</p> : null}
-
-            <div className="history-actions">
-              <button type="button" className="mini-btn" onClick={openEditor} disabled={loading}>
-                {isEnglish ? 'Edit' : '수정'}
-              </button>
-              <button
-                type="button"
-                className="mini-btn danger"
-                onClick={() => onDelete(item.id)}
-                disabled={loading}
-              >
-                {isEnglish ? 'Delete' : '삭제'}
-              </button>
-            </div>
-          </>
-        ) : (
-          <form className="history-edit-sheet" onSubmit={handleSave}>
-            <div className="history-edit-sheet-header">
-              <span className="history-edit-handle" />
-              <div className="history-edit-title-row">
-                <strong>{isEnglish ? 'Edit Workout' : '운동 기록 수정'}</strong>
-                <span>{formatTime(item.created_at, language) || (isEnglish ? 'Saved' : '저장')}</span>
-              </div>
-            </div>
-
-            <div className="history-edit-fields">
-              <label className="field-label history-edit-field">
-                {isEnglish ? 'Workout Type' : '운동 종류'}
-                <select
-                  className="workout-select"
-                  value={workoutType}
-                  onChange={(event) => setWorkoutType(event.target.value)}
-                  disabled={loading}
-                >
-                  {WORKOUT_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {getWorkoutTypeLabel(option, language)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="field-label history-edit-field">
-                {isEnglish ? 'Duration (min)' : '운동 시간 (분)'}
-                <input
-                  className="workout-input"
-                  type="number"
-                  min="0"
-                  max="300"
-                  step="5"
-                  value={durationMinutes}
-                  onChange={(event) => setDurationMinutes(event.target.value)}
-                  disabled={loading}
-                />
-              </label>
-
-              <label className="field-label history-edit-field full">
-                {isEnglish ? 'Note' : '메모'}
-                <textarea
-                  className="workout-textarea"
-                  rows="3"
-                  maxLength="120"
-                  value={note}
-                  onChange={(event) => setNote(event.target.value)}
-                  disabled={loading}
-                />
-              </label>
-            </div>
-
-            <section className="history-edit-photos">
-              <div className="photo-proof-header">
-                <span className="field-label-text">{isEnglish ? 'Photos' : '사진'}</span>
-                <span className="photo-proof-helper">
-                  {isEnglish
-                    ? `Up to ${MAX_PHOTOS}. Add, remove, reorder.`
-                    : `최대 ${MAX_PHOTOS}장. 추가, 삭제, 순서 변경.`}
-                </span>
-              </div>
-
-              <div className="photo-proof-actions">
-                <button
-                  type="button"
-                  className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={loading || photoItems.length >= MAX_PHOTOS}
-                >
-                  {isEnglish ? 'Photos' : '사진'}
-                </button>
-                <button
-                  type="button"
-                  className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
-                  onClick={() => cameraInputRef.current?.click()}
-                  disabled={loading || photoItems.length >= MAX_PHOTOS}
-                >
-                  {isEnglish ? 'Camera' : '카메라'}
-                </button>
-                <span className="photo-proof-count">
-                  {isEnglish ? `${photoItems.length}/${MAX_PHOTOS}` : `${photoItems.length}/${MAX_PHOTOS}장`}
-                </span>
-              </div>
-
-              <input
-                ref={fileInputRef}
-                className="hidden-file-input"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleAddPhotos}
-              />
-              <input
-                ref={cameraInputRef}
-                className="hidden-file-input"
-                type="file"
-                accept="image/*"
-                capture="environment"
-                multiple
-                onChange={handleAddPhotos}
-              />
-
-              <PhotoGrid
-                items={photoItems}
-                isEnglish={isEnglish}
-                onOpen={onOpenImage}
-                onRemove={handleRemovePhoto}
-                onMove={(from, to) => setPhotoItems((prev) => moveItem(prev, from, to))}
-                editable
-              />
-            </section>
-
-            <div className="history-edit-sheet-actions">
-              <div className="history-edit-sheet-copy">
-                <strong>{getWorkoutTypeLabel(workoutType, language)}</strong>
-                <span>
-                  {Number(durationMinutes)
-                    ? (isEnglish ? `${durationMinutes} min` : `${durationMinutes}분`)
-                    : (isEnglish ? 'No time' : '시간 없음')}
-                  {' · '}
-                  {formatCalories(item.estimated_calories, isEnglish)}
-                </span>
-              </div>
-              <div className="history-actions">
-                <button type="button" className="mini-btn" onClick={closeEditor} disabled={loading}>
-                  {isEnglish ? 'Cancel' : '취소'}
-                </button>
-                <button type="submit" className="mini-btn primary" disabled={loading}>
-                  {isEnglish ? 'Save' : '저장'}
-                </button>
-              </div>
-            </div>
-          </form>
-        )}
+      <div className="flex flex-wrap justify-end gap-2">
+        <SmallButton onClick={openEditor} disabled={loading}>{isEnglish ? 'Edit' : '수정'}</SmallButton>
+        <SmallButton tone="danger" onClick={() => onDelete(item.id)} disabled={loading}>{isEnglish ? 'Delete' : '삭제'}</SmallButton>
       </div>
     </article>
   )
@@ -461,71 +414,62 @@ export default function WorkoutHistory({ history, onUpdate, onDelete, loading })
 
   return (
     <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-      <div className="app-section-heading compact">
-        <div>
-          <span className="app-section-kicker">{isEnglish ? 'Timeline' : '타임라인'}</span>
-          <h2>{isEnglish ? 'History' : '기록'}</h2>
+      <div className="flex items-start justify-between gap-4">
+        <div className="grid gap-1">
+          <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{isEnglish ? 'Timeline' : '타임라인'}</span>
+          <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{isEnglish ? 'History' : '기록'}</h2>
         </div>
-        <span className="community-mini-pill">{isEnglish ? `${history.length} logs` : `${history.length}개`}</span>
+        <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{isEnglish ? `${history.length} logs` : `${history.length}개`}</span>
       </div>
 
-      <p className="subtext compact">
-        {isEnglish
-          ? 'Recent logs and the last 7 days.'
-          : '최근 기록과 7일 흐름'}
+      <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
+        {isEnglish ? 'Recent logs and the last 7 days.' : '최근 기록과 7일 흐름'}
       </p>
 
       {(loading || history.length > 0) && (
-        <div className="week-strip compact">
+        <div className="grid grid-cols-7 gap-1">
           {recentWeek.map((day) => (
-            <article key={day.key} className={`day-pill ${day.done ? 'done' : ''}`}>
-              <span>{day.label}</span>
-              <strong>{day.done ? (isEnglish ? 'Done' : '완료') : '-'}</strong>
+            <article key={day.key} className={`grid min-h-16 place-items-center rounded-lg border p-2 text-center ${day.done ? 'border-emerald-700 bg-emerald-700 text-white shadow-sm' : 'border-gray-100 bg-gray-50 text-gray-800 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100'}`}>
+              <span className="text-xs font-black">{day.label}</span>
+              <strong className="text-xs font-black">{day.done ? (isEnglish ? 'Done' : '완료') : '-'}</strong>
             </article>
           ))}
         </div>
       )}
 
-      <div className="history-list grouped compact">
-        {loading && (
-          <div className="skeleton-stack">
+      <div className="grid gap-5">
+        {loading ? (
+          <div className="grid gap-3">
             {Array.from({ length: 2 }).map((_, index) => (
               <div key={index} className="grid gap-3 rounded-2xl bg-gray-100 p-4 dark:bg-white/10">
-                <span className="skeleton-line short" />
-                <div className="skeleton-row">
-                  <span className="skeleton-avatar small" />
-                  <div className="skeleton-copy">
-                    <span className="skeleton-line medium" />
-                    <span className="skeleton-line long" />
-                  </div>
+                <span className="h-3 w-24 animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
+                <div className="grid gap-2">
+                  <span className="h-10 animate-pulse rounded-xl bg-gray-200 dark:bg-white/10" />
+                  <span className="h-10 animate-pulse rounded-xl bg-gray-200 dark:bg-white/10" />
                 </div>
               </div>
             ))}
           </div>
-        )}
+        ) : null}
 
-        {!loading && history.length === 0 && (
+        {!loading && history.length === 0 ? (
           <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">{isEnglish ? 'First log' : '첫 기록'}</span>
+            <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{isEnglish ? 'First log' : '첫 기록'}</span>
             <strong className="text-lg font-black text-gray-950 dark:text-white">{isEnglish ? 'No history yet.' : '아직 기록이 없어요.'}</strong>
             <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
-              {isEnglish
-                ? 'Save one workout above to start this view.'
-                : '위에서 운동 한 번 저장하면 여기부터 채워져요.'}
+              {isEnglish ? 'Save one workout above to start this view.' : '위에서 운동 한 번 저장하면 여기부터 채워져요.'}
             </p>
           </div>
-        )}
+        ) : null}
 
         {groupedHistory.map((group) => (
-          <section key={group.date} className="history-group">
-            <div className="history-group-header">
-              <div className="history-group-title">
-                <strong>{formatDate(group.date, language)}</strong>
-                <span>{isEnglish ? `${group.items.length} logs` : `${group.items.length}개 기록`}</span>
-              </div>
+          <section key={group.date} className="grid gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <strong className="text-sm font-black text-gray-950 dark:text-white">{formatDate(group.date, language)}</strong>
+              <span className="text-xs font-bold text-gray-700 dark:text-gray-200">{isEnglish ? `${group.items.length} logs` : `${group.items.length}개 기록`}</span>
             </div>
 
-            <div className="history-group-items">
+            <div className="grid gap-3">
               {group.items.map((item) => (
                 <HistoryItem
                   key={item.id}
@@ -541,16 +485,16 @@ export default function WorkoutHistory({ history, onUpdate, onDelete, loading })
         ))}
       </div>
 
-      {openImageUrl && (
-        <div className="lightbox-backdrop" role="dialog" aria-modal="true" onClick={() => setOpenImageUrl('')}>
-          <div className="grid max-h-[86dvh] w-full max-w-2xl gap-3 overflow-hidden rounded-3xl bg-white p-3 shadow-sm dark:bg-neutral-900" onClick={(event) => event.stopPropagation()}>
-            <button type="button" className="lightbox-close" onClick={() => setOpenImageUrl('')}>
+      {openImageUrl ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-gray-950/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" onClick={() => setOpenImageUrl('')}>
+          <div className="grid max-h-[86dvh] w-full max-w-2xl gap-3 overflow-hidden rounded-3xl bg-white p-3 shadow-2xl dark:bg-neutral-900" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="justify-self-end rounded-lg bg-gray-100 px-3 py-2 text-sm font-black text-gray-800 dark:bg-white/10 dark:text-gray-100" onClick={() => setOpenImageUrl('')}>
               {isEnglish ? 'Close' : '닫기'}
             </button>
-            <img src={openImageUrl} alt={isEnglish ? 'Expanded workout image' : '확대된 운동 이미지'} />
+            <img className="max-h-[72dvh] w-full rounded-2xl object-contain" src={openImageUrl} alt={isEnglish ? 'Expanded workout image' : '확대된 운동 이미지'} />
           </div>
         </div>
-      )}
+      ) : null}
     </section>
   )
 }

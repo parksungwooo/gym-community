@@ -69,7 +69,7 @@ export default function PaywallModal({
           {PREMIUM_PLANS.map((plan) => (
             <article
               key={plan.id}
-              className={`grid gap-4 rounded-2xl border p-4 ${plan.highlighted ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-400/20 dark:bg-emerald-500/15' : 'border-gray-100 bg-gray-50 dark:border-white/10 dark:bg-neutral-950'}`}
+              className={`grid gap-4 rounded-2xl border p-4 ${plan.highlighted ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-400/20 dark:bg-emerald-700/20' : 'border-gray-100 bg-gray-50 dark:border-white/10 dark:bg-neutral-950'}`}
             >
               <div className="paywall-plan-head">
                 <div>

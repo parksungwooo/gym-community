@@ -2027,8 +2027,8 @@ export default function App() {
               <button
                 type="button"
                 className={guestSyncNotice.actionKind === 'auth'
-                  ? 'min-h-10 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50'
-                  : 'min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10'}
+                  ? 'min-h-11 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50'
+                  : 'min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10'}
                 data-testid="guest-sync-action"
                 onClick={guestSyncNotice.actionKind === 'auth' ? () => openAuthPrompt('guest_sync') : handleRetryGuestSync}
                 disabled={guestSyncState.phase === 'syncing' || loadingAuth}
@@ -2045,10 +2045,10 @@ export default function App() {
           <strong className="text-base font-black leading-6">{errorState.title}</strong>
           <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-100">{visibleErrorMessage}</p>
           <div className="grid gap-2 sm:grid-cols-2">
-            <button type="button" className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10" onClick={() => window.location.reload()}>
+            <button type="button" className="min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-100 dark:hover:bg-white/10" onClick={() => window.location.reload()}>
               {isEnglish ? 'Refresh app' : '앱 새로고침'}
             </button>
-            <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={() => setErrorMessage('')}>
+            <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={() => setErrorMessage('')}>
               {isEnglish ? 'Hide' : '닫기'}
             </button>
           </div>

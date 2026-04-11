@@ -356,7 +356,7 @@ export default function ProfilePanel({
               </div>
               <button
                 type="button"
-                className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
+                className="min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                 onClick={handleSetupAction}
                 disabled={loading || authLoading}
               >
@@ -444,14 +444,14 @@ export default function ProfilePanel({
                 <div className="profile-photo-field-actions">
                   <button
                     type="button"
-                    className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
+                    className="min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={loading}
                   >
                     {t('사진 업로드', 'Upload photo')}
                   </button>
                   {!!draftAvatarUrl && (
-                    <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={clearAvatarImage} disabled={loading}>
+                    <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={clearAvatarImage} disabled={loading}>
                       {t('삭제', 'Remove')}
                     </button>
                   )}
@@ -661,7 +661,7 @@ export default function ProfilePanel({
                       {reminderPermission !== 'granted' && reminderPermission !== 'unsupported' && (
                         <button
                           type="button"
-                          className="min-h-10 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
+                          className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
                           onClick={onRequestReminderPermission}
                           disabled={loading}
                         >
@@ -710,7 +710,7 @@ export default function ProfilePanel({
                 {isGuest ? (
                   <button
                     type="button"
-                    className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
+                    className="min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                     onClick={onRequestAuth}
                     disabled={authLoading}
                   >
@@ -719,7 +719,7 @@ export default function ProfilePanel({
                 ) : (
                   <button
                     type="button"
-                    className="min-h-10 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
+                    className="min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                     onClick={onSignOut}
                     disabled={authLoading}
                   >

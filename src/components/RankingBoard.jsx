@@ -14,10 +14,10 @@ function FollowButton({ isFollowing, disabled, onClick, isEnglish }) {
   return (
     <button
       type="button"
-      className={`min-h-10 rounded-lg px-4 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${
+      className={`min-h-11 rounded-lg px-4 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-50 ${
         isFollowing
           ? 'bg-emerald-700 text-white shadow-sm'
-          : 'border border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400/20 dark:bg-emerald-500/15 dark:text-emerald-200'
+          : 'border border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-400/20 dark:bg-emerald-700/20 dark:text-emerald-200'
       }`}
       onClick={onClick}
       disabled={disabled}
@@ -55,7 +55,7 @@ export default function RankingBoard({
             {t('이번 주', 'This week')}
           </h2>
         </div>
-        <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
+        <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">
           {t(`1위 ${topScore}P`, `Top ${topScore} pts`)}
         </span>
       </div>
@@ -71,7 +71,7 @@ export default function RankingBoard({
             <button
               key={key}
               type="button"
-              className={`min-h-10 rounded-lg px-3 text-sm font-black transition ${
+              className={`min-h-11 rounded-lg px-4 text-sm font-black transition ${
                 isActive
                   ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-900 dark:text-white'
                   : 'text-gray-700 hover:text-gray-950 dark:text-gray-100 dark:hover:text-white'
@@ -102,7 +102,7 @@ export default function RankingBoard({
 
       {!loading && !rows.length && (
         <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
-          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
+          <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">
             {t('랭킹 대기 중', 'Ranking loading up')}
           </span>
           <strong className="text-lg font-black text-gray-950 dark:text-white">

@@ -11,7 +11,7 @@ function OptionButton({ isSelected, testId, text, onClick }) {
       aria-pressed={isSelected}
       className={`flex min-h-16 w-full items-center gap-3 rounded-lg border p-4 text-left transition active:scale-[0.99] ${
         isSelected
-          ? 'border-emerald-500 bg-emerald-50 text-emerald-950 shadow-sm dark:border-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-50'
+          ? 'border-emerald-500 bg-emerald-50 text-emerald-950 shadow-sm dark:border-emerald-400 dark:bg-emerald-700/20 dark:text-emerald-50'
           : 'border-gray-200 bg-white text-gray-700 hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-white/10 dark:bg-neutral-900 dark:text-gray-200 dark:hover:border-emerald-400'
       }`}
     >
@@ -61,8 +61,8 @@ export default function TestForm({ onSubmit, loading }) {
   if (!currentQuestion) return null
 
   return (
-    <form className="grid gap-5" onSubmit={handleSubmit}>
-      <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900">
+    <form className="grid gap-5 sm:gap-6" onSubmit={handleSubmit}>
+      <section className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
         <div
           className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10"
           role="progressbar"
@@ -94,7 +94,7 @@ export default function TestForm({ onSubmit, loading }) {
           </h2>
         </div>
 
-        <div className="grid gap-3">
+        <div className="grid gap-3 sm:gap-4">
           {currentQuestion.options.map((option, index) => (
             <OptionButton
               key={`${currentQuestion.id}-${index}`}
