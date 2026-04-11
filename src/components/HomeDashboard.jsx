@@ -402,8 +402,8 @@ export default function HomeDashboard({
     : { label: t('피드 보기', 'Open community'), onClick: onSeeCommunity }
 
   return (
-    <section className="home-dashboard-app streamlined-home home-dashboard-redesign home-dashboard-clean">
-      <section className="card home-focus-card home-growth-hero home-growth-hero-strong home-neon-command-card">
+    <section className="home-dashboard-app app-screen-flow streamlined-home home-dashboard-redesign home-dashboard-clean">
+      <section className="card app-clean-card home-focus-card home-hero-clean home-growth-hero home-growth-hero-strong home-neon-command-card">
         <div className="home-neon-overview" aria-label={t('오늘 요약', 'Today goal and level summary')}>
           <div
             className="home-daily-goal-ring"
@@ -438,7 +438,7 @@ export default function HomeDashboard({
 
         <button
           type="button"
-          className="product-recommend-card product-lift grid gap-3 p-5 text-left animate-pop"
+          className="product-recommend-card app-clean-card home-recommend-clean product-lift grid gap-3 p-5 text-left animate-pop"
           onClick={() => onStartRoutine?.({
             name: todayRecommendation.title,
             workoutType: todayRecommendation.workoutType,
@@ -569,7 +569,7 @@ export default function HomeDashboard({
 
       </section>
 
-      <section className="card home-feed-preview-shell compact-home-feed minimal-home-feed">
+      <section className="card app-clean-card home-feed-preview-shell home-feed-clean compact-home-feed minimal-home-feed">
         <div className="home-module-heading home-feed-preview-heading">
           <div>
             <span className="app-section-kicker">{t('피드', 'Now in feed')}</span>

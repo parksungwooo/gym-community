@@ -185,7 +185,7 @@ function FeedCard({
 
   return (
     <article
-      className={`feed-card compact feed-story-card feed-card-${post.type} product-lift rounded-3xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10`}
+      className={`feed-card app-clean-card feed-card-clean compact feed-story-card feed-card-${post.type} product-lift rounded-3xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10`}
     >
       <div className="feed-story-header">
         <button
@@ -281,7 +281,7 @@ function FeedCard({
         <div className="feed-actions compact">
           <button
             type="button"
-            className={`like-btn inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-extrabold transition-all duration-200 active:scale-125 ${post.likedByMe ? 'liked text-rose-600 animate-heartBeat' : 'text-slate-500 hover:text-rose-500'}`}
+            className={`like-btn feed-action-btn inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-extrabold transition-all duration-200 active:scale-125 ${post.likedByMe ? 'liked text-rose-600 animate-heartBeat' : 'text-slate-500 hover:text-rose-500'}`}
             onClick={() => onToggleLike(post.id, post.likedByMe)}
             aria-pressed={post.likedByMe}
             aria-label={
@@ -297,7 +297,7 @@ function FeedCard({
           </button>
           <button
             type="button"
-            className="comment-toggle-btn"
+            className="comment-toggle-btn feed-action-btn"
             onClick={() => {
               setCommentOpen((prev) => !prev)
               setMenuOpen(false)
@@ -310,7 +310,7 @@ function FeedCard({
           </button>
           <button
             type="button"
-            className="ghost-chip inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-extrabold transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:text-emerald-600 active:scale-95"
+            className="ghost-chip feed-action-btn inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-extrabold transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:text-emerald-600 active:scale-95"
             onClick={handleSharePost}
           >
             {isEnglish ? 'Share card' : '공유 카드'}
@@ -417,7 +417,7 @@ export default function FeedList({
     : (isEnglish ? 'Save a workout, add a photo, or cheer on a teammate from here.' : '운동을 저장하면 응원과 댓글이 여기서 시작돼요.')
 
   return (
-    <section className="card community-feed-surface compact community-feed-redesign">
+    <section className="card app-clean-card community-feed-surface feed-surface-clean compact community-feed-redesign">
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Feed' : '피드'}</span>

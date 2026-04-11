@@ -14,7 +14,7 @@ function FollowButton({ isFollowing, disabled, onClick, isEnglish }) {
   return (
     <button
       type="button"
-      className={`follow-chip rounded-full px-4 py-2 text-sm font-black transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${isFollowing ? 'active bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}
+      className={`follow-chip follow-chip-clean rounded-full px-4 py-2 text-sm font-black transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${isFollowing ? 'active bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}
       onClick={onClick}
       disabled={disabled}
     >
@@ -41,7 +41,7 @@ export default function RankingBoard({
   const topScore = rows[0]?.weekly_points ?? rows[0]?.total_xp ?? 0
 
   return (
-    <section className="card community-block-card ranking-surface compact community-ranking-redesign product-glass-card rounded-3xl animate-pop">
+    <section className="card app-clean-card community-block-card ranking-surface ranking-surface-clean compact community-ranking-redesign product-glass-card rounded-3xl animate-pop">
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{t('랭킹', 'Ranking')}</span>
@@ -50,7 +50,7 @@ export default function RankingBoard({
         <span className="community-mini-pill accent">{t(`1위 ${topScore}P`, `Top ${topScore} pts`)}</span>
       </div>
 
-      <div className="mb-3 grid grid-cols-2 gap-2 rounded-3xl bg-slate-950/5 p-1 dark:bg-white/10">
+      <div className="ranking-toggle-row mb-3 grid grid-cols-2 gap-2 rounded-3xl bg-slate-950/5 p-1 dark:bg-white/10">
         {[
           ['week', t('주간', 'Weekly')],
           ['month', t('월간', 'Monthly')],
@@ -58,7 +58,7 @@ export default function RankingBoard({
           <button
             key={key}
             type="button"
-            className={`rounded-2xl px-3 py-2 text-sm font-black transition-all ${timeframe === key ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:bg-white/70 dark:text-slate-300 dark:hover:bg-white/10'}`}
+              className={`ranking-toggle-btn rounded-2xl px-3 py-2 text-sm font-black transition-all ${timeframe === key ? 'active bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:bg-white/70 dark:text-slate-300 dark:hover:bg-white/10'}`}
             onClick={() => setTimeframe(key)}
           >
             {label}
@@ -111,7 +111,7 @@ export default function RankingBoard({
           return (
             <article
               key={item.user_id}
-              className={`ranking-card compact community-ranking-card rounded-3xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 ${getRankTone(index)} ${
+              className={`ranking-card app-clean-card ranking-card-clean compact community-ranking-card rounded-3xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10 ${getRankTone(index)} ${
                 selectedUserId === item.user_id ? 'active' : ''
               }`}
             >

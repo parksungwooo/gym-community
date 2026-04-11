@@ -28,6 +28,7 @@ import { useAppBootstrap } from './hooks/useAppBootstrap'
 import { useAppDerivedState } from './hooks/useAppDerivedState'
 import { useAppError } from './hooks/useAppError'
 import { useI18n } from './i18n.js'
+import MainLayout from './layouts/MainLayout'
 import { supabase } from './lib/supabaseClient'
 import RouteSuspenseFallback from './routes/RouteSuspenseFallback'
 import { signInWithOAuth, signOutUser } from './services/auth'
@@ -2102,8 +2103,31 @@ export default function App() {
         }}
       />
 
-      {loadingInit ? (
-        <main className="app-main" aria-busy="true">
+      <MainLayout
+        busy={loadingInit}
+        contentId={loadingInit ? undefined : 'app-content'}
+        pageHeader={loadingInit ? null : viewHeader}
+        topNav={loadingInit ? null : (
+          <AppTopActions
+            isEnglish={isEnglish}
+            themeMode={themeMode}
+            isAuthenticated={isAuthenticated}
+            showNotificationCenter={showNotificationCenter}
+            unreadNotificationCount={unreadNotificationCount}
+            onToggleTheme={handleToggleTheme}
+            onOpenNotifications={openNotificationCenter}
+          />
+        )}
+        bottomNav={loadingInit ? null : (
+          <BottomTabNav
+            tabs={tabs}
+            currentView={view}
+            onChangeView={handleChangeView}
+          />
+        )}
+        navigationLabel={isEnglish ? 'Primary navigation' : '주요 화면 이동'}
+      >
+        {loadingInit ? (
           <section className="card skeleton-screen-card">
             <div className="skeleton-copy">
               <span className="skeleton-line short" />
@@ -2117,28 +2141,7 @@ export default function App() {
             </div>
             <p className="subtext skeleton-status-text">{initStatus}</p>
           </section>
-        </main>
-      ) : (
-        <>
-          <header className="app-header">
-            <AppTopActions
-              isEnglish={isEnglish}
-              themeMode={themeMode}
-              isAuthenticated={isAuthenticated}
-              showNotificationCenter={showNotificationCenter}
-              unreadNotificationCount={unreadNotificationCount}
-              onToggleTheme={handleToggleTheme}
-              onOpenNotifications={openNotificationCenter}
-            />
-          </header>
-
-          <main className="app-main" id="app-content">
-            <section className="app-page-heading" aria-label={viewHeader.title}>
-              <span>{viewHeader.eyebrow}</span>
-              <h1>{viewHeader.title}</h1>
-              <p>{viewHeader.body}</p>
-            </section>
-
+        ) : (
             <Suspense fallback={<RouteSuspenseFallback label={isEnglish ? 'Loading route...' : '화면을 불러오는 중입니다...'} />}>
               {view === VIEW.HOME && (
                 <HomeRoute
@@ -2294,17 +2297,9 @@ export default function App() {
                 />
               )}
             </Suspense>
-          </main>
 
-          <footer className="app-bottom-nav-slot" aria-label={isEnglish ? 'Primary navigation' : '주요 화면 이동'}>
-            <BottomTabNav
-              tabs={tabs}
-              currentView={view}
-              onChangeView={handleChangeView}
-            />
-          </footer>
-        </>
-      )}
+        )}
+      </MainLayout>
     </div>
   )
 }

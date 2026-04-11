@@ -64,7 +64,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
   }
 
   return (
-    <section className="product-glass-card result-screen mx-auto grid w-full max-w-xl gap-5 rounded-[2rem] border border-white/70 bg-white/95 p-5 text-center text-slate-950 shadow-2xl shadow-slate-950/10 backdrop-blur-xl sm:p-7">
+    <section className="product-glass-card app-clean-card result-screen result-screen-clean mx-auto grid w-full max-w-xl gap-5 rounded-[2rem] border border-white/70 bg-white/95 p-5 text-center text-slate-950 shadow-2xl shadow-slate-950/10 backdrop-blur-xl sm:p-7">
       <div className="mx-auto grid justify-items-center gap-4">
         <div className="relative grid h-32 w-32 place-items-center">
           <span className="absolute inset-0 rounded-full bg-emerald-400/20 animate-burst" aria-hidden="true" />
@@ -104,7 +104,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
       <div className="grid gap-3 sm:grid-cols-[0.9fr_1.1fr]">
         <button
           type="button"
-          className="flex min-h-[56px] items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-5 text-base font-black text-slate-700 shadow-sm transition-all hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="secondary-btn result-action-btn flex min-h-[56px] items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-5 text-base font-black text-slate-700 shadow-sm transition-all hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={handleShare}
         >
           <ShareIcon />
@@ -112,7 +112,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
         </button>
         <button
           type="button"
-          className="flex min-h-[56px] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 text-base font-black text-white shadow-xl shadow-emerald-500/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-600"
+          className="primary-btn result-action-btn flex min-h-[56px] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 text-base font-black text-white shadow-xl shadow-emerald-500/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-600"
           onClick={onStartWorkout}
         >
           <DumbbellIcon />

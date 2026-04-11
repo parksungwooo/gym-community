@@ -10,7 +10,7 @@ function OptionButton({ isSelected, testId, text, onClick }) {
       data-testid={testId}
       aria-pressed={isSelected}
       className={`
-        w-full p-5 text-left rounded-3xl border-2 transition-all duration-200
+        test-option-btn w-full p-5 text-left rounded-3xl border-2 transition-all duration-200
         flex items-center gap-3 hover:shadow-md active:scale-95
         focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-emerald-300
         ${isSelected 
@@ -63,8 +63,8 @@ export default function TestForm({ onSubmit, loading }) {
   };
 
   return (
-    <div className="screen-flow screen-flow-test">
-      <div className="mb-8">
+    <div className="screen-flow screen-flow-test app-screen-flow app-screen-flow-test">
+      <div className="test-progress-card mb-8">
         <div
           className="h-2 bg-gray-100 rounded-3xl overflow-hidden"
           role="progressbar"
@@ -84,7 +84,7 @@ export default function TestForm({ onSubmit, loading }) {
       </div>
 
       <div
-        className="product-glass-card test-question-card bg-white rounded-3xl shadow-xl p-8 mb-8 animate-pop"
+        className="product-glass-card app-clean-card test-question-card bg-white rounded-3xl shadow-xl p-8 mb-8 animate-pop"
         data-testid={`test-question-${currentQuestion.id}`}
       >
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -107,18 +107,18 @@ export default function TestForm({ onSubmit, loading }) {
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="test-action-row flex gap-4">
         {currentIndex > 0 && (
-          <button type="button" onClick={handlePrevious} data-testid="test-prev-question" className="flex-1 py-5 text-lg font-semibold border-2 border-gray-300 rounded-3xl hover:bg-gray-50 transition-colors">
+          <button type="button" onClick={handlePrevious} data-testid="test-prev-question" className="secondary-btn test-nav-btn flex-1 py-5 text-lg font-semibold border-2 border-gray-300 rounded-3xl hover:bg-gray-50 transition-colors">
             {isEnglish ? '← Previous' : '← 이전'}
           </button>
         )}
         {currentIndex === questions.length - 1 ? (
-          <button type="button" onClick={handleSubmit} disabled={loading || !canSubmit} data-testid="test-submit" className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50 animate-pop">
+          <button type="button" onClick={handleSubmit} disabled={loading || !canSubmit} data-testid="test-submit" className="primary-btn test-nav-btn flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50 animate-pop">
             {loading ? (isEnglish ? 'Calculating...' : '계산 중') : (isEnglish ? 'See My Level →' : '결과 보기 →')}
           </button>
         ) : (
-          <button type="button" onClick={handleNext} disabled={!currentAnswer} data-testid="test-next-question" className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50">
+          <button type="button" onClick={handleNext} disabled={!currentAnswer} data-testid="test-next-question" className="primary-btn test-nav-btn flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50">
             {isEnglish ? 'Next →' : '다음 →'}
           </button>
         )}
