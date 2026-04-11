@@ -290,6 +290,7 @@ export default function HomeDashboard({
     activitySummary,
     stats,
     todayDone,
+    language,
     isEnglish,
   })
   const quickWorkouts = [

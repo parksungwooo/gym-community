@@ -6,6 +6,7 @@ import { getActionableErrorMessage } from '../src/features/app/appFlowUtils.js'
 import { buildCommunityAccessResult } from '../src/features/community/communityFlow.js'
 import { buildGuestWorkoutRecord } from '../src/lib/guestStorage.js'
 import { buildNotificationNavigation } from '../src/features/notifications/notificationFlow.js'
+import { getTodayWorkoutRecommendation } from '../src/features/workout/recommendations.js'
 import { getActivityEventMeta, getActivityLevelProgress } from '../src/utils/activityLevel.js'
 import { buildAppHistoryState, getHashForView, parseViewFromHash, shouldPushHomeBackGuard } from '../src/utils/appRouting.js'
 import { getImageSourceCandidates } from '../src/utils/imageOptimization.js'
@@ -203,6 +204,21 @@ const tests = [
       assert.equal(progress.levelValue, 7)
       assert.equal(progress.nextLevelValue, 8)
       assert.equal(progress.remainingXp, 390)
+    },
+  },
+  {
+    name: 'today workout recommendation returns renderable localized copy',
+    run() {
+      const recommendation = getTodayWorkoutRecommendation({
+        currentLevel: { level: 1 },
+        stats: { weeklyCount: 0 },
+        language: 'en',
+      })
+
+      assert.equal(recommendation.title, '15-min easy walk')
+      assert.equal(recommendation.label, 'First log this week')
+      assert.equal(recommendation.body, 'Today works best with a low-barrier session.')
+      assert.equal(recommendation.intensityLabel, 'Light')
     },
   },
   {

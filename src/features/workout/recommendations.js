@@ -51,12 +51,20 @@ function getLevelNumber(currentLevel, activitySummary) {
   return 1
 }
 
+function getLocalizedText(value, language = 'ko') {
+  if (!value || typeof value !== 'object') return value ?? ''
+  return value[language] ?? value.ko ?? value.en ?? ''
+}
+
 export function getTodayWorkoutRecommendation({
   currentLevel,
   stats = {},
   activitySummary = {},
   todayDone = false,
+  language = 'ko',
+  isEnglish = false,
 } = {}) {
+  const resolvedLanguage = language === 'en' || isEnglish ? 'en' : 'ko'
   const levelValue = getLevelNumber(currentLevel, activitySummary)
   const recommendation = LEVEL_RECOMMENDATIONS.find((item) => levelValue <= item.maxLevel) ?? LEVEL_RECOMMENDATIONS.at(-1)
   const weeklyCount = Number(stats?.weeklyCount) || 0
@@ -84,6 +92,10 @@ export function getTodayWorkoutRecommendation({
 
   return {
     ...recommendation,
+    title: getLocalizedText(recommendation.title, resolvedLanguage),
+    intensityLabel: getLocalizedText(recommendation.intensity, resolvedLanguage),
+    label: getLocalizedText(context.label, resolvedLanguage),
+    body: getLocalizedText(context.body, resolvedLanguage),
     levelValue,
     context,
     estimatedXp: Math.max(10, Math.round(recommendation.durationMinutes * (levelValue >= 4 ? 1.4 : 1.1))),
