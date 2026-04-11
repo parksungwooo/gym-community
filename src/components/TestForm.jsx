@@ -63,7 +63,7 @@ export default function TestForm({ onSubmit, loading }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="screen-flow screen-flow-test">
       <div className="mb-8">
         <div
           className="h-2 bg-gray-100 rounded-3xl overflow-hidden"
@@ -77,16 +77,18 @@ export default function TestForm({ onSubmit, loading }) {
         </div>
         <div className="flex justify-between text-xs text-gray-400 mt-2">
           <span>{currentIndex + 1} / {questions.length}</span>
-          <span className="font-medium text-emerald-600">{answeredCount} answered</span>
+          <span className="font-medium text-emerald-600">
+            {isEnglish ? `${answeredCount} answered` : `${answeredCount}개 답변`}
+          </span>
         </div>
       </div>
 
       <div
-        className="product-glass-card bg-white rounded-3xl shadow-xl p-8 mb-8 animate-pop"
+        className="product-glass-card test-question-card bg-white rounded-3xl shadow-xl p-8 mb-8 animate-pop"
         data-testid={`test-question-${currentQuestion.id}`}
       >
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          {isEnglish ? `Question ${currentIndex + 1}` : `질문 ${currentIndex + 1}`}
+          {isEnglish ? `Question ${currentIndex + 1}` : `체크 ${currentIndex + 1}`}
         </h2>
         <p className="text-xl text-gray-700 leading-relaxed mb-10">
           {currentQuestion.question}
@@ -113,7 +115,7 @@ export default function TestForm({ onSubmit, loading }) {
         )}
         {currentIndex === questions.length - 1 ? (
           <button type="button" onClick={handleSubmit} disabled={loading || !canSubmit} data-testid="test-submit" className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50 animate-pop">
-            {loading ? '계산 중...' : '내 레벨 확인하기 →'}
+            {loading ? (isEnglish ? 'Calculating...' : '계산 중') : (isEnglish ? 'See My Level →' : '결과 보기 →')}
           </button>
         ) : (
           <button type="button" onClick={handleNext} disabled={!currentAnswer} data-testid="test-next-question" className="flex-1 py-5 text-lg font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-3xl transition-all disabled:opacity-50">

@@ -52,11 +52,11 @@ export default function ResultView({ score, level, onStartWorkout }) {
     try {
       await navigator.clipboard.writeText(`${shareText} ${window.location.href}`)
       await shareOrDownloadCard({
-        eyebrow: isEnglish ? 'Fitness Result' : '체력 결과',
+        eyebrow: isEnglish ? 'Fitness Result' : '내 레벨',
         title: displayLevel,
         metric: isEnglish ? `${score} pts` : `${score}점`,
         detail: message,
-        footer: isEnglish ? 'Level test complete' : '레벨 테스트 완료',
+        footer: isEnglish ? 'Level test complete' : '레벨 체크 완료',
       }, 'fitness-result-card.svg')
     } catch {
       alert(isEnglish ? 'Copy failed.' : '\uBCF5\uC0AC \uC2E4\uD328.')
@@ -64,7 +64,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
   }
 
   return (
-    <section className="product-glass-card mx-auto grid w-full max-w-xl gap-5 rounded-[2rem] border border-white/70 bg-white/95 p-5 text-center text-slate-950 shadow-2xl shadow-slate-950/10 backdrop-blur-xl sm:p-7">
+    <section className="product-glass-card result-screen mx-auto grid w-full max-w-xl gap-5 rounded-[2rem] border border-white/70 bg-white/95 p-5 text-center text-slate-950 shadow-2xl shadow-slate-950/10 backdrop-blur-xl sm:p-7">
       <div className="mx-auto grid justify-items-center gap-4">
         <div className="relative grid h-32 w-32 place-items-center">
           <span className="absolute inset-0 rounded-full bg-emerald-400/20 animate-burst" aria-hidden="true" />
@@ -79,7 +79,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
 
         <div className="grid gap-2">
           <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.16em] text-emerald-700">
-            {isEnglish ? 'Fitness Result' : '\uCCB4\uB825 \uACB0\uACFC'}
+            {isEnglish ? 'Fitness Result' : '내 레벨'}
           </span>
           <h2 className="m-0 text-3xl font-black tracking-[-0.05em] text-slate-950 sm:text-4xl">
             {displayLevel}
@@ -97,7 +97,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
         <p className="mt-3 mb-0 text-sm font-semibold leading-6 text-slate-500">
           {isEnglish
             ? "Now turn this level into today's workout log."
-            : '\uC774\uC81C \uC774 \uB808\uBCA8\uC744 \uC624\uB298\uC758 \uC6B4\uB3D9 \uAE30\uB85D\uC73C\uB85C \uC774\uC5B4\uAC00\uBCF4\uC138\uC694.'}
+            : '이제 오늘 운동 하나만 남겨볼까요?'}
         </p>
       </div>
 
@@ -108,7 +108,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
           onClick={handleShare}
         >
           <ShareIcon />
-          {isEnglish ? 'Share' : '\uACF5\uC720'}
+          {isEnglish ? 'Share' : '결과 공유'}
         </button>
         <button
           type="button"
@@ -116,7 +116,7 @@ export default function ResultView({ score, level, onStartWorkout }) {
           onClick={onStartWorkout}
         >
           <DumbbellIcon />
-          {isEnglish ? 'Log workout' : '\uC6B4\uB3D9 \uAE30\uB85D'}
+          {isEnglish ? 'Log workout' : '운동 기록'}
         </button>
       </div>
     </section>

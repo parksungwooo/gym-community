@@ -292,7 +292,7 @@ function HistoryItem({ item, onUpdate, onDelete, loading, onOpenImage }) {
               <span className="history-edit-handle" />
               <div className="history-edit-title-row">
                 <strong>{isEnglish ? 'Edit Workout' : '운동 기록 수정'}</strong>
-                <span>{formatTime(item.created_at, language) || (isEnglish ? 'Saved' : '저장됨')}</span>
+                <span>{formatTime(item.created_at, language) || (isEnglish ? 'Saved' : '저장')}</span>
               </div>
             </div>
 

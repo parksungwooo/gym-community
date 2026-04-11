@@ -100,7 +100,7 @@ export default function ProfilePanel({
   const nicknameMissing = !draftName.trim()
   const latestLevelLabel = latestResult?.level
     ? localizeLevelText(latestResult.level, language)
-    : t('아직 테스트 전', 'Not tested yet')
+    : t('레벨 미정', 'Not tested yet')
   const heroLevelLabel = latestResult?.level
     ? localizeLevelText(latestResult.level, language)
     : t('미측정', 'No test')
@@ -173,8 +173,8 @@ export default function ProfilePanel({
   const setupCard = (() => {
     if (isGuest) {
       return {
-        title: t('로그인하면 기록이 이어져요.', 'Log in to keep your progress.'),
-        body: t('운동, 체중, 프로필이 계정에 저장돼요.', 'Workouts, weight, and profile save to your account.'),
+        title: t('로그인하면 흐름이 이어져요.', 'Log in to keep your progress.'),
+        body: t('운동, 체중, 프로필을 안전하게 보관해요.', 'Workouts, weight, and profile save to your account.'),
         actionLabel: t('로그인', 'Log in'),
         actionKey: 'auth',
       }
@@ -182,8 +182,8 @@ export default function ProfilePanel({
 
     if (nicknameMissing || !canUseCommunity) {
       return {
-        title: t('닉네임 저장하면 커뮤니티가 열려요.', 'Save a nickname to open community.'),
-        body: t('이름만 저장하면 피드와 메이트를 바로 볼 수 있어요.', 'A nickname is enough for feed and mates.'),
+        title: t('닉네임만 정하면 시작돼요.', 'Save a nickname to open community.'),
+        body: t('피드와 메이트 기능이 바로 열려요.', 'A nickname is enough for feed and mates.'),
         actionLabel: t('닉네임 입력', 'Add nickname'),
         actionKey: 'nickname',
       }
@@ -191,18 +191,18 @@ export default function ProfilePanel({
 
     if (!latestResult) {
       return {
-        title: t('레벨 테스트부터 해보세요.', 'Start with the level test.'),
-        body: t('기록 탭에서 한 번만 하면 요약이 더 잘 맞아요.', 'One quick check makes the summaries fit better.'),
-        actionLabel: t('기록 탭 가기', 'Go to Records'),
+        title: t('내 레벨부터 확인해요.', 'Start with the level test.'),
+        body: t('한 번만 체크하면 추천이 더 잘 맞아요.', 'One quick check makes the summaries fit better.'),
+        actionLabel: t('레벨 확인', 'Go to Records'),
         actionKey: 'progress',
       }
     }
 
     if (!hasWorkoutHistory) {
       return {
-        title: t('첫 운동 기록부터 시작해요.', 'Start with your first workout log.'),
-        body: t('기록 탭 한 번이면 홈과 달력이 채워져요.', 'One log starts filling Home and the calendar.'),
-        actionLabel: t('기록 탭 가기', 'Go to Records'),
+        title: t('첫 기록을 남겨요.', 'Start with your first workout log.'),
+        body: t('한 번만 저장해도 홈과 달력이 살아나요.', 'One log starts filling Home and the calendar.'),
+        actionLabel: t('기록하기', 'Go to Records'),
         actionKey: 'progress',
       }
     }
@@ -307,7 +307,7 @@ export default function ProfilePanel({
           <div className="app-section-heading compact">
             <div>
               <span className="app-section-kicker">{t('다음', 'Next')}</span>
-              <h2 className="app-section-title small">{t('프로필 준비', 'Profile setup')}</h2>
+              <h2 className="app-section-title small">{t('시작 준비', 'Profile setup')}</h2>
             </div>
             <span className="community-mini-pill accent">{`${readyStepCount}/${readySteps.length}`}</span>
           </div>
@@ -406,7 +406,7 @@ export default function ProfilePanel({
 
             <SettingRow
               label={t('닉네임', 'Nickname')}
-              helper={t('저장에 필요해요.', 'Needed to save.')}
+              helper={t('커뮤니티에서 보여요.', 'Needed to save.')}
               compact
             >
               <div className="settings-input-stack">
@@ -431,7 +431,7 @@ export default function ProfilePanel({
 
             <SettingRow
               label={t('프로필 사진', 'Profile photo')}
-              helper={t('커뮤니티에도 보여요.', 'Shows in community.')}
+              helper={t('피드와 프로필에 보여요.', 'Shows in community.')}
               compact
             >
               <div className="profile-photo-field">
@@ -585,7 +585,7 @@ export default function ProfilePanel({
             </SettingRow>
 
             <p className="subtext compact settings-inline-note">
-              {t('체중 기록은 기록 탭', 'Log weight in Records.')}
+              {t('체중은 기록 탭에서 남겨요.', 'Log weight in Records.')}
             </p>
           </section>
         )}
@@ -600,7 +600,7 @@ export default function ProfilePanel({
             <div className="profile-summary-grid compact profile-menu-summary-grid">
               <SummaryStat label={t('팔로워', 'Followers')} value={String(followStats?.followerCount ?? 0)} />
               <SummaryStat label={t('팔로잉', 'Following')} value={String(followStats?.followingCount ?? 0)} />
-              <SummaryStat label={t('닉네임 상태', 'Nickname')} value={nicknameMissing ? t('필요', 'Required') : t('완료', 'Ready')} />
+              <SummaryStat label={t('닉네임', 'Nickname')} value={nicknameMissing ? t('필요', 'Required') : t('준비 완료', 'Ready')} />
             </div>
 
             <SettingRow
@@ -634,7 +634,7 @@ export default function ProfilePanel({
 
             <SettingRow
               label={t('운동 리마인더', 'Workout reminder')}
-              helper={t('그 시간에 알려줘요.', 'Alerts at that time.')}
+              helper={t('정한 시간에 알려드릴게요.', 'Alerts at that time.')}
               compact
             >
               <div className="settings-reminder-stack">
@@ -732,7 +732,7 @@ export default function ProfilePanel({
         )}
 
         <button type="submit" className="primary-btn settings-save-btn compact" disabled={loading || nicknameMissing}>
-          {loading ? t('저장 중...', 'Saving...') : t('저장', 'Save')}
+          {loading ? t('저장 중', 'Saving...') : t('저장하기', 'Save')}
         </button>
       </form>
     </section>

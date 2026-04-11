@@ -3,55 +3,55 @@ import { useI18n } from '../i18n.js'
 function getCopy(reason, isEnglish) {
   const copyMap = {
     save_workout: {
-      title: isEnglish ? 'Log in to keep this workout.' : '로그인하면 이 기록이 남아요.',
-      body: isEnglish ? 'Workout logs save to your account.' : '운동 기록은 계정에 저장돼요.',
+      title: isEnglish ? 'Log in to keep this workout.' : '로그인하면 기록이 이어져요.',
+      body: isEnglish ? 'Workout logs save to your account.' : '운동 기록을 안전하게 보관해요.',
     },
     save_weight: {
-      title: isEnglish ? 'Log in to keep this weight log.' : '로그인하면 체중 기록이 남아요.',
-      body: isEnglish ? 'Weight records save to your account.' : '체중 기록은 계정에 저장돼요.',
+      title: isEnglish ? 'Log in to keep this weight log.' : '로그인하면 체중 흐름이 남아요.',
+      body: isEnglish ? 'Weight records save to your account.' : '체중 변화를 안전하게 보관해요.',
     },
     save_profile: {
       title: isEnglish ? 'Log in to save your profile.' : '로그인하면 프로필이 저장돼요.',
-      body: isEnglish ? 'Profile changes save to your account.' : '프로필 수정은 계정과 함께 저장돼요.',
+      body: isEnglish ? 'Profile changes save to your account.' : '프로필과 설정을 안전하게 보관해요.',
     },
     save_routine: {
-      title: isEnglish ? 'Log in to keep this routine.' : '로그인하면 이 루틴이 남아요.',
-      body: isEnglish ? 'You can reuse routines after login.' : '로그인 후에는 루틴을 다시 쓸 수 있어요.',
+      title: isEnglish ? 'Log in to keep this routine.' : '로그인하면 루틴을 저장해요.',
+      body: isEnglish ? 'You can reuse routines after login.' : '자주 하는 조합을 다시 쓸 수 있어요.',
     },
     save_test: {
-      title: isEnglish ? 'Log in to keep this result.' : '로그인하면 이 결과가 남아요.',
-      body: isEnglish ? 'Test results save to your account.' : '레벨 결과는 계정에 저장돼요.',
+      title: isEnglish ? 'Log in to keep this result.' : '로그인하면 레벨이 저장돼요.',
+      body: isEnglish ? 'Test results save to your account.' : '다음 추천이 더 정확해져요.',
     },
     follow: {
-      title: isEnglish ? 'Log in to follow people' : '팔로우하려면 로그인해주세요',
-      body: isEnglish ? 'Following and personal feeds need a login.' : '팔로우와 개인 피드는 로그인 후 열려요.',
+      title: isEnglish ? 'Log in to follow people' : '팔로우하려면 로그인이 필요해요',
+      body: isEnglish ? 'Following and personal feeds need a login.' : '내 피드를 개인화할 수 있어요.',
     },
     like: {
-      title: isEnglish ? 'Log in to like posts' : '좋아요를 누르려면 로그인해주세요',
-      body: isEnglish ? 'Reactions are tied to your account.' : '반응은 내 계정 기준으로 남아요.',
+      title: isEnglish ? 'Log in to like posts' : '응원하려면 로그인이 필요해요',
+      body: isEnglish ? 'Reactions are tied to your account.' : '좋아요가 내 계정으로 남아요.',
     },
     comment: {
-      title: isEnglish ? 'Log in to comment' : '댓글을 남기려면 로그인해주세요',
+      title: isEnglish ? 'Log in to comment' : '댓글을 남기려면 로그인이 필요해요',
       body: isEnglish ? 'Comments are posted from your account.' : '댓글은 내 계정으로 남아요.',
     },
     report: {
-      title: isEnglish ? 'Log in to report content' : '신고하려면 로그인해주세요',
-      body: isEnglish ? 'Reports are saved with your account.' : '신고 기록은 계정과 함께 저장돼요.',
+      title: isEnglish ? 'Log in to report content' : '신고하려면 로그인이 필요해요',
+      body: isEnglish ? 'Reports are saved with your account.' : '안전한 커뮤니티를 위해 필요해요.',
     },
     block: {
-      title: isEnglish ? 'Log in to block users' : '차단하려면 로그인해주세요',
-      body: isEnglish ? 'Blocking changes your personal community view.' : '차단은 내 커뮤니티 화면에 반영돼요.',
+      title: isEnglish ? 'Log in to block users' : '차단하려면 로그인이 필요해요',
+      body: isEnglish ? 'Blocking changes your personal community view.' : '내 피드에 바로 반영돼요.',
     },
     guest_profile: {
       title: isEnglish ? 'Keep going with an account.' : '계정으로 이어서 써볼까요?',
-      body: isEnglish ? 'Logs and profile save after login.' : '기록과 프로필은 로그인 후 저장돼요.',
+      body: isEnglish ? 'Logs and profile save after login.' : '기록과 프로필을 안전하게 보관해요.',
     },
     guest_sync: {
       title: isEnglish ? 'Log in to sync saved workouts.' : '\uC800\uC7A5\uD55C \uC6B4\uB3D9 \uAE30\uB85D\uC744 \uB3D9\uAE30\uD654\uD558\uB824\uBA74 \uB85C\uADF8\uC778\uD558\uC138\uC694.',
       body: isEnglish ? 'Local workouts stay on this device until you sign in.' : '\uB85C\uADF8\uC778\uD558\uAE30 \uC804\uAE4C\uC9C0 \uB85C\uCEEC \uC6B4\uB3D9 \uAE30\uB85D\uC740 \uC774 \uAE30\uAE30\uC5D0 \uBA38\uBB34\uB985\uB2C8\uB2E4.',
     },
     premium_upgrade: {
-      title: isEnglish ? 'Log in to start Pro' : 'Pro를 시작하려면 로그인해주세요',
+      title: isEnglish ? 'Log in to start Pro' : 'Pro를 시작하려면 로그인이 필요해요',
       body: isEnglish ? 'Upgrades are tied to your account.' : '업그레이드는 계정과 연결돼요.',
     },
   }

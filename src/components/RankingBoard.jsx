@@ -68,7 +68,7 @@ export default function RankingBoard({
 
       <p className="subtext compact">
         {t(
-          '포인트와 운동량 기준이에요.',
+          '이번 주 기록 기준이에요.',
           timeframe === 'week' ? 'Based on weekly activity points.' : 'Monthly view blends total XP with recent weekly points.',
         )}
       </p>
@@ -92,11 +92,11 @@ export default function RankingBoard({
 
       {!loading && !rows.length && (
         <div className="empty-state-card warm">
-          <span className="empty-state-badge">{t('랭킹 준비 중', 'Ranking loading up')}</span>
-          <strong>{t('랭킹이 아직 비어 있어요.', 'Ranking is still empty.')}</strong>
+          <span className="empty-state-badge">{t('랭킹 대기 중', 'Ranking loading up')}</span>
+          <strong>{t('아직 랭킹이 비었어요.', 'Ranking is still empty.')}</strong>
           <p>
             {t(
-              '기록이 쌓이면 여기 보여요.',
+              '첫 기록이 올라오면 바로 채워져요.',
               'Logs will show here.',
             )}
           </p>

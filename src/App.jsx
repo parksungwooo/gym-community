@@ -402,7 +402,7 @@ export default function App() {
       setErrorMessage(
         isEnglish
           ? `${failedCount} local workout ${failedCount === 1 ? 'is' : 'are'} still waiting to sync. Sign in again or refresh and try once more.`
-          : `로컬 운동 기록 ${failedCount}개는 아직 동기화되지 않았어요. 다시 로그인하거나 새로고침 후 다시 시도해주세요.`,
+          : `로컬 운동 기록 ${failedCount}개는 아직 동기화되지 않았어요. 로그인하거나 새로고침 후 다시 시도해 주세요.`,
       )
     }
   }, [isEnglish, refreshFeed, refreshUserSummary, setErrorMessage, showSuccess])
@@ -590,7 +590,7 @@ export default function App() {
               syncErr,
               isEnglish
                 ? 'Local workouts are still waiting to sync. Sign in again or refresh and try once more.'
-                : '로컬 운동 기록이 아직 동기화되지 않았어요. 다시 로그인하거나 새로고침 후 다시 시도해주세요.',
+                : '로컬 운동 기록이 아직 동기화되지 않았어요. 로그인하거나 새로고침 후 다시 시도해 주세요.',
               isEnglish,
             ))
           }
@@ -601,7 +601,7 @@ export default function App() {
           navigateToView(VIEW.HOME, { replace: true })
         }
       } catch (error) {
-        captureError(error, isEnglish ? 'Failed to sync auth state.' : '인증 상태 동기화에 실패했습니다.')
+        captureError(error, isEnglish ? 'Failed to sync auth state.' : '로그인 상태를 확인하지 못했어요.')
       } finally {
         setLoadingAuth(false)
       }
@@ -758,7 +758,7 @@ export default function App() {
         {
           body: isEnglish
             ? 'Your reminder time has arrived. Log one workout to keep the flow going.'
-            : '운동할 시간이에요. 오늘 기록 한 번만 남겨보세요.',
+            : '운동할 시간이에요. 오늘 한 번만 남겨봐요.',
         },
       )
 
@@ -832,7 +832,7 @@ export default function App() {
         'info',
       )
     } catch (error) {
-      captureError(error, isEnglish ? 'Failed to request reminder permission.' : '리마인더 권한 요청에 실패했습니다.')
+      captureError(error, isEnglish ? 'Failed to request reminder permission.' : '알림 권한을 요청하지 못했어요.')
     }
   }, [captureError, isEnglish, showSuccess])
 
@@ -880,7 +880,7 @@ export default function App() {
       persistPendingAction(authPrompt?.pendingAction ?? null)
       await signInWithOAuth('google')
     } catch (error) {
-      captureError(error, isEnglish ? 'Google sign-in failed.' : 'Google 로그인에 실패했습니다.')
+      captureError(error, isEnglish ? 'Google sign-in failed.' : 'Google 로그인을 완료하지 못했어요.')
       setLoadingAuth(false)
     }
   }
@@ -892,7 +892,7 @@ export default function App() {
       persistPendingAction(authPrompt?.pendingAction ?? null)
       await signInWithOAuth('kakao')
     } catch (error) {
-      captureError(error, isEnglish ? 'Kakao sign-in failed.' : 'Kakao 로그인에 실패했습니다.')
+      captureError(error, isEnglish ? 'Kakao sign-in failed.' : 'Kakao 로그인을 완료하지 못했어요.')
       setLoadingAuth(false)
     }
   }
@@ -906,7 +906,7 @@ export default function App() {
       await loadPublicData()
       navigateToView(VIEW.HOME, { replace: true })
     } catch (error) {
-      captureError(error, isEnglish ? 'Sign-out failed.' : '로그아웃에 실패했습니다.')
+      captureError(error, isEnglish ? 'Sign-out failed.' : '로그아웃하지 못했어요.')
     } finally {
       setLoadingAuth(false)
     }
@@ -944,7 +944,7 @@ export default function App() {
       }
     } catch (error) {
       console.error(error)
-      captureError(error, isEnglish ? 'The result is shown, but saving to the database failed. Please check SQL/RLS settings.' : '결과는 표시됐지만 DB 저장에 실패했어요. SQL/RLS 설정을 확인해주세요.')
+      captureError(error, isEnglish ? 'The result is shown, but saving to the database failed. Please check SQL/RLS settings.' : '결과는 보이지만 저장하지 못했어요. 설정을 확인해 주세요.')
     } finally {
       setLoadingAction(false)
     }
@@ -1028,7 +1028,7 @@ export default function App() {
           error,
           isEnglish
             ? 'Local storage is unavailable. Log in to save this workout.'
-            : '로컬 저장을 사용할 수 없어요. 로그인해서 운동 기록을 저장해주세요.',
+            : '이 기기에서는 임시 저장을 사용할 수 없어요. 로그인 후 저장해 주세요.',
         )
       }
     }
@@ -1073,7 +1073,7 @@ export default function App() {
       navigateToView(VIEW.HOME)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (error) {
-      captureError(error, isEnglish ? 'Failed to save workout.' : '운동 기록 저장에 실패했습니다.')
+      captureError(error, isEnglish ? 'Failed to save workout.' : '운동 기록을 저장하지 못했어요.')
     } finally {
       setLoadingAction(false)
     }
@@ -1096,7 +1096,7 @@ export default function App() {
       setWorkoutTemplates(templates)
       showSuccess(isEnglish ? 'Routine saved' : '루틴 저장', 'routine')
     } catch (error) {
-      captureError(error, isEnglish ? 'Failed to save routine.' : '루틴 저장에 실패했습니다.')
+      captureError(error, isEnglish ? 'Failed to save routine.' : '루틴을 저장하지 못했어요.')
     } finally {
       setLoadingAction(false)
     }
@@ -1110,7 +1110,7 @@ export default function App() {
       const templates = await fetchWorkoutTemplates(user.id)
       setWorkoutTemplates(templates)
       showSuccess(isEnglish ? 'Routine deleted.' : '루틴 삭제.', 'danger-soft')
-    }, isEnglish ? 'Failed to delete routine.' : '루틴 삭제에 실패했습니다.')
+    }, isEnglish ? 'Failed to delete routine.' : '루틴을 삭제하지 못했어요.')
   }
 
   const handleUpdateWorkout = async (workoutLogId, details) => {
@@ -1123,7 +1123,7 @@ export default function App() {
       })
       await refreshUserSummary(user.id)
       showSuccess(isEnglish ? 'Workout updated.' : '운동 수정.', 'info')
-    }, isEnglish ? 'Failed to update workout.' : '운동 기록 수정에 실패했습니다.')
+    }, isEnglish ? 'Failed to update workout.' : '운동 기록을 수정하지 못했어요.')
   }
 
   const handleDeleteWorkout = async (workoutLogId) => {
@@ -1135,7 +1135,7 @@ export default function App() {
       const doneToday = await hasWorkoutCompleted(user.id, getTodayDateString())
       setTodayDone(doneToday)
       showSuccess(isEnglish ? 'Workout deleted.' : '운동 삭제.', 'danger-soft')
-    }, isEnglish ? 'Failed to delete workout.' : '운동 기록 삭제에 실패했습니다.')
+    }, isEnglish ? 'Failed to delete workout.' : '운동 기록을 삭제하지 못했어요.')
   }
 
   const handleToggleLike = async (postId, isLiked) => {
@@ -1149,7 +1149,7 @@ export default function App() {
     await runActionTask(async () => {
       await toggleLike(user.id, postId, isLiked)
       await refreshFeed(user.id)
-    }, isEnglish ? 'Failed to update like.' : '좋아요 처리에 실패했습니다.', { useLoadingState: false })
+    }, isEnglish ? 'Failed to update like.' : '좋아요를 반영하지 못했어요.', { useLoadingState: false })
   }
 
   const handleSubmitComment = async (postId, content) => {
@@ -1163,7 +1163,7 @@ export default function App() {
     await runActionTask(async () => {
       await addComment(user.id, postId, content)
       await refreshFeed(user.id)
-    }, isEnglish ? 'Failed to add comment.' : '댓글 등록에 실패했습니다.', { useLoadingState: false })
+    }, isEnglish ? 'Failed to add comment.' : '댓글을 등록하지 못했어요.', { useLoadingState: false })
   }
 
   const openReportComposer = useCallback((target) => {
@@ -1204,7 +1204,7 @@ export default function App() {
       setReportTarget(null)
       showSuccess(isEnglish ? 'Report sent' : '신고 접수', 'info')
     } catch (error) {
-      captureError(error, isEnglish ? 'Failed to submit report.' : '신고 접수에 실패했습니다.')
+      captureError(error, isEnglish ? 'Failed to submit report.' : '신고를 접수하지 못했어요.')
     } finally {
       setLoadingAction(false)
     }
@@ -1220,11 +1220,11 @@ export default function App() {
       await resolveModerationReport(reportId, nextStatus, resolutionNote)
       await refreshModeration(moderationStatus)
       showSuccess(
-        isEnglish ? 'Updated' : '처리 완료',
+        isEnglish ? 'Updated' : '처리했어요',
         'info',
       )
     } catch (error) {
-      captureError(error, isEnglish ? 'Failed to update moderation report.' : '신고 처리에 실패했습니다.')
+      captureError(error, isEnglish ? 'Failed to update moderation report.' : '신고 상태를 바꾸지 못했어요.')
     } finally {
       setModerationActionLoading(false)
     }
@@ -1290,7 +1290,7 @@ export default function App() {
         isBlocked ? 'info' : 'danger-soft',
       )
     } catch (error) {
-      captureError(error, isEnglish ? 'Failed to update block.' : '차단 상태 변경에 실패했습니다.')
+      captureError(error, isEnglish ? 'Failed to update block.' : '차단 상태를 바꾸지 못했어요.')
     } finally {
       setLoadingAction(false)
     }
@@ -1387,14 +1387,14 @@ export default function App() {
       }
       showSuccess(
         nextProfile.needsAvatarReattach
-          ? (isEnglish ? 'Saved. Reattach photo.' : '저장됨. 사진 다시 선택')
+          ? (isEnglish ? 'Saved. Reattach photo.' : '저장했어요. 사진만 다시 선택해 주세요')
           : changedReminderEnabled || changedReminderTime
-            ? (isEnglish ? 'Saved. Reminder updated.' : '저장됨. 리마인더 변경')
-            : (isEnglish ? 'Saved' : '저장됨'),
+            ? (isEnglish ? 'Saved. Reminder updated.' : '저장했어요. 알림도 바꿨어요')
+            : (isEnglish ? 'Saved' : '저장했어요'),
         'info',
       )
     } catch (error) {
-      captureError(error, isEnglish ? 'Failed to save profile.' : '프로필 저장에 실패했습니다.')
+      captureError(error, isEnglish ? 'Failed to save profile.' : '프로필을 저장하지 못했어요.')
     } finally {
       setLoadingAction(false)
     }
@@ -1423,7 +1423,7 @@ export default function App() {
         'success',
       )
     } catch (error) {
-      captureError(error, isEnglish ? 'Failed to save weight.' : '몸무게 저장에 실패했습니다.')
+      captureError(error, isEnglish ? 'Failed to save weight.' : '체중을 저장하지 못했어요.')
     } finally {
       setLoadingAction(false)
     }
@@ -1445,7 +1445,7 @@ export default function App() {
         'success',
       )
       return true
-    }, isEnglish ? 'Failed to create mate post.' : '메이트 모집글 작성에 실패했습니다.', { defaultValue: false })
+    }, isEnglish ? 'Failed to create mate post.' : '메이트 글을 올리지 못했어요.', { defaultValue: false })
   }
 
   const handleToggleMateInterest = async (postId, isInterested) => {
@@ -1482,7 +1482,7 @@ export default function App() {
           : (isEnglish ? 'Reopened' : '재개'),
         'info',
       )
-    }, isEnglish ? 'Failed to update mate post.' : '메이트 모집 상태 변경에 실패했습니다.')
+    }, isEnglish ? 'Failed to update mate post.' : '메이트 글 상태를 바꾸지 못했어요.')
   }
 
   const handleToggleFollow = async (targetUserId, isFollowing) => {
@@ -1518,7 +1518,7 @@ export default function App() {
           : (isEnglish ? 'Following' : '팔로우'),
         'info',
       )
-    }, isEnglish ? 'Failed to update follow.' : '팔로우 상태 변경에 실패했습니다.')
+    }, isEnglish ? 'Failed to update follow.' : '팔로우를 반영하지 못했어요.')
   }
 
   useEffect(() => {
@@ -1590,7 +1590,7 @@ export default function App() {
       } catch (error) {
         if (!cancelled) {
           setCommunitySearchResults([])
-          captureError(error, isEnglish ? 'Failed to search users.' : '사람 검색에 실패했습니다.')
+          captureError(error, isEnglish ? 'Failed to search users.' : '사람을 찾지 못했어요.')
         }
       } finally {
         if (!cancelled) {
@@ -1692,7 +1692,7 @@ export default function App() {
       showSuccess(
         isEnglish
           ? 'Save nickname first.'
-          : '닉네임 먼저 저장',
+          : '닉네임 먼저 저장하기',
         'info',
       )
       return
@@ -1874,6 +1874,28 @@ export default function App() {
     { key: VIEW.PROGRESS, label: isEnglish ? 'Records' : '기록' },
     { key: VIEW.PROFILE, label: isEnglish ? 'Profile' : '프로필' },
   ]
+  const viewHeader = {
+    [VIEW.HOME]: {
+      eyebrow: isEnglish ? 'Gym Community' : 'Gym Community',
+      title: isEnglish ? 'Today\'s Training' : '오늘 운동',
+      body: isEnglish ? 'Pick one action and keep your momentum visible.' : '짧게라도 남기면 리듬이 이어져요.',
+    },
+    [VIEW.COMMUNITY]: {
+      eyebrow: isEnglish ? 'Crew Feed' : '크루 피드',
+      title: isEnglish ? 'Train Together' : '함께 뛰는 공간',
+      body: isEnglish ? 'See logs, rankings, and teammates in one clean feed.' : '피드와 랭킹에서 서로의 운동을 응원해요.',
+    },
+    [VIEW.PROGRESS]: {
+      eyebrow: isEnglish ? 'Progress Lab' : '성장 기록',
+      title: isEnglish ? 'Your Records' : '내 기록',
+      body: isEnglish ? 'Check your level, XP, body data, and workout history.' : '레벨, XP, 운동 흐름을 한눈에 확인해요.',
+    },
+    [VIEW.PROFILE]: {
+      eyebrow: isEnglish ? 'Profile' : '프로필',
+      title: isEnglish ? 'Your Fitness Identity' : '내 프로필',
+      body: isEnglish ? 'Tune your goals, nickname, reminders, and community settings.' : '목표와 알림, 커뮤니티 설정을 정리해요.',
+    },
+  }[view]
   /*
   const guestSyncNotice = (() => {
     if (!guestSyncState.pendingCount) return null
@@ -1983,7 +2005,7 @@ export default function App() {
     return null
   })()
   return (
-    <main className="app-shell">
+    <div className="app-shell">
       {guestSyncNotice && (
         <section
           className={`app-sync-card ${guestSyncNotice.tone}`}
@@ -2081,22 +2103,24 @@ export default function App() {
       />
 
       {loadingInit ? (
-        <section className="card skeleton-screen-card">
-          <div className="skeleton-copy">
-            <span className="skeleton-line short" />
-            <span className="skeleton-line long" />
-          </div>
-          <div className="skeleton-hero-block" />
-          <div className="skeleton-grid">
-            <span className="skeleton-panel" />
-            <span className="skeleton-panel" />
-            <span className="skeleton-panel" />
-          </div>
-          <p className="subtext skeleton-status-text">{initStatus}</p>
-        </section>
+        <main className="app-main" aria-busy="true">
+          <section className="card skeleton-screen-card">
+            <div className="skeleton-copy">
+              <span className="skeleton-line short" />
+              <span className="skeleton-line long" />
+            </div>
+            <div className="skeleton-hero-block" />
+            <div className="skeleton-grid">
+              <span className="skeleton-panel" />
+              <span className="skeleton-panel" />
+              <span className="skeleton-panel" />
+            </div>
+            <p className="subtext skeleton-status-text">{initStatus}</p>
+          </section>
+        </main>
       ) : (
         <>
-          {!showWorkoutPanel && (
+          <header className="app-header">
             <AppTopActions
               isEnglish={isEnglish}
               themeMode={themeMode}
@@ -2106,174 +2130,182 @@ export default function App() {
               onToggleTheme={handleToggleTheme}
               onOpenNotifications={openNotificationCenter}
             />
-          )}
+          </header>
 
-          {!showWorkoutPanel && (
+          <main className="app-main" id="app-content">
+            <section className="app-page-heading" aria-label={viewHeader.title}>
+              <span>{viewHeader.eyebrow}</span>
+              <h1>{viewHeader.title}</h1>
+              <p>{viewHeader.body}</p>
+            </section>
+
+            <Suspense fallback={<RouteSuspenseFallback label={isEnglish ? 'Loading route...' : '화면을 불러오는 중입니다...'} />}>
+              {view === VIEW.HOME && (
+                <HomeRoute
+                  celebration={celebration}
+                  isEnglish={isEnglish}
+                  profile={profile}
+                  todayDone={todayDone}
+                  currentLevel={latestResult?.level ?? testResult?.level ?? null}
+                  stats={workoutStats}
+                  challenge={challenge}
+                  activitySummary={activitySummary}
+                  homeInsight={homeInsight}
+                  achievementBadges={achievementBadges}
+                  reminder={reminderStatus}
+                  reminderPermission={reminderPermission}
+                  feedPreview={homeFeedPreview}
+                  routineTemplates={workoutTemplates}
+                  workoutLoading={loadingAction}
+                  onOpenWorkoutComposer={() => {
+                    setCelebration(null)
+                    openWorkoutComposer()
+                  }}
+                  onStartRoutine={(routine) => openWorkoutComposer(routine)}
+                  onOpenTest={() => {
+                    navigateToView(VIEW.PROGRESS)
+                    openTestFlow()
+                  }}
+                  onSeeCommunity={() => handleChangeView(VIEW.COMMUNITY)}
+                  onSelectFeedPreviewUser={(item) => {
+                    handleSelectCommunityUser(item)
+                    handleChangeView(VIEW.COMMUNITY)
+                  }}
+                  onRequestReminderPermission={handleRequestReminderPermission}
+                  showWorkoutPanel={showWorkoutPanel}
+                  workoutPreset={workoutPreset}
+                  onCompleteWorkout={handleWorkoutComplete}
+                  onSaveRoutine={handleSaveWorkoutTemplate}
+                  onDeleteRoutine={handleDeleteWorkoutTemplate}
+                  onCloseWorkoutComposer={closeWorkoutComposer}
+                />
+              )}
+
+              {view === VIEW.PROGRESS && (
+                <ProgressRoute
+                  isEnglish={isEnglish}
+                  showTestForm={showTestForm}
+                  showTestResult={showTestResult}
+                  onToggleTestFlow={() => {
+                    if (showTestForm || showTestResult) {
+                      closeTestFlow()
+                      return
+                    }
+
+                    openTestFlow()
+                  }}
+                  onCloseTestFlow={closeTestFlow}
+                  onGoHome={() => navigateToView(VIEW.HOME)}
+                  onSubmitTest={handleSubmitTest}
+                  loadingAction={loadingAction}
+                  testResult={testResult}
+                  latestResult={latestResult}
+                  badges={badges}
+                  weeklyGoal={profile?.weekly_goal || 4}
+                  bodyMetrics={bodyMetrics}
+                  activitySummary={activitySummary}
+                  achievementBadges={achievementBadges}
+                  recentActivityEvents={recentActivityEvents}
+                  isPro={isPro}
+                  onOpenPaywall={openPaywall}
+                  onSaveWeight={handleSaveWeight}
+                  workoutStats={workoutStats}
+                  workoutHistory={workoutHistory}
+                  onUpdateWorkout={handleUpdateWorkout}
+                  onDeleteWorkout={handleDeleteWorkout}
+                />
+              )}
+
+              {view === VIEW.COMMUNITY && (
+                <CommunityRoute
+                  isEnglish={isEnglish}
+                  canUseCommunity={hasCommunityNickname}
+                  onGoProfile={() => navigateToView(VIEW.PROFILE)}
+                  selectedCommunityUser={selectedCommunityUser}
+                  selectedCommunityProfile={selectedCommunityProfile}
+                  loadingSelectedCommunityProfile={loadingSelectedCommunityProfile}
+                  activeCommunityProfile={activeCommunityProfile}
+                  followingIds={followingIds}
+                  blockedIds={blockedIds}
+                  currentUserId={user?.id ?? null}
+                  loadingAction={loadingAction}
+                  onToggleFollow={handleToggleFollow}
+                  onOpenReportComposer={openReportComposer}
+                  onToggleBlock={handleToggleBlock}
+                  onClearCommunityUser={handleClearCommunityUser}
+                  communitySearchQuery={communitySearchQuery}
+                  onCommunitySearchQueryChange={setCommunitySearchQuery}
+                  communitySearchResults={communitySearchResults}
+                  loadingCommunitySearch={loadingCommunitySearch}
+                  onSelectCommunityUser={handleSelectCommunityUser}
+                  suggestedUsers={suggestedUsers}
+                  currentLevel={latestResult?.level ?? testResult?.level ?? null}
+                  loadingFeed={loadingFeed}
+                  loadingMatePosts={loadingMatePosts}
+                  loadingLeaderboard={loadingLeaderboard}
+                  visibleLeaderboard={visibleLeaderboard}
+                  visibleFeedPosts={visibleFeedPosts}
+                  visibleMatePosts={visibleMatePosts}
+                  onEnsureLeaderboard={refreshLeaderboard}
+                  onToggleLike={handleToggleLike}
+                  onSubmitComment={handleSubmitComment}
+                  onCreateMatePost={handleCreateMatePost}
+                  onToggleMateInterest={handleToggleMateInterest}
+                  onUpdateMatePostStatus={handleUpdateMatePostStatus}
+                  isAdmin={isAdmin}
+                  moderationReports={moderationReports}
+                  moderationLoading={loadingModeration}
+                  moderationActionLoading={moderationActionLoading}
+                  moderationStatus={moderationStatus}
+                  onModerationStatusChange={setModerationStatus}
+                  onRefreshModeration={() => refreshModeration(moderationStatus)}
+                  onResolveReport={handleResolveReport}
+                  onTogglePostVisibility={handleToggleReportedPostVisibility}
+                />
+              )}
+
+              {view === VIEW.PROFILE && (
+                <ProfileRoute
+                  user={user}
+                  profile={effectiveProfile}
+                  latestResult={latestResult}
+                  stats={workoutStats}
+                  badges={badges}
+                  activitySummary={activitySummary}
+                  achievementBadges={achievementBadges}
+                  challenge={challenge}
+                  bodyMetrics={bodyMetrics}
+                  followStats={followStats}
+                  loading={loadingAction}
+                  authLoading={loadingAuth}
+                  isAuthenticated={isAuthenticated}
+                  canUseCommunity={hasCommunityNickname}
+                  language={language}
+                  reminderPermission={reminderPermission}
+                  isPro={isPro}
+                  onOpenPaywall={openPaywall}
+                  onSetLanguage={setLanguage}
+                  onRequestAuth={() => openAuthPrompt('guest_profile')}
+                  onRequestReminderPermission={handleRequestReminderPermission}
+                  onSignOut={handleSignOut}
+                  onGoProgress={() => navigateToView(VIEW.PROGRESS)}
+                  onSaveProfile={handleUpdateProfile}
+                  onSaveWeight={handleSaveWeight}
+                />
+              )}
+            </Suspense>
+          </main>
+
+          <footer className="app-bottom-nav-slot" aria-label={isEnglish ? 'Primary navigation' : '주요 화면 이동'}>
             <BottomTabNav
               tabs={tabs}
               currentView={view}
               onChangeView={handleChangeView}
             />
-          )}
-
-          <Suspense fallback={<RouteSuspenseFallback label={isEnglish ? 'Loading route...' : '화면을 불러오는 중입니다...'} />}>
-            {view === VIEW.HOME && (
-              <HomeRoute
-                celebration={celebration}
-                isEnglish={isEnglish}
-                profile={profile}
-                todayDone={todayDone}
-                currentLevel={latestResult?.level ?? testResult?.level ?? null}
-                stats={workoutStats}
-                challenge={challenge}
-                activitySummary={activitySummary}
-                homeInsight={homeInsight}
-                achievementBadges={achievementBadges}
-                reminder={reminderStatus}
-                reminderPermission={reminderPermission}
-                feedPreview={homeFeedPreview}
-                routineTemplates={workoutTemplates}
-                workoutLoading={loadingAction}
-                onOpenWorkoutComposer={() => {
-                  setCelebration(null)
-                  openWorkoutComposer()
-                }}
-                onStartRoutine={(routine) => openWorkoutComposer(routine)}
-                onOpenTest={() => {
-                  navigateToView(VIEW.PROGRESS)
-                  openTestFlow()
-                }}
-                onSeeCommunity={() => handleChangeView(VIEW.COMMUNITY)}
-                onSelectFeedPreviewUser={(item) => {
-                  handleSelectCommunityUser(item)
-                  handleChangeView(VIEW.COMMUNITY)
-                }}
-                onRequestReminderPermission={handleRequestReminderPermission}
-                showWorkoutPanel={showWorkoutPanel}
-                workoutPreset={workoutPreset}
-                onCompleteWorkout={handleWorkoutComplete}
-                onSaveRoutine={handleSaveWorkoutTemplate}
-                onDeleteRoutine={handleDeleteWorkoutTemplate}
-                onCloseWorkoutComposer={closeWorkoutComposer}
-              />
-            )}
-
-            {view === VIEW.PROGRESS && (
-              <ProgressRoute
-                isEnglish={isEnglish}
-                showTestForm={showTestForm}
-                showTestResult={showTestResult}
-                onToggleTestFlow={() => {
-                  if (showTestForm || showTestResult) {
-                    closeTestFlow()
-                    return
-                  }
-
-                  openTestFlow()
-                }}
-                onCloseTestFlow={closeTestFlow}
-                onGoHome={() => navigateToView(VIEW.HOME)}
-                onSubmitTest={handleSubmitTest}
-                loadingAction={loadingAction}
-                testResult={testResult}
-                latestResult={latestResult}
-                badges={badges}
-                weeklyGoal={profile?.weekly_goal || 4}
-                bodyMetrics={bodyMetrics}
-                activitySummary={activitySummary}
-                achievementBadges={achievementBadges}
-                recentActivityEvents={recentActivityEvents}
-                isPro={isPro}
-                onOpenPaywall={openPaywall}
-                onSaveWeight={handleSaveWeight}
-                workoutStats={workoutStats}
-                workoutHistory={workoutHistory}
-                onUpdateWorkout={handleUpdateWorkout}
-                onDeleteWorkout={handleDeleteWorkout}
-              />
-            )}
-
-            {view === VIEW.COMMUNITY && (
-              <CommunityRoute
-                isEnglish={isEnglish}
-                canUseCommunity={hasCommunityNickname}
-                onGoProfile={() => navigateToView(VIEW.PROFILE)}
-                selectedCommunityUser={selectedCommunityUser}
-                selectedCommunityProfile={selectedCommunityProfile}
-                loadingSelectedCommunityProfile={loadingSelectedCommunityProfile}
-                activeCommunityProfile={activeCommunityProfile}
-                followingIds={followingIds}
-                blockedIds={blockedIds}
-                currentUserId={user?.id ?? null}
-                loadingAction={loadingAction}
-                onToggleFollow={handleToggleFollow}
-                onOpenReportComposer={openReportComposer}
-                onToggleBlock={handleToggleBlock}
-                onClearCommunityUser={handleClearCommunityUser}
-                communitySearchQuery={communitySearchQuery}
-                onCommunitySearchQueryChange={setCommunitySearchQuery}
-                communitySearchResults={communitySearchResults}
-                loadingCommunitySearch={loadingCommunitySearch}
-                onSelectCommunityUser={handleSelectCommunityUser}
-                suggestedUsers={suggestedUsers}
-                currentLevel={latestResult?.level ?? testResult?.level ?? null}
-                loadingFeed={loadingFeed}
-                loadingMatePosts={loadingMatePosts}
-                loadingLeaderboard={loadingLeaderboard}
-                visibleLeaderboard={visibleLeaderboard}
-                visibleFeedPosts={visibleFeedPosts}
-                visibleMatePosts={visibleMatePosts}
-                onEnsureLeaderboard={refreshLeaderboard}
-                onToggleLike={handleToggleLike}
-                onSubmitComment={handleSubmitComment}
-                onCreateMatePost={handleCreateMatePost}
-                onToggleMateInterest={handleToggleMateInterest}
-                onUpdateMatePostStatus={handleUpdateMatePostStatus}
-                isAdmin={isAdmin}
-                moderationReports={moderationReports}
-                moderationLoading={loadingModeration}
-                moderationActionLoading={moderationActionLoading}
-                moderationStatus={moderationStatus}
-                onModerationStatusChange={setModerationStatus}
-                onRefreshModeration={() => refreshModeration(moderationStatus)}
-                onResolveReport={handleResolveReport}
-                onTogglePostVisibility={handleToggleReportedPostVisibility}
-              />
-            )}
-
-            {view === VIEW.PROFILE && (
-              <ProfileRoute
-                user={user}
-                profile={effectiveProfile}
-                latestResult={latestResult}
-                stats={workoutStats}
-                badges={badges}
-                activitySummary={activitySummary}
-                achievementBadges={achievementBadges}
-                challenge={challenge}
-                bodyMetrics={bodyMetrics}
-                followStats={followStats}
-                loading={loadingAction}
-                authLoading={loadingAuth}
-                isAuthenticated={isAuthenticated}
-                canUseCommunity={hasCommunityNickname}
-                language={language}
-                reminderPermission={reminderPermission}
-                isPro={isPro}
-                onOpenPaywall={openPaywall}
-                onSetLanguage={setLanguage}
-                onRequestAuth={() => openAuthPrompt('guest_profile')}
-                onRequestReminderPermission={handleRequestReminderPermission}
-                onSignOut={handleSignOut}
-                onGoProgress={() => navigateToView(VIEW.PROGRESS)}
-                onSaveProfile={handleUpdateProfile}
-                onSaveWeight={handleSaveWeight}
-              />
-            )}
-          </Suspense>
+          </footer>
         </>
       )}
-    </main>
+    </div>
   )
 }
 

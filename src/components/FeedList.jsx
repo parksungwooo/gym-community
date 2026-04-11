@@ -58,7 +58,7 @@ function getPostContent(post, language) {
   switch (post.type) {
     case 'workout_complete': {
       if (note) return note
-      return isEnglish ? 'Workout logged.' : '운동 기록 완료.'
+      return isEnglish ? 'Workout logged.' : '운동 완료.'
     }
     case 'test_result':
       return isEnglish
@@ -142,7 +142,7 @@ function getSharePayloadForPost(post, language, isEnglish) {
     title,
     metric: primaryStat,
     detail,
-    footer: isEnglish ? 'Shared workout story' : '공유 운동 카드',
+    footer: isEnglish ? 'Shared workout story' : '운동 공유 카드',
   }
 }
 
@@ -166,7 +166,7 @@ function FeedCard({
   const authorName = shortUser(post.user_id, post.authorDisplayName, isEnglish)
   const authorLevel = post.authorLevel
     ? localizeLevelText(post.authorLevel, language)
-    : isEnglish ? 'Level pending' : '레벨 준비 중'
+    : isEnglish ? 'Level pending' : '레벨 미정'
 
   const submitComment = async (event) => {
     event.preventDefault()
@@ -410,18 +410,18 @@ export default function FeedList({
     return post.type === filter
   })
   const emptyTitle = filter === 'following'
-    ? (isEnglish ? 'No following posts yet.' : '팔로우한 사람의 글이 아직 없어요.')
-    : (isEnglish ? 'Start the community with your first workout.' : '첫 운동을 기록하고 커뮤니티를 시작해보세요!')
+    ? (isEnglish ? 'No following posts yet.' : '팔로우 피드가 비었어요.')
+    : (isEnglish ? 'Start the community with your first workout.' : '첫 기록으로 피드를 열어요.')
   const emptyBody = filter === 'following'
-    ? (isEnglish ? 'Follow more people to build your crew feed.' : '관심 있는 운동 메이트를 팔로우하면 피드가 채워져요.')
-    : (isEnglish ? 'Save a workout, add a photo, or cheer on a teammate from here.' : '운동을 저장하거나 사진을 올리면 이곳에서 응원과 댓글이 시작돼요.')
+    ? (isEnglish ? 'Follow more people to build your crew feed.' : '마음에 드는 사람을 팔로우하면 여기가 채워져요.')
+    : (isEnglish ? 'Save a workout, add a photo, or cheer on a teammate from here.' : '운동을 저장하면 응원과 댓글이 여기서 시작돼요.')
 
   return (
     <section className="card community-feed-surface compact community-feed-redesign">
       <div className="app-section-heading compact">
         <div>
           <span className="app-section-kicker">{isEnglish ? 'Feed' : '피드'}</span>
-          <h2>{isEnglish ? 'Community' : '커뮤니티'}</h2>
+          <h2>{isEnglish ? 'Community' : '피드'}</h2>
         </div>
         <span className="community-mini-pill">{isEnglish ? `${visiblePosts.length} posts` : `${visiblePosts.length}개`}</span>
       </div>
@@ -484,20 +484,6 @@ export default function FeedList({
           </span>
           <strong className="feed-empty-title">{emptyTitle}</strong>
           <p className="feed-empty-body">{emptyBody}</p>
-          <strong>
-            {filter === 'following'
-              ? (isEnglish ? 'No following posts.' : '팔로우 글이 없어요.')
-              : (isEnglish ? 'Feed is empty.' : '피드가 비어 있어요.')}
-          </strong>
-          <p>
-            {filter === 'following'
-              ? (isEnglish
-                ? 'Follow more people.'
-                : '더 팔로우해보세요.')
-              : (isEnglish
-                ? 'Posts will show up here.'
-                : '글이 여기 쌓여요.')}
-          </p>
         </div>
       )}
 

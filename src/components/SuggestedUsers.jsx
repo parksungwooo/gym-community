@@ -18,7 +18,7 @@ function buildReason(item, currentLevel, language) {
   }
 
   if ((item.total_workouts ?? 0) >= 10) {
-    return language === 'en' ? 'Building a habit' : '운동 습관 형성 중'
+    return language === 'en' ? 'Building a habit' : '꾸준히 하는 중'
   }
 
   return language === 'en' ? 'Similar pace' : '비슷한 페이스'
@@ -101,10 +101,10 @@ export default function SuggestedUsers({
       {!loading && !rows.length && (
         <div className="empty-state-card">
           <span className="empty-state-badge">{t('곧 채워져요', 'Coming soon')}</span>
-          <strong>{t('추천이 여기 보여요.', 'Suggestions appear here.')}</strong>
+          <strong>{t('곧 맞는 사람이 보여요.', 'Suggestions appear here.')}</strong>
           <p>
             {t(
-              '기록이 더 쌓이면 추천돼요.',
+              '기록이 쌓이면 비슷한 페이스를 찾아드릴게요.',
               'More logs will unlock suggestions.',
             )}
           </p>
@@ -117,7 +117,7 @@ export default function SuggestedUsers({
           const isFollowing = followingIds.includes(item.user_id)
           const levelLabel = item.latest_level
             ? localizeLevelText(item.latest_level, language)
-            : t('레벨 준비 중', 'Level pending')
+            : t('레벨 미정', 'Level pending')
 
           return (
             <article
@@ -137,7 +137,7 @@ export default function SuggestedUsers({
                       className="suggested-user-avatar"
                       imageUrl={item.avatar_url}
                       fallback={item.avatar_emoji || 'RUN'}
-                      alt={item.display_name || (isEnglish ? 'Suggested user' : '추천 유저')}
+                      alt={item.display_name || (isEnglish ? 'Suggested user' : '추천 사용자')}
                     />
                     <div className="community-spotlight-copy">
                       <strong className="suggested-user-name">{item.display_name}</strong>

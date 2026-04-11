@@ -98,8 +98,8 @@ export function buildChallenge(stats, profile, isEnglish) {
 export function validateDisplayName(name, isEnglish) {
   const trimmed = name.trim()
 
-  if (!trimmed) return isEnglish ? 'Please enter a nickname.' : '닉네임을 입력해주세요.'
-  if (trimmed.length < 2 || trimmed.length > 12) return isEnglish ? 'Nickname must be 2 to 12 characters.' : '닉네임은 2자 이상 12자 이하로 입력해주세요.'
+  if (!trimmed) return isEnglish ? 'Please enter a nickname.' : '닉네임을 입력해 주세요.'
+  if (trimmed.length < 2 || trimmed.length > 12) return isEnglish ? 'Nickname must be 2 to 12 characters.' : '닉네임은 2~12자로 입력해 주세요.'
   if (!/^[0-9A-Za-z가-힣]+$/.test(trimmed)) return isEnglish ? 'Nickname can use Korean, English letters, and numbers only.' : '닉네임은 한글, 영문, 숫자만 사용할 수 있어요.'
 
   return ''

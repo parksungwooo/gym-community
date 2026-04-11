@@ -55,11 +55,11 @@ function PhotoProofList({ items, isEnglish, onRemove, onMove }) {
   if (!items.length) {
     return (
       <div className="photo-proof-empty">
-        <strong>{isEnglish ? 'No photos' : '사진 없음'}</strong>
+        <strong>{isEnglish ? 'No photos' : '사진 선택 안 함'}</strong>
         <p>
           {isEnglish
             ? 'Camera asks on tap.'
-            : '카메라는 눌릴 때만 물어요.'}
+            : '인증 사진은 선택이에요.'}
         </p>
       </div>
     )
@@ -141,7 +141,7 @@ export default function WorkoutPanel({
 
   const noteHint = useMemo(() => {
     if (workoutType === '러닝') {
-      return isEnglish ? 'ex: Park 3km, steady' : '예: 공원 3km, 안정적'
+      return isEnglish ? 'ex: Park 3km, steady' : '예: 공원 3km, 가볍게'
     }
 
     if (workoutType === '웨이트') {
@@ -156,7 +156,7 @@ export default function WorkoutPanel({
   const optionalSummary = useMemo(() => {
     const summaryParts = []
 
-    if (note.trim()) summaryParts.push(isEnglish ? 'Note added' : '메모 있음')
+    if (note.trim()) summaryParts.push(isEnglish ? 'Note added' : '메모 추가')
     if (photoItems.length > 0) summaryParts.push(isEnglish ? `${photoItems.length} photo${photoItems.length > 1 ? 's' : ''}` : `사진 ${photoItems.length}장`)
     if (!shareToFeed) summaryParts.push(isEnglish ? 'Private' : '비공개')
 
@@ -164,7 +164,7 @@ export default function WorkoutPanel({
       return summaryParts.join(' · ')
     }
 
-    return isEnglish ? 'Note, photos, privacy' : '메모, 사진, 공개 설정'
+    return isEnglish ? 'Note, photos, privacy' : '메모 · 사진 · 공개'
   }, [isEnglish, note, photoItems.length, shareToFeed])
 
   const manualSummary = useMemo(() => {
@@ -187,10 +187,10 @@ export default function WorkoutPanel({
     if (routineTemplates.length > 0) {
       return isEnglish
         ? `${routineTemplates.length} saved routine${routineTemplates.length > 1 ? 's' : ''}`
-        : `${routineTemplates.length}개 저장됨`
+        : `${routineTemplates.length}개 저장`
     }
 
-    return isEnglish ? 'Save for later' : '저장해두고 재사용'
+    return isEnglish ? 'Save for later' : '다음엔 더 빠르게'
   }, [isEnglish, routineTemplates.length])
 
   const hasOptionalContent = note.trim().length > 0 || photoItems.length > 0 || !shareToFeed
@@ -344,18 +344,18 @@ export default function WorkoutPanel({
 
       <div className="workout-capture-header compact">
         <div>
-          <span className="app-section-kicker">{isEnglish ? 'Workout Sheet' : '운동 기록'}</span>
-          <h2>{isEnglish ? 'Workout Log' : '운동 기록'}</h2>
+          <span className="app-section-kicker">{isEnglish ? 'Workout Sheet' : '오늘 운동'}</span>
+          <h2>{isEnglish ? 'Workout Log' : '기록하기'}</h2>
           <p className="subtext compact">
             {isEnglish
               ? 'Type and time are enough.'
-              : '종류와 시간만 적으면 돼요.'}
+              : '종류와 시간만 남기면 끝.'}
           </p>
         </div>
 
         <div className="capture-header-actions">
           <span className={`capture-status subtle ${todayDone ? 'done' : ''}`}>
-            {todayDone ? (isEnglish ? 'More available' : '추가 가능') : (isEnglish ? 'Ready' : '준비됨')}
+            {todayDone ? (isEnglish ? 'More available' : '추가 가능') : (isEnglish ? 'Ready' : '준비 완료')}
           </span>
           {onClose ? (
             <button type="button" className="sheet-close-btn" onClick={onClose} disabled={loading}>
@@ -376,7 +376,7 @@ export default function WorkoutPanel({
             aria-label={isEnglish ? `Notes and photos, ${optionalActionLabel}` : `\uBA54\uBAA8\uC640 \uC0AC\uC9C4, ${optionalActionLabel}`}
           >
             <span className="sheet-tool-copy">
-              <strong>{isEnglish ? 'Notes & Photos' : '메모·사진'}</strong>
+              <strong>{isEnglish ? 'Notes & Photos' : '메모/사진'}</strong>
               <span>{optionalSummary}</span>
             </span>
             <span className="sheet-tool-state" aria-hidden="true" data-label={optionalActionLabel}>
@@ -393,7 +393,7 @@ export default function WorkoutPanel({
             aria-label={isEnglish ? `Saved routines, ${routineActionLabel}` : `\uC800\uC7A5 \uB8E8\uD2F4, ${routineActionLabel}`}
           >
             <span className="sheet-tool-copy">
-              <strong>{isEnglish ? 'Saved Routines' : '저장 루틴'}</strong>
+              <strong>{isEnglish ? 'Saved Routines' : '내 루틴'}</strong>
               <span>{routineSummary}</span>
             </span>
             <span className="sheet-tool-state" aria-hidden="true" data-label={routineActionLabel}>
@@ -421,7 +421,7 @@ export default function WorkoutPanel({
         </section>
 
         <section className="sheet-section quick-choice-section compact">
-          <span className="field-label-text">{isEnglish ? 'Duration' : '운동 시간'}</span>
+          <span className="field-label-text">{isEnglish ? 'Duration' : '시간'}</span>
           <div className="quick-chip-row compact">
             {QUICK_DURATION_OPTIONS.map((value) => (
               <button
@@ -447,12 +447,12 @@ export default function WorkoutPanel({
             aria-label={isEnglish ? `Fine tune, ${manualActionLabel}` : `\uC138\uBD80 \uC870\uC815, ${manualActionLabel}`}
           >
             <span className="manual-edit-copy">
-              <span className="manual-edit-label">{isEnglish ? 'Fine Tune' : '세부 조정'}</span>
+              <span className="manual-edit-label">{isEnglish ? 'Fine Tune' : '직접 입력'}</span>
               <strong className="manual-edit-value">{manualSummary}</strong>
               <span className="manual-edit-helper">
                 {usesCustomSelection
-                  ? (isEnglish ? 'A custom time is active. Open this to adjust it.' : '현재 빠른 선택에 없는 값이 적용돼 있어요.')
-                  : (isEnglish ? 'Only open this when you need a custom time.' : '빠른 선택에 없는 시간만 여기서 바꾸면 돼요.')}
+                  ? (isEnglish ? 'A custom time is active. Open this to adjust it.' : '직접 입력한 값이 적용됐어요.')
+                  : (isEnglish ? 'Only open this when you need a custom time.' : '원하는 시간은 여기서 바꿔요.')}
               </span>
             </span>
             <span className="manual-edit-action" aria-hidden="true" data-label={manualActionLabel}>
@@ -472,7 +472,7 @@ export default function WorkoutPanel({
               </label>
 
               <label className="field-label">
-                <span className="field-label-text">{isEnglish ? 'Duration (min)' : '운동 시간(분)'}</span>
+                <span className="field-label-text">{isEnglish ? 'Duration (min)' : '시간(분)'}</span>
                 <input className="workout-input compact" type="number" min="0" max="300" step="5" value={durationMinutes} onChange={handleDurationChange} disabled={loading} />
               </label>
             </div>
@@ -554,8 +554,8 @@ export default function WorkoutPanel({
               </div>
             ) : (
               <div className="routine-empty-card compact">
-                <strong>{isEnglish ? 'Save a combo' : '조합 저장'}</strong>
-                <p>{isEnglish ? 'Start faster next time.' : '다음엔 더 빨라요.'}</p>
+                <strong>{isEnglish ? 'Save a combo' : '루틴 저장'}</strong>
+                <p>{isEnglish ? 'Start faster next time.' : '자주 하는 운동을 저장해요.'}</p>
               </div>
             )}
           </section>
@@ -595,9 +595,9 @@ export default function WorkoutPanel({
             <section className="sheet-section compact">
               <div className="feed-share-row">
                 <div>
-                  <span className="field-label-text">{isEnglish ? 'Share to Feed' : '피드 공개'}</span>
+                  <span className="field-label-text">{isEnglish ? 'Share to Feed' : '피드에 공유'}</span>
                   <p className="photo-proof-helper">
-                    {isEnglish ? 'Off for private.' : '끄면 비공개'}
+                    {isEnglish ? 'Off for private.' : '끄면 나만 볼 수 있어요'}
                   </p>
                 </div>
                 <button type="button" className={`toggle-chip ${shareToFeed ? 'active' : ''}`} onClick={() => setShareToFeed((prev) => !prev)} disabled={loading}>
@@ -614,7 +614,7 @@ export default function WorkoutPanel({
             className="capture-submit-btn compact flex min-h-[56px] items-center justify-center rounded-2xl bg-emerald-500 px-5 text-base font-black text-white shadow-xl shadow-emerald-500/25 transition-all hover:-translate-y-0.5 hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
             disabled={loading}
           >
-            {loading ? (isEnglish ? 'Saving...' : '저장 중...') : todayDone ? (isEnglish ? 'Save more' : '추가 저장') : (isEnglish ? 'Save' : '저장')}
+            {loading ? (isEnglish ? 'Saving...' : '저장 중') : todayDone ? (isEnglish ? 'Save more' : '하나 더 저장') : (isEnglish ? 'Save' : '기록 저장')}
           </button>
         </div>
       </form>

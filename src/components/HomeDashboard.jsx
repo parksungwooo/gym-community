@@ -110,8 +110,8 @@ function QuickWorkoutCard({ item, isEnglish, onStart }) {
 }
 
 function formatCalories(value, isEnglish) {
-  if (!value) return isEnglish ? 'No data yet' : '아직 데이터 없음'
-  return isEnglish ? `~${value} kcal` : `약 ${value}kcal`
+  if (!value) return isEnglish ? 'No data yet' : '기록 없음'
+  return isEnglish ? `~${value} kcal` : `${value}kcal`
 }
 
 function getHomeFeedPhotoUrl(post) {
@@ -126,7 +126,7 @@ function getHomeFeedMeta(post, language, isEnglish) {
   if (post?.type !== 'workout_complete') {
     if (post?.type === 'challenge_complete') return isEnglish ? 'Challenge complete' : '챌린지 완료'
     if (post?.type === 'level_up') return isEnglish ? 'Level up' : '레벨업'
-    return isEnglish ? 'Community update' : '커뮤니티 업데이트'
+    return isEnglish ? 'Community update' : '새 피드'
   }
 
   const workoutType = getWorkoutTypeLabel(post?.metadata?.workoutType, language)
@@ -147,16 +147,16 @@ function getHomeFeedCopy(post, language, isEnglish) {
     if (post?.metadata?.note) {
       return isEnglish
         ? `${workoutType} session saved. ${post.metadata.note}`
-        : `${workoutType} 기록을 남겼어요. ${post.metadata.note}`
+        : `${workoutType} 완료. ${post.metadata.note}`
     }
 
-    return isEnglish ? `${workoutType} session saved.` : `${workoutType} 기록을 남겼어요.`
+    return isEnglish ? `${workoutType} session saved.` : `${workoutType} 완료.`
   }
 
   if (post?.type === 'challenge_complete') return isEnglish ? 'Weekly challenge cleared.' : '주간 챌린지를 달성했어요.'
-  if (post?.type === 'level_up') return isEnglish ? 'Level-up update shared.' : '레벨업 소식을 공유했어요.'
+  if (post?.type === 'level_up') return isEnglish ? 'Level-up update shared.' : '레벨업을 공유했어요.'
 
-  return isEnglish ? 'Shared a fresh progress update.' : '새로운 진행 상황을 공유했어요.'
+  return isEnglish ? 'Shared a fresh progress update.' : '새 기록을 공유했어요.'
 }
 
 function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }) {
@@ -165,7 +165,7 @@ function HomeFeedPreviewCard({ post, sourceLabel, onSelectUser, onSeeCommunity }
   const authorName = post.authorDisplayName || (isEnglish ? 'Guest' : '게스트')
   const authorLevel = post.authorLevel
     ? localizeLevelText(post.authorLevel, language)
-    : t('레벨 준비 중', 'Level pending')
+    : t('레벨 미정', 'Level pending')
   const photoUrl = getHomeFeedPhotoUrl(post)
   const storyMeta = getHomeFeedMeta(post, language, isEnglish)
   const content = getHomeFeedCopy(post, language, isEnglish)
@@ -284,7 +284,7 @@ export default function HomeDashboard({
   const levelNeedleAngle = `${-72 + (activityLevelProgress * 1.44)}deg`
   const currentLevelLabel = currentLevel
     ? localizeLevelText(currentLevel, language)
-    : t('레벨 준비 중', 'Level pending')
+    : t('레벨 미정', 'Level pending')
   const todayRecommendation = getTodayWorkoutRecommendation({
     currentLevel,
     activitySummary,
@@ -316,47 +316,47 @@ export default function HomeDashboard({
   ].slice(0, 4)
 
   const heroTitle = todayDone
-    ? t('오늘 기록 완료', 'Saved for today')
-    : t('오늘 한 번이면 돼요', 'One log is enough today')
+    ? t('오늘 완료', 'Saved for today')
+    : t('오늘은 한 번만', 'One log is enough today')
 
   const heroBadgeLabel = todayDone
     ? t('오늘 완료', 'Saved today')
     : goalCurrent > 0
       ? t(`이번 주 ${goalCurrent}/${goalTarget}`, `Week ${goalCurrent}/${goalTarget}`)
-      : t('첫 기록 만들기', 'Start the first log')
+      : t('첫 기록 시작', 'Start the first log')
 
   const heroDescription = nickname
     ? todayDone
       ? t(
-          `${nickname}님, 오늘 기록은 이미 끝났어요.`,
+          `${nickname}님, 오늘도 해냈어요.`,
           `${nickname}, today is already done.`,
         )
       : t(
-          `${nickname}님, 짧게 남겨도 충분해요.`,
+          `${nickname}님, 짧게라도 남겨봐요.`,
           `${nickname}, a short log is enough.`,
         )
     : t(
-        '종류와 시간만 적어도 충분해요.',
+        '종류와 시간만 남기면 돼요.',
         'Type and time are enough.',
       )
 
   const recentWorkoutTitle = stats.lastWorkoutType
     ? getWorkoutTypeLabel(stats.lastWorkoutType, language)
-    : t('아직 기록 없음', 'No workout yet')
+    : t('기록 없음', 'No workout yet')
 
   const recentWorkoutMeta = stats.lastWorkoutType
     ? [
         stats.lastWorkoutDuration ? t(`${stats.lastWorkoutDuration}분`, `${stats.lastWorkoutDuration} min`) : null,
         stats.lastWorkoutCalories ? formatCalories(stats.lastWorkoutCalories, isEnglish) : null,
       ].filter(Boolean).join(' · ')
-    : t('첫 기록이 여기에 보여요.', 'Your first log shows here.')
+    : t('첫 기록이 여기 쌓여요.', 'Your first log shows here.')
 
   const recentWorkoutFootnote = stats.lastWorkoutType
     ? t(
         `최근 운동 ${recentWorkoutTitle}${recentWorkoutMeta ? ` · ${recentWorkoutMeta}` : ''}`,
         `Latest ${recentWorkoutTitle}${recentWorkoutMeta ? ` · ${recentWorkoutMeta}` : ''}`,
       )
-    : t('최근 운동은 기록을 남기면 여기서 보여요.', 'Recent workouts show up here after you log.')
+    : t('기록하면 최근 운동이 여기 보여요.', 'Recent workouts show up here after you log.')
 
   const heroMetrics = [
     {
@@ -373,7 +373,7 @@ export default function HomeDashboard({
 
   const showReminderInline = reminder?.enabled && !todayDone
   const reminderTitle = reminder?.due
-    ? t('지금 기록할 시간이에요.', 'Time to log today.')
+    ? t('지금 한 번 남겨요.', 'Time to log today.')
     : t(
         `리마인더 ${reminder?.reminderTimeLabel}`,
         `Reminder ${reminder?.reminderTimeLabel}`,
@@ -381,11 +381,11 @@ export default function HomeDashboard({
 
   const reminderBody = reminder?.due
     ? t(
-        '한 번만 남기면 흐름이 이어져요.',
+        '한 번이면 리듬이 이어져요.',
         'One quick save keeps the streak alive.',
       )
     : t(
-        '돌아올 시간을 잡아뒀어요.',
+        '운동할 시간을 기억해둘게요.',
         'A return time is already set.',
       )
 
@@ -397,19 +397,19 @@ export default function HomeDashboard({
 
   const featuredPost = featuredFeedSection.items[0] ?? null
   const emptyFeedSecondaryAction = !currentLevel
-    ? { label: t('레벨 테스트', 'Level test'), onClick: onOpenTest }
-    : { label: t('커뮤니티 보기', 'Open community'), onClick: onSeeCommunity }
+    ? { label: t('레벨 확인', 'Level test'), onClick: onOpenTest }
+    : { label: t('피드 보기', 'Open community'), onClick: onSeeCommunity }
 
   return (
     <section className="home-dashboard-app streamlined-home home-dashboard-redesign home-dashboard-clean">
       <section className="card home-focus-card home-growth-hero home-growth-hero-strong home-neon-command-card">
-        <div className="home-neon-overview" aria-label={t('오늘 목표와 레벨 요약', 'Today goal and level summary')}>
+        <div className="home-neon-overview" aria-label={t('오늘 요약', 'Today goal and level summary')}>
           <div
             className="home-daily-goal-ring"
             style={{ '--goal-angle': dailyGoalAngle }}
           >
             <div className="home-daily-goal-core">
-              <span>{t('일일 목표', 'Daily Goal')}</span>
+              <span>{t('오늘 목표', 'Daily Goal')}</span>
               <strong>{`${Math.round(todayCalories)} / ${dailyGoalCalories}`}</strong>
               <small>{t('kcal', 'kcal')}</small>
               <em>{`${Math.round(dailyGoalProgress)}% ${isEnglish ? 'Completed' : '완료'}`}</em>
@@ -429,7 +429,7 @@ export default function HomeDashboard({
             <strong>{`Lv.${activityLevelValue} ${currentLevelLabel}`}</strong>
             <small>
               {activitySummary?.remainingXp
-                ? t(`다음 레벨까지 ${activitySummary.remainingXp} XP`, `${activitySummary.remainingXp} XP to next level`)
+                ? t(`다음 레벨까지 ${activitySummary.remainingXp}XP`, `${activitySummary.remainingXp} XP to next level`)
                 : t('오늘도 성장 중', 'Growing today')}
             </small>
           </div>
@@ -474,9 +474,9 @@ export default function HomeDashboard({
 
         <div className="home-quick-workout-shell">
           <div className="home-quick-workout-heading">
-            <strong>{t('빠른 운동 시작', 'Quick Workout')}</strong>
+            <strong>{t('빠른 시작', 'Quick Workout')}</strong>
             <button type="button" className="home-quick-workout-see-all" onClick={onOpenWorkoutComposer}>
-              {t('직접 기록', 'Custom')}
+              {t('직접 입력', 'Custom')}
             </button>
           </div>
           <div className="home-quick-workout-grid">
@@ -493,7 +493,7 @@ export default function HomeDashboard({
 
         <div className="home-growth-hero-main">
           <div className="home-focus-copy">
-            <span className="app-section-kicker">{t('오늘의 액션', 'Today')}</span>
+            <span className="app-section-kicker">{t('오늘 할 일', 'Today')}</span>
             <div className="home-focus-topline">
               <span className={`home-focus-badge ${todayDone ? 'done' : 'fresh'}`}>{heroBadgeLabel}</span>
             </div>
@@ -519,8 +519,8 @@ export default function HomeDashboard({
               {workoutLoading
                 ? t('여는 중...', 'Opening...')
                 : todayDone
-                  ? t('추가 기록', 'Add log')
-                  : t('운동 기록', 'Log workout')}
+                  ? t('하나 더', 'Add log')
+                  : t('기록하기', 'Log workout')}
             </button>
 
             {topRoutine ? (
@@ -533,7 +533,7 @@ export default function HomeDashboard({
               </button>
             ) : !currentLevel ? (
               <button type="button" className="ghost-btn home-focus-secondary" onClick={onOpenTest}>
-                {t('레벨 테스트', 'Level test')}
+                {t('레벨 확인', 'Level test')}
               </button>
             ) : null}
           </div>
@@ -571,11 +571,11 @@ export default function HomeDashboard({
       <section className="card home-feed-preview-shell compact-home-feed minimal-home-feed">
         <div className="home-module-heading home-feed-preview-heading">
           <div>
-            <span className="app-section-kicker">{t('지금 피드', 'Now in feed')}</span>
-            <h3>{t('지금 볼 한 장', 'One story to see')}</h3>
+            <span className="app-section-kicker">{t('피드', 'Now in feed')}</span>
+            <h3>{t('오늘의 피드', 'One story to see')}</h3>
           </div>
           <button type="button" className="ghost-btn" onClick={onSeeCommunity}>
-            {t('커뮤니티', 'Community')}
+            {t('피드 보기', 'Community')}
           </button>
         </div>
 
@@ -589,16 +589,16 @@ export default function HomeDashboard({
         ) : (
           <div className="empty-state-card cool home-feed-empty">
             <span className="empty-state-badge">{t('피드', 'Feed')}</span>
-            <strong>{t('아직 피드가 조용해요.', 'Feed is quiet for now.')}</strong>
+            <strong>{t('아직 조용해요', 'Feed is quiet for now.')}</strong>
             <p>
               {t(
-                '운동 한 번 기록하거나 커뮤니티를 열어보면 여기부터 채워져요.',
+                '첫 기록을 남기면 피드가 살아나요.',
                 'One log or a quick visit to community starts this area.',
               )}
             </p>
             <div className="state-action-row home-feed-empty-actions">
               <button type="button" className="primary-btn" onClick={onOpenWorkoutComposer}>
-                {t('운동 기록', 'Log workout')}
+                {t('기록하기', 'Log workout')}
               </button>
               <button type="button" className="ghost-btn" onClick={emptyFeedSecondaryAction.onClick}>
                 {emptyFeedSecondaryAction.label}

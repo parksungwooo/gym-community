@@ -60,13 +60,13 @@ function getHeroCopy(weeklyCount, weeklyGoal, isEnglish) {
   if (weeklyCount > 0) {
     return {
       title: isEnglish ? 'Your rhythm is showing.' : '이번 주 흐름이 보여요.',
-      body: isEnglish ? 'Logs, streak, and level together.' : '기록, 연속, 레벨을 같이 봐요.',
+      body: isEnglish ? 'Logs, streak, and level together.' : '기록과 레벨을 한눈에 봐요.',
     }
   }
 
   return {
-    title: isEnglish ? 'The first log starts here.' : '첫 기록부터 시작해요.',
-    body: isEnglish ? 'One workout opens the page.' : '운동 한 번이면 이 화면이 채워져요.',
+    title: isEnglish ? 'The first log starts here.' : '첫 기록을 남겨요.',
+    body: isEnglish ? 'One workout opens the page.' : '한 번만 저장해도 흐름이 보여요.',
   }
 }
 
@@ -105,7 +105,7 @@ export default function ProgressPanel({
     : badges
   const latestWorkoutName = stats.lastWorkoutType
     ? getWorkoutTypeLabel(stats.lastWorkoutType, language)
-    : (isEnglish ? 'No workout yet' : '아직 기록 없음')
+    : (isEnglish ? 'No workout yet' : '기록 없음')
   const heroCopy = getHeroCopy(stats.weeklyCount ?? 0, weeklyGoal, isEnglish)
 
   const latestWorkoutMetaParts = [
@@ -117,7 +117,7 @@ export default function ProgressPanel({
 
   const latestWorkoutMeta = latestWorkoutMetaParts.length
     ? latestWorkoutMetaParts.join(' · ')
-    : stats.lastWorkoutNote || (isEnglish ? 'Time not saved yet.' : '시간 기록 없음')
+    : stats.lastWorkoutNote || (isEnglish ? 'Time not saved yet.' : '시간 없음')
 
   const trendPoints = bodyMetrics?.history?.slice(-6) ?? []
   const weightValues = trendPoints.map((item) => item.weightKg)
@@ -128,7 +128,7 @@ export default function ProgressPanel({
   const lastWorkoutDateLabel = stats.lastWorkoutDate ? formatDate(stats.lastWorkoutDate, language) : '--'
   const levelMeta = latestResult
     ? (isEnglish ? `${latestResult.score} pts` : `${latestResult.score}점`)
-    : (isEnglish ? 'Test pending' : '테스트 전')
+    : (isEnglish ? 'Test pending' : '레벨 미정')
   const bmiMeta = bodyMetrics?.bmi != null
     ? `${getBmiCategory(bodyMetrics.bmi, isEnglish)} · ${bodyMetrics.heightCm}cm / ${bodyMetrics.latestWeightKg}kg`
     : (isEnglish ? 'Add height and weight.' : '키와 체중을 입력해요.')
@@ -213,7 +213,7 @@ export default function ProgressPanel({
             <p className="record-highlight-meta">
               {achievementBadges.length
                 ? (isEnglish ? `${achievementBadges.length} badges` : `배지 ${achievementBadges.length}개`)
-                : (isEnglish ? 'Badges open as you log.' : '기록이 쌓이면 배지가 열려요.')}
+                : (isEnglish ? 'Badges open as you log.' : '기록하면 배지가 열려요.')}
             </p>
           </div>
         </section>
@@ -247,8 +247,8 @@ export default function ProgressPanel({
           ) : (
             <div className="empty-state-card cool">
               <span className="empty-state-badge">XP</span>
-              <strong>{isEnglish ? 'No recent XP yet.' : '최근 XP가 아직 없어요.'}</strong>
-              <p>{isEnglish ? 'Logs and tests fill this.' : '기록과 테스트가 쌓이면 보여요.'}</p>
+              <strong>{isEnglish ? 'No recent XP yet.' : '아직 XP가 없어요.'}</strong>
+              <p>{isEnglish ? 'Logs and tests fill this.' : '운동을 남기면 바로 쌓여요.'}</p>
             </div>
           )}
         </section>
@@ -266,7 +266,7 @@ export default function ProgressPanel({
             <HealthStatTile
               label={isEnglish ? 'Today' : '오늘'}
               value={formatCalories(stats.todayCalories, isEnglish)}
-              meta={isEnglish ? 'Saved logs' : '기록 기준'}
+              meta={isEnglish ? 'Saved logs' : '오늘 기록'}
               tone="cool"
             />
             <HealthStatTile
@@ -278,7 +278,7 @@ export default function ProgressPanel({
             <HealthStatTile
               label={isEnglish ? 'Total' : '누적'}
               value={formatCalories(stats.totalCalories, isEnglish)}
-              meta={isEnglish ? 'All logs' : '전체 기록'}
+              meta={isEnglish ? 'All logs' : '누적 기록'}
             />
           </div>
         </section>
@@ -369,8 +369,8 @@ export default function ProgressPanel({
         ) : (
           <div className="empty-state-card cool">
             <span className="empty-state-badge">{isEnglish ? 'Weight' : '체중'}</span>
-            <strong>{isEnglish ? 'The first entry starts this.' : '첫 체중부터 시작돼요.'}</strong>
-            <p>{isEnglish ? 'Log it in Profile.' : '프로필에서 기록해요.'}</p>
+            <strong>{isEnglish ? 'The first entry starts this.' : '첫 체중을 남겨요.'}</strong>
+            <p>{isEnglish ? 'Log it in Profile.' : '프로필에서 바로 기록할 수 있어요.'}</p>
           </div>
         )}
       </section>
@@ -394,8 +394,8 @@ export default function ProgressPanel({
           ) : (
             <div className="empty-state-card cool">
               <span className="empty-state-badge">{isEnglish ? 'Badge' : '배지'}</span>
-              <strong>{isEnglish ? 'No badges yet.' : '아직 배지가 없어요.'}</strong>
-              <p>{isEnglish ? 'They unlock as you log.' : '기록이 쌓이면 열려요.'}</p>
+              <strong>{isEnglish ? 'No badges yet.' : '아직 열린 배지가 없어요.'}</strong>
+              <p>{isEnglish ? 'They unlock as you log.' : '기록할수록 하나씩 열려요.'}</p>
             </div>
           )}
         </section>
@@ -429,7 +429,7 @@ export default function ProgressPanel({
               <div className="empty-state-card cool">
                 <span className="empty-state-badge">{isEnglish ? 'Pattern' : '패턴'}</span>
                 <strong>{isEnglish ? 'Patterns build here.' : '패턴이 여기에 쌓여요.'}</strong>
-                <p>{isEnglish ? 'More logs make it clearer.' : '기록이 늘수록 더 또렷해져요.'}</p>
+                <p>{isEnglish ? 'More logs make it clearer.' : '기록할수록 패턴이 또렷해져요.'}</p>
               </div>
             )}
           </div>
