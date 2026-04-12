@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { buildSuggestedUsers } from '../features/community/communityFlow'
 import { buildHomeInsight } from '../features/home/homeFlow'
-import { buildBadges, buildChallenge, createGuestProfile, getReminderStatus } from '../features/profile/profileFlow'
+import { buildBadges, buildChallenge, createGuestProfile } from '../features/profile/profileFlow'
 import { getActivityLevelProgress } from '../utils/activityLevel'
 import { buildBodyMetrics } from '../utils/bodyMetrics'
 import { isProMember } from '../utils/premium'
@@ -17,7 +17,6 @@ export function useAppDerivedState({
   recentActivityEvents,
   workoutStats,
   isEnglish,
-  language,
   todayDone,
   followingIds,
   feedPosts,
@@ -65,10 +64,6 @@ export function useAppDerivedState({
     }
   }, [activityProgress, effectiveProfile, recentActivityEvents, workoutStats.streak])
   const hasCommunityNickname = Boolean(effectiveProfile.display_name?.trim())
-  const reminderStatus = useMemo(
-    () => getReminderStatus(effectiveProfile, todayDone, language),
-    [effectiveProfile, language, todayDone],
-  )
   const visibleLeaderboard = useMemo(
     () => leaderboard.filter((item) => !blockedIds.includes(item.user_id)),
     [blockedIds, leaderboard],
@@ -146,7 +141,6 @@ export function useAppDerivedState({
     activityProgress,
     activitySummary,
     hasCommunityNickname,
-    reminderStatus,
     visibleLeaderboard,
     visibleFeedPosts,
     visibleMatePosts,
