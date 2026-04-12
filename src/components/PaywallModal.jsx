@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useI18n } from '../i18n.js'
+import { usePaywallCheckout } from '../hooks/usePaywallCheckout.js'
 import {
   getProComparisonRows,
   getProFeatureDefinition,
@@ -16,10 +17,14 @@ import {
   PREMIUM_PROOF_POINTS,
   PREMIUM_RISK_REVERSALS,
   PREMIUM_TRANSFORMATION_TIMELINE,
-  getCheckoutPreparation,
   getPaywallCopy,
   getPaywallTriggerCopy,
 } from '../utils/premium'
+
+const PAYMENT_METHOD_OPTIONS = [
+  ['stripe', 'Stripe'],
+  ['toss', 'Toss Payments'],
+]
 
 function OutcomeCard({ title, body }) {
   return (
@@ -212,6 +217,16 @@ function ProMissionPill({ mission }) {
   )
 }
 
+function CheckoutErrorMessage({ message }) {
+  if (!message) return null
+
+  return (
+    <p className="m-0 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-black leading-6 text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/15 dark:text-rose-200">
+      {message}
+    </p>
+  )
+}
+
 function CheckoutConfirmation({
   plan,
   provider,
@@ -356,20 +371,26 @@ export default function PaywallModal({
 }) {
   const { isEnglish, language } = useI18n()
   const t = (ko, en) => (isEnglish ? en : ko)
-  const [provider, setProvider] = useState('stripe')
-  const [selectedPlanId, setSelectedPlanId] = useState('annual')
-  const [checkoutStep, setCheckoutStep] = useState('details')
-  const [activationResult, setActivationResult] = useState(null)
-  const [checkoutError, setCheckoutError] = useState('')
-
-  const selectedPlan = useMemo(
-    () => PREMIUM_PLANS.find((plan) => plan.id === selectedPlanId) ?? PREMIUM_PLANS[0],
-    [selectedPlanId],
-  )
-  const checkout = useMemo(
-    () => getCheckoutPreparation(selectedPlan.id, provider),
-    [provider, selectedPlan.id],
-  )
+  const checkoutFlow = usePaywallCheckout({
+    isEnglish,
+    loading,
+    onUpgradePlan,
+  })
+  const {
+    activationResult,
+    busy,
+    checkout,
+    checkoutError,
+    checkoutStep,
+    provider,
+    selectedPlan,
+    setActivationResult,
+    setCheckoutError,
+    setCheckoutStep,
+    setProvider,
+    setSelectedPlanId,
+    backToDetails,
+  } = checkoutFlow
   const proFeatureDefinitions = useMemo(() => getProFeatureDefinition(language), [language])
   const proMissionPreview = useMemo(() => getProMissionPreview(language), [language])
   const proPaywallHighlights = useMemo(() => getProPaywallHighlights(language), [language])
@@ -379,19 +400,13 @@ export default function PaywallModal({
 
   const copy = getPaywallCopy(context, language)
   const triggerCopy = getPaywallTriggerCopy(context, language)
-  const busy = loading || checkoutStep === 'activating'
 
   const resetAndClose = () => {
-    setCheckoutStep('details')
-    setActivationResult(null)
-    setCheckoutError('')
+    checkoutFlow.resetCheckout()
     onClose?.()
   }
 
-  const handleStartCheckout = () => {
-    setCheckoutError('')
-    setCheckoutStep('confirm')
-  }
+  const handleStartCheckout = checkoutFlow.startCheckout
 
   const handleConfirmCheckout = async () => {
     setCheckoutError('')
@@ -454,17 +469,10 @@ export default function PaywallModal({
               language={language}
               isEnglish={isEnglish}
               loading={busy}
-              onBack={() => {
-                setCheckoutError('')
-                setCheckoutStep('details')
-              }}
+              onBack={backToDetails}
               onConfirm={handleConfirmCheckout}
             />
-            {checkoutError ? (
-              <p className="m-0 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-black leading-6 text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/15 dark:text-rose-200">
-                {checkoutError}
-              </p>
-            ) : null}
+            <CheckoutErrorMessage message={checkoutError} />
           </>
         ) : (
           <>
@@ -708,10 +716,7 @@ export default function PaywallModal({
             </span>
           </div>
           <div className="grid grid-cols-2 gap-1 rounded-2xl bg-white p-1 shadow-sm dark:bg-neutral-950">
-            {[
-              ['stripe', 'Stripe'],
-              ['toss', 'Toss Payments'],
-            ].map(([key, label]) => (
+            {PAYMENT_METHOD_OPTIONS.map(([key, label]) => (
               <button
                 key={key}
                 type="button"

@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { getWorkoutTypeLabel, useI18n } from '../i18n.js'
 import { getProWorkoutNudge } from '../features/pro/proStrategy.js'
 import { calculateXpAward, getXpRuleLabel } from '../features/xp/xpRules.js'
+import { useWorkoutPhotos } from '../hooks/useWorkoutPhotos.js'
 import OptimizedImage from './OptimizedImage'
 
 const WORKOUT_OPTIONS = ['걷기', '러닝', '웨이트', '스트레칭', '요가', '사이클', '기타']
@@ -47,16 +48,6 @@ function shouldOpenManualEditor(selection = {}) {
 function getSelectableWorkoutOptions(workoutType) {
   if (!workoutType || WORKOUT_OPTIONS.includes(workoutType)) return WORKOUT_OPTIONS
   return [...WORKOUT_OPTIONS, workoutType]
-}
-
-function buildNewPhotoItems(files) {
-  return files.map((file, index) => ({
-    id: `${file.name}-${file.lastModified}-${index}-${Math.random().toString(36).slice(2, 6)}`,
-    kind: 'new',
-    file,
-    previewUrl: URL.createObjectURL(file),
-    label: file.name,
-  }))
 }
 
 function ChoiceButton({ active, children, onClick, disabled }) {
@@ -203,8 +194,14 @@ export default function WorkoutPanel({
 }) {
   const { language, isEnglish } = useI18n()
   const t = (ko, en) => (isEnglish ? en : ko)
-  const galleryInputRef = useRef(null)
-  const cameraInputRef = useRef(null)
+  const {
+    cameraInputRef,
+    clearPhotos,
+    galleryInputRef,
+    handleFileChange,
+    handleRemovePhoto,
+    photoItems,
+  } = useWorkoutPhotos(MAX_PHOTOS)
   const hasPrefilledAdvanced = Boolean(initialSelection?.note || initialSelection?.defaultShareToFeed === false || shouldOpenManualEditor(initialSelection))
   const shouldExposeAdvanced = Number(historyCount) >= ADVANCED_EXPOSURE_THRESHOLD
   const [workoutType, setWorkoutType] = useState(() => initialSelection?.workoutType || '러닝')
@@ -213,18 +210,11 @@ export default function WorkoutPanel({
   const [loadKg, setLoadKg] = useState(() => String(initialSelection?.loadKg ?? 0))
   const [note, setNote] = useState(() => getDisplayText(initialSelection?.note, language, ''))
   const [routineName, setRoutineName] = useState(() => getDisplayText(initialSelection?.name, language, ''))
-  const [photoItems, setPhotoItems] = useState([])
   const [shareToFeed, setShareToFeed] = useState(() => initialSelection?.defaultShareToFeed !== false)
   const [showAdvancedTools, setShowAdvancedTools] = useState(() => hasPrefilledAdvanced || shouldExposeAdvanced)
   const [showRoutineTools, setShowRoutineTools] = useState(false)
   const [showOptionalFields, setShowOptionalFields] = useState(false)
   const [showManualEditor, setShowManualEditor] = useState(() => shouldOpenManualEditor(initialSelection))
-
-  useEffect(() => () => {
-    photoItems.forEach((item) => {
-      if (item.kind === 'new' && item.previewUrl) URL.revokeObjectURL(item.previewUrl)
-    })
-  }, [photoItems])
 
   const selectableWorkoutOptions = useMemo(() => getSelectableWorkoutOptions(workoutType), [workoutType])
   const usesCustomSelection = useMemo(
@@ -313,24 +303,18 @@ export default function WorkoutPanel({
     const nextSets = initialSelection?.sets || 3
     const nextLoadKg = initialSelection?.loadKg ?? 0
 
-    photoItems.forEach((item) => {
-      if (item.kind === 'new' && item.previewUrl) URL.revokeObjectURL(item.previewUrl)
-    })
+    clearPhotos()
     setWorkoutType(nextWorkoutType)
     setDurationMinutes(String(nextDurationMinutes))
     setSets(String(nextSets))
     setLoadKg(String(nextLoadKg))
     setNote('')
     setRoutineName(initialSelection?.name || '')
-    setPhotoItems([])
     setShareToFeed(initialSelection?.defaultShareToFeed !== false)
     setShowAdvancedTools(hasPrefilledAdvanced || shouldExposeAdvanced)
     setShowRoutineTools(false)
     setShowOptionalFields(false)
     syncManualEditor(nextWorkoutType, nextDurationMinutes, nextSets, nextLoadKg)
-
-    if (galleryInputRef.current) galleryInputRef.current.value = ''
-    if (cameraInputRef.current) cameraInputRef.current.value = ''
   }
 
   const handleSubmit = async (event) => {
@@ -407,21 +391,6 @@ export default function WorkoutPanel({
       sets: Number(sets) || 0,
       loadKg: Number(loadKg) || 0,
       note: note.trim(),
-    })
-  }
-
-  const handleFileChange = (event) => {
-    const nextFiles = Array.from(event.target.files ?? [])
-    if (!nextFiles.length) return
-    setPhotoItems((prev) => [...prev, ...buildNewPhotoItems(nextFiles)].slice(0, MAX_PHOTOS))
-    event.target.value = ''
-  }
-
-  const handleRemovePhoto = (targetIndex) => {
-    setPhotoItems((prev) => {
-      const target = prev[targetIndex]
-      if (target?.kind === 'new' && target.previewUrl) URL.revokeObjectURL(target.previewUrl)
-      return prev.filter((_, index) => index !== targetIndex)
     })
   }
 

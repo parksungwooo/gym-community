@@ -292,13 +292,10 @@ function LeagueWidget({ league, isEnglish, language, onSeeCommunity }) {
 
   useEffect(() => {
     const updateTimeLeft = () => setTimeLeft(formatLeagueTimeLeft(league.resetAt, isEnglish))
-    const timeoutId = window.setTimeout(updateTimeLeft, 0)
-    const timerId = window.setInterval(() => {
-      updateTimeLeft()
-    }, 60000)
+    updateTimeLeft()
+    const timerId = window.setInterval(updateTimeLeft, 60000)
 
     return () => {
-      window.clearTimeout(timeoutId)
       window.clearInterval(timerId)
     }
   }, [isEnglish, league.resetAt])
