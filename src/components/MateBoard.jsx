@@ -100,11 +100,11 @@ export default function MateBoard({
   }
 
   return (
-    <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <section className="grid gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('메이트', 'Mates')}</span>
-          <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('함께할 사람', 'Find a mate')}</h2>
+          <h2 className="m-0 text-xl font-black leading-tight text-gray-950 dark:text-white">{t('함께할 사람', 'Find a mate')}</h2>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
           <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">
@@ -112,7 +112,7 @@ export default function MateBoard({
           </span>
           <button
             type="button"
-            className={`min-h-11 rounded-lg px-4 text-sm font-black shadow-sm transition disabled:opacity-50 ${showComposer ? 'bg-emerald-700 text-white' : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10'}`}
+            className={`min-h-10 rounded-lg px-3 text-xs font-black shadow-sm transition disabled:opacity-50 ${showComposer ? 'bg-emerald-700 text-white' : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10'}`}
             onClick={() => setShowComposer((prev) => !prev)}
             disabled={actionLoading}
           >
@@ -129,10 +129,10 @@ export default function MateBoard({
       </p>
 
       {showComposer && (
-        <form className="grid gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950" onSubmit={handleSubmit}>
-          <div className="grid gap-3 sm:grid-cols-2">
+        <form className="grid gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-white/10 dark:bg-neutral-950" onSubmit={handleSubmit}>
+          <div className="grid gap-2.5 sm:grid-cols-2">
             <input
-              className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
+              className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
               value={draft.title}
               onChange={(event) => handleDraftChange('title', event.target.value)}
               placeholder={t('예: 망원 저녁 러닝', 'ex: Evening run in Mangwon')}
@@ -140,7 +140,7 @@ export default function MateBoard({
               required
             />
             <input
-              className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
+              className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
               value={draft.locationLabel}
               onChange={(event) => handleDraftChange('locationLabel', event.target.value)}
               placeholder={t('예: 망원동 / 합정역 근처', 'ex: Mangwon / near Hapjeong')}
@@ -148,7 +148,7 @@ export default function MateBoard({
               required
             />
             <select
-              className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
+              className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
               value={draft.workoutType}
               onChange={(event) => handleDraftChange('workoutType', event.target.value)}
             >
@@ -157,7 +157,7 @@ export default function MateBoard({
               ))}
             </select>
             <select
-              className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
+              className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
               value={draft.timeSlot}
               onChange={(event) => handleDraftChange('timeSlot', event.target.value)}
             >
@@ -168,7 +168,7 @@ export default function MateBoard({
               ))}
             </select>
             <select
-              className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
+              className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white"
               value={draft.difficulty}
               onChange={(event) => handleDraftChange('difficulty', event.target.value)}
             >
@@ -179,7 +179,7 @@ export default function MateBoard({
               ))}
             </select>
             <input
-              className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
+              className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
               type="number"
               min="1"
               max="20"
@@ -190,7 +190,7 @@ export default function MateBoard({
           </div>
 
           <textarea
-            className="min-h-24 resize-none rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm font-semibold leading-6 text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
+            className="min-h-20 resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold leading-6 text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
             rows="3"
             maxLength={180}
             value={draft.body}
@@ -199,12 +199,12 @@ export default function MateBoard({
           />
 
           <div className="grid gap-2 sm:grid-cols-2">
-            <button type="submit" className="min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50" disabled={actionLoading}>
+            <button type="submit" className="min-h-10 rounded-lg bg-emerald-700 px-3 text-xs font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50" disabled={actionLoading}>
               {t('올리기', 'Post')}
             </button>
             <button
               type="button"
-              className="min-h-12 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
+              className="min-h-10 rounded-lg bg-gray-100 px-3 text-xs font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
               onClick={() => {
                 setDraft(createInitialDraft())
                 setShowComposer(false)
@@ -228,7 +228,7 @@ export default function MateBoard({
             <button
               key={item.key}
               type="button"
-              className={`min-h-11 shrink-0 rounded-lg px-4 text-sm font-black transition ${scope === item.key ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
+              className={`min-h-10 shrink-0 rounded-lg px-3 text-xs font-black transition ${scope === item.key ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
               onClick={() => setScope(item.key)}
             >
               {item.label}
@@ -241,7 +241,7 @@ export default function MateBoard({
             <button
               key={item}
               type="button"
-              className={`min-h-11 shrink-0 rounded-lg px-4 text-sm font-black transition ${workoutFilter === item ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
+              className={`min-h-10 shrink-0 rounded-lg px-3 text-xs font-black transition ${workoutFilter === item ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
               onClick={() => setWorkoutFilter(item)}
             >
               {item === 'all' ? t('운동 전체', 'All workouts') : item}
@@ -253,9 +253,9 @@ export default function MateBoard({
       {loading && (
         <div className="grid gap-3">
           {Array.from({ length: 2 }).map((_, index) => (
-            <div key={index} className="grid gap-3 rounded-2xl bg-gray-100 p-4 dark:bg-white/10">
+            <div key={index} className="grid gap-3 rounded-2xl bg-gray-100 p-3 dark:bg-white/10">
               <div className="flex items-center gap-3">
-                <span className="h-12 w-12 animate-pulse rounded-2xl bg-gray-200 dark:bg-white/10" />
+                <span className="h-10 w-10 animate-pulse rounded-xl bg-gray-200 dark:bg-white/10" />
                 <div className="grid flex-1 gap-2">
                   <span className="h-3 w-24 animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
                   <span className="h-3 w-full animate-pulse rounded-full bg-gray-200 dark:bg-white/10" />
@@ -271,7 +271,7 @@ export default function MateBoard({
       )}
 
       {!loading && !filteredPosts.length && (
-        <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-5 text-center dark:border-white/10">
+        <div className="grid gap-2 rounded-2xl border border-dashed border-gray-200 p-4 text-center dark:border-white/10">
           <span className="mx-auto w-fit rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{t('첫 모집글', 'First post')}</span>
           <strong className="text-lg font-black text-gray-950 dark:text-white">{t('맞는 글이 없어요.', 'No matching posts.')}</strong>
           <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">
@@ -290,11 +290,11 @@ export default function MateBoard({
           const canShowInterest = !isMine && !isClosed
 
           return (
-            <article key={post.id} className={`grid gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950 ${isClosed ? 'opacity-70' : ''}`}>
-              <div className="flex flex-wrap items-start justify-between gap-3">
+            <article key={post.id} className={`grid gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-white/10 dark:bg-neutral-950 ${isClosed ? 'opacity-70' : ''}`}>
+              <div className="flex flex-wrap items-start justify-between gap-2">
                 <button
                   type="button"
-                  className="flex min-w-0 items-center gap-3 text-left"
+                  className="flex min-w-0 items-center gap-2.5 text-left"
                   onClick={() => onSelectUser?.({
                     user_id: post.user_id,
                     display_name: post.display_name,
@@ -303,41 +303,41 @@ export default function MateBoard({
                   })}
                 >
                   <UserAvatar
-                    className="h-12 w-12 rounded-2xl"
+                    className="h-10 w-10 rounded-xl"
                     imageUrl={post.avatar_url}
                     fallback={post.avatar_emoji || 'RUN'}
                     alt={post.display_name || (isEnglish ? 'Mate author' : '메이트 작성자')}
                   />
                   <div className="min-w-0">
                     <strong className="block truncate text-base font-black text-gray-950 dark:text-white">{post.display_name || (isEnglish ? 'Community member' : '커뮤니티 멤버')}</strong>
-                    <span className="mt-1 block text-sm font-semibold text-gray-700 dark:text-gray-200">{isEnglish ? post.activity_level_label : `Lv ${post.activity_level ?? 1}`}</span>
+                    <span className="mt-0.5 block text-xs font-semibold text-gray-700 dark:text-gray-200">{isEnglish ? post.activity_level_label : `Lv ${post.activity_level ?? 1}`}</span>
                   </div>
                 </button>
 
                 <div className="flex flex-wrap justify-end gap-2">
-                  {isMine && <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{t('내 글', 'Mine')}</span>}
-                  <span className={`rounded-full px-3 py-1.5 text-xs font-black ${isClosed ? 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200'}`}>
+                  {isMine && <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-[11px] font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{t('내 글', 'Mine')}</span>}
+                  <span className={`rounded-lg px-2.5 py-1 text-[11px] font-black ${isClosed ? 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200'}`}>
                     {isClosed ? t('마감', 'Closed') : t('모집 중', 'Open')}
                   </span>
                 </div>
               </div>
 
               <div className="grid gap-1">
-                <h3 className="m-0 text-lg font-black leading-6 text-gray-950 dark:text-white">{post.title}</h3>
-                <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{post.location_label}</p>
+                <h3 className="m-0 text-base font-black leading-6 text-gray-950 dark:text-white">{post.title}</h3>
+                <p className="m-0 text-sm font-semibold leading-5 text-gray-700 dark:text-gray-200">{post.location_label}</p>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <span className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{post.workout_type}</span>
-                <span className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{formatTimeSlot(post.time_slot, isEnglish)}</span>
-                <span className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{formatDifficulty(post.difficulty, isEnglish)}</span>
-                <span className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-black text-amber-800 dark:bg-amber-500/15 dark:text-amber-200">
+                <span className="rounded-lg bg-emerald-50 px-2.5 py-1.5 text-[11px] font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{post.workout_type}</span>
+                <span className="rounded-lg bg-gray-100 px-2.5 py-1.5 text-[11px] font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{formatTimeSlot(post.time_slot, isEnglish)}</span>
+                <span className="rounded-lg bg-gray-100 px-2.5 py-1.5 text-[11px] font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{formatDifficulty(post.difficulty, isEnglish)}</span>
+                <span className="rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-black text-amber-800 dark:bg-amber-500/15 dark:text-amber-200">
                   {isEnglish ? `${post.capacity} spots` : `${post.capacity}명 모집`}
                 </span>
               </div>
 
               {post.body && (
-                <p className="m-0 rounded-2xl bg-white p-3 text-sm font-semibold leading-6 text-gray-800 dark:bg-white/10 dark:text-gray-100">{post.body}</p>
+                <p className="m-0 rounded-xl bg-white p-2.5 text-sm font-semibold leading-6 text-gray-800 dark:bg-white/10 dark:text-gray-100">{post.body}</p>
               )}
 
               <div className="flex flex-wrap items-end justify-between gap-3">
@@ -350,7 +350,7 @@ export default function MateBoard({
                   {canShowInterest && (
                     <button
                       type="button"
-                      className={`min-h-11 rounded-lg px-3 text-sm font-black transition disabled:opacity-50 ${post.interested_by_me ? 'bg-emerald-700 text-white' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
+                      className={`min-h-10 rounded-lg px-3 text-xs font-black transition disabled:opacity-50 ${post.interested_by_me ? 'bg-emerald-700 text-white' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                       disabled={actionLoading}
                       onClick={() => onToggleInterest?.(post.id, post.interested_by_me)}
                     >
@@ -363,7 +363,7 @@ export default function MateBoard({
                   {isMine && !isClosed && (
                     <button
                       type="button"
-                      className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
+                      className="min-h-10 rounded-lg bg-gray-100 px-3 text-xs font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
                       disabled={actionLoading}
                       onClick={() => onToggleStatus?.(post.id, 'closed')}
                     >

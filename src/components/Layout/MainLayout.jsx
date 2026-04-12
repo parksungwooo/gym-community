@@ -11,19 +11,19 @@ export default function MainLayout({
     <>
       {topNav ? (
         <header className="pointer-events-none fixed inset-x-0 top-0 z-40">
-          <div className="pointer-events-auto mx-auto flex w-full max-w-3xl justify-end px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:px-6">
+          <div className="pointer-events-auto mx-auto flex w-full max-w-3xl justify-end px-3 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:px-5">
             {topNav}
           </div>
         </header>
       ) : null}
 
       <main
-        className="mx-auto grid min-h-dvh w-full max-w-3xl content-start gap-6 px-4 pb-[calc(env(safe-area-inset-bottom)+8rem)] pt-[calc(env(safe-area-inset-top)+5rem)] sm:px-6 sm:pb-[calc(env(safe-area-inset-bottom)+8.5rem)] sm:pt-[calc(env(safe-area-inset-top)+5.5rem)]"
+        className="mx-auto grid min-h-dvh w-full max-w-3xl content-start gap-4 px-3 pb-[calc(env(safe-area-inset-bottom)+7rem)] pt-[calc(env(safe-area-inset-top)+4.5rem)] sm:px-5 sm:pb-[calc(env(safe-area-inset-bottom)+7.5rem)] sm:pt-[calc(env(safe-area-inset-top)+5rem)]"
         id={contentId}
         aria-busy={busy || undefined}
       >
         {pageHeader ? (
-          <section className="grid gap-2 pr-20 sm:pr-24" aria-label={pageHeader.title}>
+          <section className="grid gap-1.5 pr-20 sm:pr-24" aria-label={pageHeader.title}>
             <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">
               {pageHeader.eyebrow}
             </span>
@@ -38,11 +38,11 @@ export default function MainLayout({
           </section>
         ) : null}
 
-        <div className="grid gap-6 sm:gap-7">{children}</div>
+        <div className="grid gap-4 sm:gap-5">{children}</div>
       </main>
 
       {bottomNav ? (
-        <footer className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-6" aria-label={navigationLabel || 'Primary navigation'}>
+        <footer className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-5" aria-label={navigationLabel || 'Primary navigation'}>
           <div className="mx-auto w-full max-w-3xl">
             {bottomNav}
           </div>

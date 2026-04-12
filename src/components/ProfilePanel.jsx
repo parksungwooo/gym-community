@@ -10,10 +10,10 @@ const FITNESS_TAG_OPTIONS = ['러닝', '웨이트', '다이어트', '벌크업',
 
 function SettingRow({ label, helper, compact = false, children }) {
   return (
-    <section className={`grid gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-white/10 dark:bg-neutral-950 ${compact ? 'sm:grid-cols-[0.9fr_1.1fr] sm:items-start' : ''}`}>
+    <section className={`grid gap-2.5 rounded-xl border border-gray-100 bg-gray-50 p-3 dark:border-white/10 dark:bg-neutral-950 ${compact ? 'sm:grid-cols-[0.9fr_1.1fr] sm:items-start' : ''}`}>
       <div className="grid gap-1">
         <strong className="text-sm font-black text-gray-950 dark:text-white">{label}</strong>
-        {helper ? <span className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{helper}</span> : null}
+        {helper ? <span className="text-sm font-semibold leading-5 text-gray-700 dark:text-gray-200">{helper}</span> : null}
       </div>
       <div className="min-w-0">{children}</div>
     </section>
@@ -22,9 +22,9 @@ function SettingRow({ label, helper, compact = false, children }) {
 
 function SummaryStat({ label, value }) {
   return (
-    <article className="grid gap-1 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+    <article className="grid gap-1 rounded-xl bg-gray-50 p-3 dark:bg-white/10">
       <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">{label}</span>
-      <strong className="truncate text-2xl font-black leading-tight text-gray-950 dark:text-white">{value}</strong>
+      <strong className="truncate text-xl font-black leading-tight text-gray-950 dark:text-white">{value}</strong>
     </article>
   )
 }
@@ -33,13 +33,13 @@ function MenuButton({ menuKey, label, meta, active, onClick }) {
   return (
     <button
       type="button"
-      className={`min-h-16 rounded-2xl border p-4 text-left transition ${active ? 'active border-emerald-500 bg-emerald-50 text-emerald-950 shadow-sm dark:bg-emerald-700/20 dark:text-emerald-50' : 'border-gray-100 bg-gray-50 text-gray-950 hover:bg-white dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:hover:bg-white/10'}`}
+      className={`min-h-12 rounded-xl border p-3 text-left transition ${active ? 'active border-emerald-500 bg-emerald-50 text-emerald-950 shadow-sm dark:bg-emerald-700/20 dark:text-emerald-50' : 'border-gray-100 bg-gray-50 text-gray-950 hover:bg-white dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:hover:bg-white/10'}`}
       onClick={onClick}
       data-testid={`profile-menu-${menuKey}`}
     >
       <div className="grid gap-1">
-        <strong className="text-base font-black">{label}</strong>
-        <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{meta}</span>
+        <strong className="text-sm font-black">{label}</strong>
+        <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">{meta}</span>
       </div>
     </button>
   )
@@ -275,12 +275,12 @@ export default function ProfilePanel({
   }
 
   return (
-    <section className="grid gap-6">
-      <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+    <section className="grid gap-4">
+      <section className="grid gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="shrink-0">
             <UserAvatar
-              className="h-20 w-20 rounded-3xl sm:h-24 sm:w-24"
+              className="h-16 w-16 rounded-2xl sm:h-20 sm:w-20"
               imageUrl={draftAvatarUrl}
               fallback={draftAvatar}
               alt={isEnglish ? 'Profile photo' : '프로필 사진'}
@@ -289,15 +289,15 @@ export default function ProfilePanel({
 
           <div className="grid min-w-0 gap-2">
             <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{isGuest ? t('게스트 체험 중', 'Guest Trial') : t('프로필', 'Profile')}</span>
-            <h2 className="m-0 truncate text-3xl font-black leading-tight text-gray-950 dark:text-white">{heroDisplayName}</h2>
-            <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{heroBio}</p>
+            <h2 className="m-0 truncate text-2xl font-black leading-tight text-gray-950 dark:text-white sm:text-3xl">{heroDisplayName}</h2>
+            <p className="m-0 text-sm font-semibold leading-5 text-gray-700 dark:text-gray-200">{heroBio}</p>
 
             <div className="flex flex-wrap gap-2">
-              <span className={`rounded-lg px-3 py-2 text-xs font-black ${isPro ? 'bg-emerald-700 text-white' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>
+              <span className={`rounded-lg px-2.5 py-1.5 text-xs font-black ${isPro ? 'bg-emerald-700 text-white' : 'bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-gray-100'}`}>
                 {isPro ? t('Pro 멤버', 'Pro member') : t('Free 플랜', 'Free plan')}
               </span>
               {isPro ? (
-                <span className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">
+                <span className="rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">
                   {t(`유효 ${premiumUntilLabel}`, `Valid ${premiumUntilLabel}`)}
                 </span>
               ) : null}
@@ -306,7 +306,7 @@ export default function ProfilePanel({
             {!!draftTags.length && (
               <div className="flex flex-wrap gap-2">
                 {draftTags.map((tag) => (
-                  <span key={tag} className="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{tag}</span>
+                  <span key={tag} className="rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{tag}</span>
                 ))}
               </div>
             )}
@@ -321,16 +321,16 @@ export default function ProfilePanel({
       </section>
 
       {setupCard && (
-        <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-          <div className="flex items-start justify-between gap-4">
+        <section className="grid gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-5">
+          <div className="flex items-start justify-between gap-3">
             <div>
               <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('다음', 'Next')}</span>
-              <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('시작 준비', 'Profile setup')}</h2>
+              <h2 className="m-0 text-xl font-black leading-tight text-gray-950 dark:text-white">{t('시작 준비', 'Profile setup')}</h2>
             </div>
             <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 dark:bg-emerald-700/20 dark:text-emerald-200">{`${readyStepCount}/${readySteps.length}`}</span>
           </div>
 
-          <div className="grid gap-2 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+          <div className="grid gap-2 rounded-xl bg-gray-50 p-3 dark:bg-white/10">
             <strong className="text-base font-black text-gray-950 dark:text-white">{setupCard.title}</strong>
             <p className="m-0 text-sm font-semibold leading-6 text-gray-700 dark:text-gray-200">{setupCard.body}</p>
           </div>
@@ -346,7 +346,7 @@ export default function ProfilePanel({
           <div className="grid">
             <button
               type="button"
-              className="min-h-12 rounded-lg bg-emerald-700 px-5 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50"
+              className="min-h-10 rounded-lg bg-emerald-700 px-4 text-xs font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:opacity-50"
               onClick={handleSetupAction}
               disabled={loading || authLoading}
             >
@@ -356,25 +356,25 @@ export default function ProfilePanel({
         </section>
       )}
 
-      <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
-        <div className="flex items-start justify-between gap-4">
+      <section className="grid gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-5">
+        <div className="flex items-start justify-between gap-3">
           <div>
             <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('마이페이지', 'My page')}</span>
-            <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('빠른 이동', 'Quick access')}</h2>
+            <h2 className="m-0 text-xl font-black leading-tight text-gray-950 dark:text-white">{t('빠른 이동', 'Quick access')}</h2>
           </div>
           <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-black text-gray-800 dark:bg-white/10 dark:text-gray-100">{activeSectionTitle}</span>
         </div>
 
         {setupCard && (
           <>
-            <div className="grid gap-3 rounded-2xl bg-gray-50 p-4 dark:bg-white/10 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="grid gap-2 rounded-xl bg-gray-50 p-3 dark:bg-white/10 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="grid gap-1">
                 <span className="text-xs font-black uppercase text-gray-700 dark:text-gray-200">{t('다음 한 걸음', 'Next best step')}</span>
                 <strong className="text-base font-black text-gray-950 dark:text-white">{setupCard.title}</strong>
               </div>
               <button
                 type="button"
-                className="min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
+                className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-xs font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                 onClick={handleSetupAction}
                 disabled={loading || authLoading}
               >
@@ -392,7 +392,7 @@ export default function ProfilePanel({
           </>
         )}
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {menuItems.map((item) => (
             <MenuButton
               key={item.key}
@@ -406,7 +406,7 @@ export default function ProfilePanel({
         </div>
       </section>
 
-      <form className="grid gap-5" onSubmit={handleSubmit}>
+      <form className="grid gap-4" onSubmit={handleSubmit}>
         <input
           ref={fileInputRef}
           className="sr-only"
@@ -416,10 +416,10 @@ export default function ProfilePanel({
         />
 
         {activeSection === 'profile' && (
-          <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
+          <section className="grid gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-5">
             <div className="grid gap-1">
               <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('내 정보', 'Identity')}</span>
-              <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('프로필 기본 정보', 'Profile basics')}</h2>
+              <h2 className="m-0 text-xl font-black leading-tight text-gray-950 dark:text-white">{t('프로필 기본 정보', 'Profile basics')}</h2>
             </div>
 
             <SettingRow
@@ -430,7 +430,7 @@ export default function ProfilePanel({
               <div className="grid gap-2">
                 <input
                   ref={nicknameInputRef}
-                  className={`min-h-12 rounded-lg border bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300 ${nicknameMissing ? 'border-rose-300 dark:border-rose-400/40' : 'border-gray-200 dark:border-white/10'}`}
+                  className={`min-h-10 rounded-lg border bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300 ${nicknameMissing ? 'border-rose-300 dark:border-rose-400/40' : 'border-gray-200 dark:border-white/10'}`}
                   type="text"
                   maxLength="20"
                   required
@@ -454,7 +454,7 @@ export default function ProfilePanel({
             >
               <div className="grid gap-3 sm:grid-cols-[auto_1fr] sm:items-center">
                 <UserAvatar
-                  className="h-16 w-16 rounded-2xl"
+                  className="h-14 w-14 rounded-xl"
                   imageUrl={draftAvatarUrl}
                   fallback={draftAvatar}
                   alt={isEnglish ? 'Profile preview' : '프로필 미리보기'}
@@ -462,14 +462,14 @@ export default function ProfilePanel({
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    className="min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
+                    className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-xs font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={loading}
                   >
                     {t('사진 업로드', 'Upload photo')}
                   </button>
                   {!!draftAvatarUrl && (
-                    <button type="button" className="min-h-11 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={clearAvatarImage} disabled={loading}>
+                    <button type="button" className="min-h-10 rounded-lg bg-gray-100 px-3 text-xs font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white" onClick={clearAvatarImage} disabled={loading}>
                       {t('삭제', 'Remove')}
                     </button>
                   )}
@@ -487,7 +487,7 @@ export default function ProfilePanel({
                   <button
                     key={item}
                     type="button"
-                    className={`min-h-11 rounded-lg px-3 text-sm font-black transition disabled:opacity-50 ${draftAvatar === item ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
+                    className={`min-h-10 rounded-lg px-3 text-xs font-black transition disabled:opacity-50 ${draftAvatar === item ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                     onClick={() => setDraftAvatar(item)}
                     disabled={loading}
                   >
@@ -503,7 +503,7 @@ export default function ProfilePanel({
               compact
             >
               <textarea
-                className="min-h-24 resize-none rounded-lg border border-gray-200 bg-white px-3 py-3 text-sm font-semibold leading-6 text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
+                className="min-h-20 resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold leading-6 text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
                 rows="3"
                 maxLength="90"
                 value={draftBio}
@@ -523,7 +523,7 @@ export default function ProfilePanel({
                   <button
                     key={tag}
                     type="button"
-                    className={`min-h-11 rounded-lg px-3 text-sm font-black transition disabled:opacity-50 ${draftTags.includes(tag) ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
+                    className={`min-h-10 rounded-lg px-3 text-xs font-black transition disabled:opacity-50 ${draftTags.includes(tag) ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                     onClick={() => toggleTag(tag)}
                     disabled={loading || (!draftTags.includes(tag) && draftTags.length >= 4)}
                   >
@@ -536,10 +536,10 @@ export default function ProfilePanel({
         )}
 
         {activeSection === 'activity' && (
-          <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
+          <section className="grid gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-5">
             <div className="grid gap-1">
               <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('내 활동', 'Activity')}</span>
-              <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('목표', 'Goals')}</h2>
+              <h2 className="m-0 text-xl font-black leading-tight text-gray-950 dark:text-white">{t('목표', 'Goals')}</h2>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
@@ -554,7 +554,7 @@ export default function ProfilePanel({
               compact
             >
               <input
-                className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
+                className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
                 type="number"
                 min="1"
                 step="0.1"
@@ -571,7 +571,7 @@ export default function ProfilePanel({
               compact
             >
               <input
-                className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
+                className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
                 type="number"
                 min="1"
                 step="0.1"
@@ -592,7 +592,7 @@ export default function ProfilePanel({
                   <button
                     key={goal}
                     type="button"
-                    className={`min-h-11 rounded-lg px-3 text-sm font-black transition disabled:opacity-50 ${draftGoal === goal ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
+                    className={`min-h-10 rounded-lg px-3 text-xs font-black transition disabled:opacity-50 ${draftGoal === goal ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                     onClick={() => setDraftGoal(goal)}
                     disabled={loading}
                   >
@@ -602,17 +602,17 @@ export default function ProfilePanel({
               </div>
             </SettingRow>
 
-            <p className="m-0 rounded-2xl bg-gray-50 p-4 text-sm font-semibold leading-6 text-gray-700 dark:bg-white/10 dark:text-gray-200">
+            <p className="m-0 rounded-xl bg-gray-50 p-3 text-sm font-semibold leading-5 text-gray-700 dark:bg-white/10 dark:text-gray-200">
               {t('체중은 기록 탭에서 남겨요.', 'Log weight in Records.')}
             </p>
           </section>
         )}
 
         {activeSection === 'community' && (
-          <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
+          <section className="grid gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-5">
             <div className="grid gap-1">
               <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('커뮤니티', 'Community')}</span>
-              <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('공개', 'Sharing')}</h2>
+              <h2 className="m-0 text-xl font-black leading-tight text-gray-950 dark:text-white">{t('공개', 'Sharing')}</h2>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
@@ -628,7 +628,7 @@ export default function ProfilePanel({
             >
               <button
                 type="button"
-                className={`min-h-11 rounded-lg px-4 text-sm font-black transition disabled:opacity-50 ${draftDefaultShare ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
+                className={`min-h-10 rounded-lg px-3 text-xs font-black transition disabled:opacity-50 ${draftDefaultShare ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                 onClick={() => setDraftDefaultShare((prev) => !prev)}
                 disabled={loading}
               >
@@ -636,7 +636,7 @@ export default function ProfilePanel({
               </button>
             </SettingRow>
 
-            <div className="grid gap-1 rounded-2xl bg-gray-50 p-4 dark:bg-white/10">
+            <div className="grid gap-1 rounded-xl bg-gray-50 p-3 dark:bg-white/10">
               <strong className="text-sm font-black text-gray-950 dark:text-white">{t('닉네임과 사진이 보여요.', 'Nickname and photo show.')}</strong>
               <p className="m-0 text-sm font-semibold text-gray-700 dark:text-gray-200">{t('짧을수록 좋아요.', 'Short looks better.')}</p>
             </div>
@@ -644,10 +644,10 @@ export default function ProfilePanel({
         )}
 
         {activeSection === 'settings' && (
-          <section className="grid gap-5 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-6">
+          <section className="grid gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:p-5">
             <div className="grid gap-1">
               <span className="text-xs font-black uppercase text-emerald-800 dark:text-emerald-200">{t('설정', 'Settings')}</span>
-              <h2 className="m-0 text-2xl font-black leading-tight text-gray-950 dark:text-white">{t('설정', 'Settings')}</h2>
+              <h2 className="m-0 text-xl font-black leading-tight text-gray-950 dark:text-white">{t('설정', 'Settings')}</h2>
             </div>
 
             <SettingRow
@@ -658,7 +658,7 @@ export default function ProfilePanel({
               compact
             >
               <div className="grid gap-3">
-                <div className={`grid gap-3 rounded-2xl p-4 ${isPro ? 'border border-emerald-300/20 bg-neutral-950 text-white' : 'bg-emerald-50 dark:bg-emerald-500/10'}`}>
+                <div className={`grid gap-2.5 rounded-xl p-3 ${isPro ? 'border border-emerald-300/20 bg-neutral-950 text-white' : 'bg-emerald-50 dark:bg-emerald-500/10'}`}>
                   <strong className={`text-base font-black ${isPro ? 'text-white' : 'text-emerald-950 dark:text-emerald-50'}`}>
                     {isPro ? t('Pro 활성화 완료', 'Pro active') : t('지금 Pro로 바꾸면 달라지는 것', 'What changes when you upgrade')}
                   </strong>
@@ -680,7 +680,7 @@ export default function ProfilePanel({
                       [t('고급 분석', 'Analytics'), t('1RM·회복·XP 흐름', '1RM, recovery, XP')],
                       [t('공유 카드', 'Share card'), t('카톡/인스타용 결과물', 'Kakao/Instagram-ready')],
                     ].map(([title, body]) => (
-                      <article key={title} className="rounded-2xl bg-gray-50 p-3 dark:bg-white/10">
+                      <article key={title} className="rounded-xl bg-gray-50 p-3 dark:bg-white/10">
                         <strong className="text-sm font-black text-gray-950 dark:text-white">{title}</strong>
                         <p className="m-0 mt-1 text-xs font-bold leading-5 text-gray-700 dark:text-gray-200">{body}</p>
                       </article>
@@ -690,8 +690,8 @@ export default function ProfilePanel({
                 <button
                   type="button"
                   className={isPro
-                    ? 'min-h-11 rounded-lg bg-gray-100 px-4 text-sm font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'
-                    : 'min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800'}
+                    ? 'min-h-10 rounded-lg bg-gray-100 px-3 text-xs font-black text-gray-800 transition hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'
+                    : 'min-h-10 rounded-lg bg-emerald-700 px-3 text-xs font-black text-white shadow-sm transition hover:bg-emerald-800'}
                   onClick={() => onOpenPaywall?.(PREMIUM_CONTEXT.AI_PLAN)}
                 >
                   {isPro ? t('Pro 혜택 다시 보기', 'View Pro benefits') : t('첫 달 40% 할인으로 Pro 보기', 'See Pro with 40% off')}
@@ -707,7 +707,7 @@ export default function ProfilePanel({
               <div className="grid gap-3">
                 <button
                   type="button"
-                  className={`min-h-11 rounded-lg px-4 text-sm font-black transition disabled:opacity-50 ${draftReminderEnabled ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
+                  className={`min-h-10 rounded-lg px-3 text-xs font-black transition disabled:opacity-50 ${draftReminderEnabled ? 'bg-emerald-700 text-white shadow-sm' : 'bg-gray-100 text-gray-800 hover:text-gray-950 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white'}`}
                   onClick={() => setDraftReminderEnabled((prev) => !prev)}
                   disabled={loading}
                 >
@@ -717,7 +717,7 @@ export default function ProfilePanel({
                 {draftReminderEnabled && (
                   <>
                     <input
-                      className="min-h-12 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
+                      className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm font-bold text-gray-950 outline-none transition placeholder:text-gray-600 focus:border-emerald-500 dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:placeholder:text-gray-300"
                       type="time"
                       value={draftReminderTime}
                       onChange={(event) => setDraftReminderTime(event.target.value)}
@@ -728,7 +728,7 @@ export default function ProfilePanel({
                       {reminderPermission !== 'granted' && reminderPermission !== 'unsupported' && (
                         <button
                           type="button"
-                          className="min-h-11 rounded-lg bg-gray-100 px-3 text-sm font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
+                          className="min-h-10 rounded-lg bg-gray-100 px-3 text-xs font-black text-gray-800 transition hover:text-gray-950 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:text-white"
                           onClick={onRequestReminderPermission}
                           disabled={loading}
                         >
@@ -746,17 +746,17 @@ export default function ProfilePanel({
               helper={t('앱 언어', 'App language.')}
               compact
             >
-              <div className="grid grid-cols-2 gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-white/10">
+              <div className="grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1 dark:bg-white/10">
                 <button
                   type="button"
-                  className={`min-h-11 rounded-lg px-4 text-sm font-black transition ${language === 'ko' ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-900 dark:text-white' : 'text-gray-700 hover:text-gray-950 dark:text-gray-100 dark:hover:text-white'}`}
+                  className={`min-h-10 rounded-lg px-3 text-xs font-black transition ${language === 'ko' ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-900 dark:text-white' : 'text-gray-700 hover:text-gray-950 dark:text-gray-100 dark:hover:text-white'}`}
                   onClick={() => onSetLanguage('ko')}
                 >
                   한국어
                 </button>
                 <button
                   type="button"
-                  className={`min-h-11 rounded-lg px-4 text-sm font-black transition ${language === 'en' ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-900 dark:text-white' : 'text-gray-700 hover:text-gray-950 dark:text-gray-100 dark:hover:text-white'}`}
+                  className={`min-h-10 rounded-lg px-3 text-xs font-black transition ${language === 'en' ? 'bg-white text-gray-950 shadow-sm dark:bg-neutral-900 dark:text-white' : 'text-gray-700 hover:text-gray-950 dark:text-gray-100 dark:hover:text-white'}`}
                   onClick={() => onSetLanguage('en')}
                 >
                   English
@@ -777,7 +777,7 @@ export default function ProfilePanel({
                 {isGuest ? (
                   <button
                     type="button"
-                    className="min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
+                    className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-xs font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                     onClick={onRequestAuth}
                     disabled={authLoading}
                   >
@@ -786,7 +786,7 @@ export default function ProfilePanel({
                 ) : (
                   <button
                     type="button"
-                    className="min-h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
+                    className="min-h-10 rounded-lg border border-gray-200 bg-white px-3 text-xs font-black text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-white/10 dark:bg-neutral-950 dark:text-gray-100 dark:hover:bg-white/10"
                     onClick={onSignOut}
                     disabled={authLoading}
                   >
@@ -798,7 +798,7 @@ export default function ProfilePanel({
           </section>
         )}
 
-        <button type="submit" className="min-h-14 rounded-lg bg-emerald-700 px-5 text-base font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50" disabled={loading || nicknameMissing}>
+        <button type="submit" className="min-h-12 rounded-lg bg-emerald-700 px-4 text-sm font-black text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50" disabled={loading || nicknameMissing}>
           {loading ? t('저장 중', 'Saving...') : t('저장하기', 'Save')}
         </button>
       </form>
