@@ -1,6 +1,8 @@
 # Logs
 logs
 *.log
+*.err
+*.out
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -15,6 +17,12 @@ dist-ssr
 .env.*
 !.env.example
 .vercel
+
+# Local QA/browser captures
+.chrome-qa/
+/app-home*.png
+/mobile-*.png
+/qa-*.png
 
 # Editor directories and files
 .vscode/*
